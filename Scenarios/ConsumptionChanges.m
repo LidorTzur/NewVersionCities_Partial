@@ -15,18 +15,18 @@
 global BaseYear
 
 % vehicle quantity
-VehicleAmountsCell = Data.VehicleAmountsCell;
+VehicleAmountsCell = Data.Trans_DataBase.VehicleAmountsCell;
 VehicleAmounts_RowNames = {'Quantity', 'Gasoline', 'Diesel', 'Drive Per Day', 'Drive Per Year', 'Cars Per Year'};
 VehicleAmounts_ColNames = {'Bus','Car','Minibus','Motorcycle', 'Truck', 'LCV'};
 VehicleAmounts_Row_Num = numel(VehicleAmounts_RowNames);
 VehicleAmounts_Col_Num = numel(VehicleAmounts_ColNames);
 
 % Transportation
-TransportationConsumptionTable = Data.TransportationConsumptionTable;
+TransportationConsumptionTable = Data.Trans_DataBase.TransportationConsumptionTable;
 
 % Food
-FoodConsumptionCell = Data.FoodConsumptionCell;
-RowNames = Data.FoodRowName;
+FoodConsumptionCell = Data.Food_DataBase.FoodConsumptionCell;
+RowNames = Data.Food_DataBase.FoodRowName;
 ColNames = {'Humans and Other - Local','Animals - Local','Humans and Others - Import','Animals - Import'};
 OnlyImportedFoodIndex = [2, 8, 45, 46, 47, 55, 57, 58, 62];
 % 1X32 cell, each one conatains a table of consumption for the relevant year.
@@ -41,8 +41,8 @@ parse(p,varargin{:});
 %% Electricity Consumption
 
 % NEW: Electicity that the industry consumes isn't affected by the population growth.
-ElectricityConsumptionTable = Data.ElectricityConsumptionTable;
-IndustryElectricityConsumptionChange = Data.IndustryElectricityConsumptionChange; % assuming industrial grow by 1.1
+ElectricityConsumptionTable = Data.Electricity_DataBase.ElectricityConsumptionTable;
+IndustryElectricityConsumptionChange = Data.Electricity_DataBase.IndustryElectricityConsumptionChange; % assuming industrial grow by 1.1
 ChangeInElectricityConsumptionPercentageIndustry = CalculatePercentageLinear(1, IndustryElectricityConsumptionChange, Years);
 
 for i=2:Years
@@ -76,7 +76,7 @@ end
 % assuming perfect corrrelation between population growth and food consumption.
 % SHIRI'S UPDATE:
 % adding upper-bound to the growth of local consumption due to area limitation.
-UpperBound = Data.TotalGrowthForLocalFood;
+UpperBound =  Data.Food_DataBase.TotalGrowthForLocalFood;
 if (width(ScenariosTable) == Years) % making sure the table has enough columns
     if (ScenariosTable{5,Years} < 0.8267 && ScenariosTable{5,Years} > 0.826) 
     % moderate scenario: due to the prevention of food loss we can use more land.
@@ -121,6 +121,7 @@ end
 
 
 %% WATER
+
 % Lidor's Update to be generic
 WDB = Data.Water_DataBase;
 
@@ -129,7 +130,8 @@ WDB = Data.Water_DataBase;
 water_Names = WDB.water_Names; % {'Water for Domestic & Industrial', 'Water for Agriculture', 'Water for Neighbors', 'Water for  Nature', 'Drilling Water', 'Reclaimed Wastewater', 'Brackish water, fresh and non-fresh reservoir water', 'Desalinated Water'};
 waterData  = array2table(zeros(numel(water_Names), Years), 'RowNames', water_Names);
 
-for i =1:Years    
+for i =1:Years  
+
    % 1. FOR THE UNCHANGING SECTORS
    waterData{'Water for Domestic & Industrial',i} = WDB.Avg_per_capita_domestic; % Fixed Consumption per capita
    waterData{'Water for Neighbors',i} = WDB.Avg_per_capita_Palestinians; % Consumption per capita
@@ -150,7 +152,7 @@ for i =1:Years
    else
        selectedValue = WDB.Nature_water_yearThresholds_values(idx);
    end
-   waterData{'Water for nature', i} = selectedValue;
+   waterData{'Water for  Nature', i} = selectedValue;
 
    % Old solution
    % switch true 
@@ -180,9 +182,10 @@ for i =1:Years
 end
 
 %% Water Consumption
-WaterConsumptionCell = Data.WaterConsumptionCell;
-CurrentConsumption = array2table(zeros(1,numel(water_Names)), 'VariableNames', water_Names);
-Initialization = WaterConsumptionCell{1}{:,1:5};
+WaterConsumptionCell = WDB.WaterConsumptionCell;
+sectorNames = WDB.WaterConsumptionTableNew.Properties.RowNames;
+CurrentConsumption = array2table(zeros(1, numel(sectorNames)), 'VariableNames', sectorNames);
+% Initialization = WaterConsumptionCell{1}{:,1:5};
 
 % %%2019 Data - from Dor's Model
 % CurrentConsumption{1,'Water for Domestic & Industrial'} = 1022;
@@ -194,7 +197,7 @@ Initialization = WaterConsumptionCell{1}{:,1:5};
 % CurrentConsumption{1,'Brackish water, fresh and non-fresh reservoir water'} = 250;
 % CurrentConsumption{1,'Desalinated Water'} = 609;
 
-CurrentConsumption(1, :) = WDB.WaterConsumptionTableNew{:, '2019'}';
+CurrentConsumption{1, :} = WDB.WaterConsumptionTableNew{:, '2019'}';
 WaterConsumptionCell{1} =  CurrentConsumption;
 
 %The essential change that ensures the correctness of the water model in a single scenario
@@ -213,19 +216,19 @@ if (ScenariosTable{1,1}) == ScenariosTable{1,width(ScenariosTable)} && (orderInd
         % CurrentConsumption{1,7} = 250;
         % CurrentConsumption{1,8} = 524;  
 
-        CurrentConsumption(1, :) = WDB.WaterConsumptionTableNew{:,'2022'}';
+        CurrentConsumption{1, :} = WDB.WaterConsumptionTableNew{:,'2022'}';
         WaterConsumptionCell{i} =  CurrentConsumption;
     end
 
 else
     for i =2:Years 
-        
-        CurrentConsumption = array2table(zeros(1,numel(water_Names)), 'VariableNames', water_Names);
+        sectorNames = WDB.WaterConsumptionTableNew.Properties.RowNames;
+        CurrentConsumption = array2table(zeros(1, numel(sectorNames)), 'VariableNames', sectorNames);
         % Consumers
         CurrentConsumption{1,'Water for Domestic & Industrial'} = pop{'Israel population',i}*waterData{'Water for Domestic & Industrial',i}; 
         CurrentConsumption{1,'Water for Agriculture'} = pop{'Israel population',i}*waterData{'Water for Agriculture',i}; 
         CurrentConsumption{1,'Water for Neighbors'} = pop{'Palestinian Authority population',i}*waterData{'Water for Neighbors',i}; 
-        CurrentConsumption{1,'Water for nature'} = waterData{'Water for nature', i}; 
+        CurrentConsumption{1,'Water for  Nature'} = waterData{'Water for  Nature', i}; 
         % Suppliers
         CurrentConsumption{1,'Drilling Water'} = waterData{'Drilling Water',i}; %% natural 
         CurrentConsumption{1,'Reclaimed Wastewater'} = WDB.ReclaimedRatio*CurrentConsumption{1,'Water for Domestic & Industrial'}; 
@@ -243,21 +246,20 @@ else
             % CurrentConsumption{1,6} = 636;
             % CurrentConsumption{1,7} = 250;
             % CurrentConsumption{1,8} = 524;  
-            CurrentConsumption(1, :) = WDB.WaterConsumptionTableNew{:, '2022'}';
 
-
+            CurrentConsumption{1, :} = WDB.WaterConsumptionTableNew{:, '2022'}';
         end
-       
           WaterConsumptionCell{i} =  CurrentConsumption;
     end
 end
+
 Data.Water_DataBase = WDB;
 
 
 
 
 %% Construction
-ConstructionTable = Data.ConstructionTable;
+ConstructionTable = Data.Const_DataBase.ConstructionTable;
 ConstructionInitialization = ConstructionTable{1:10,1};
 for i=2:Years
     ConstructionTable{1:10, i} = ScenariosTable{1,i}*ConstructionInitialization;
@@ -268,7 +270,7 @@ end
 RowNames = {'Organic Products','Plastic', 'Paper', 'Cardboard', 'Diapers', 'Garden Waste', 'Textile', 'Metal', 'Glass', 'Pruned Trees','Wood', 'Oils', 'Others'};
 ColNames = {'Local Authorities - Waste', 'Local Authorities - Recycling', 'Industry - Waste', 'Industry - Recycling','Food Industry - Waste' , 'Food Industry - Recycling','Agriculture - Waste', 'Agriculture - Recycling'};
 
-WateAndRecyclingCell = Data.WateAndRecyclingCell;
+WateAndRecyclingCell = Data.Materials_DataBase.WateAndRecyclingCell;
 for i =2:Years
     CurrentRecyclingAndWate =  array2table(zeros(13,8), 'RowNames', RowNames);
     CurrentRecyclingAndWate.Properties.VariableNames = ColNames;
@@ -278,7 +280,7 @@ end
 
 %% Organic Waste
 
-OrganicWasteAmount = Data.OrganicWasteAmountsCell;
+OrganicWasteAmount =  Data.Food_DataBase.OrganicWasteAmountsCell;
 RowNames = {'Local Authorities', 'Food Industry', 'Agriculture'};
 ColNames = OrganicWasteAmount{1}.Properties.VariableNames;
 for i = 2:Years
@@ -291,7 +293,7 @@ end
 %% Amounts of Fuels
 RowNames = {'Crude Oil Products - Not for Energy', 'Crude Oil For Export', 'Crude Oil Import', 'Crude Oil Products - For Energy', 'LPG - Home', 'LPG - Commertiel' };
 ColNames = {'Naptha', 'Mazut','Diesel','Kerosene','Gasoline','Liquified Petroleum Gas', 'Other'};
-AmountsOfFuelsCells = Data.AmountsOfFuelsCells;
+AmountsOfFuelsCells = Data.Materials_DataBase.AmountsOfFuelsCells;
 AmountsOfFuelsCells{1,1}{4,:} = AmountsOfFuelsCells{1,1}{4,:}*2;%Completion to an estimated size of 1.5 MTOE Because currently the data is 0.75
 for i = 1:Years
     CurrentFuelConsumption = array2table(zeros(6,7),'RowNames', RowNames);

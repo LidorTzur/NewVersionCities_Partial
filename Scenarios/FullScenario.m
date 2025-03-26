@@ -19,29 +19,37 @@ function [EmissionsByYears,ConsumptionAmounts, Resources, WaterFromFoodCell] = F
 global BaseYear
 addpath("CalcFunctions");
 
+%% Initialize the Results calculated data-base
+% Initialize the row names
+Emission_RowNames = {'Food', 'Electricity - Direct', 'Electricity - Indirect', 'Transportation - Direct', 'Train Emissions','Transportation - Indirect', 'Construction', 'Consumption Emissions' ,'Fuel for Industry', 'Sewege Treatment'}; %, 'Water from food'
+consumption_RowNames = {'Water', 'Fuels For Electriciy Manufacturing', 'Fuels For Transportation Amounts', 'Materials For Construction', 'Fuels For Energy Industry'};
+Resources_RowNames = {'Area For Electricity', 'Cumulative Area','Area For Food', 'Operating Costs', 'Setting Costs', 'Fuels Costs', 'Cost Of Area For PV','Area For Construction'};
+% Initialize the final tables
+EmissionsByYears = cell(numel(Emission_RowNames),Years);  % Initialize the emissions table for each year
+ConsumptionAmounts = cell(numel(consumption_RowNames),Years); % Initialize the consumption table for each year
+Resources = cell(numel(Resources_RowNames), Years);  % Initialize the resources table for each year
+
+%% Inputs
 % Fuel for energy in the industry & others
-FuelConsumption_RowNames = {'Crude Oil Products - For Energy', 'LPG - Home', 'LPG - Commertiel'  };
-FuelConsumption_ColNames = {'Naptha', 'Mazut','Diesel','Kerosene','Gasoline','Liquified Petroleum Gas', 'Other'};
+FuelConsumption_RowNames = Data.Materials_DataBase.FuelConsumption_RowNames;
+FuelConsumption_ColNames = Data.Materials_DataBase.FuelConsumption_ColNames;
 
 % Electricity_Emissions 
-ElectricityBySources_row_names = {'KWh From Coal', 'KWh From Natural Gas', 'KWh From Renewable Energies', 'KWh From Soler', 'KWh From Mazut', 'KWh From Waste Incinaration', 'Total'};
+ElectricityBySources_row_names = Data.Electricity_DataBase.ElectricityBySources_row_names;
 ElectricityBySources = array2table(zeros(numel(ElectricityBySources_row_names),Years));
 ElectricityBySources.Properties.RowNames = ElectricityBySources_row_names;
 
-% Electricity water coeff
-Drillind_Water_Coeff = 0.51+0.4;
-
-% Electricity Furels coeff
-Crude_Oil_To_Electricity = 11.63; % Crude oil to electricity - Needs to understand where it is came from
-fuel_MTOE_coeff = 2.5;
-fuel_LPG_coeff = 2.9;
-
 % Renewable Sources Electricity table
-Renewable_Electricity_row_names = {'Coal','Natural Gas','PV', 'Wind', 'Biomass', 'Thermo Solar', 'Total'};
+Renewable_Electricity_row_names = Data.Electricity_DataBase.Renewable_Electricity_row_names;
 Renewable_Electricity_row_num = numel(Renewable_Electricity_row_names);
 
+% Electricity Fuels coeff
+Crude_Oil_To_Electricity = Data.Electricity_DataBase.Crude_Oil_To_Electricity; % Crude oil to electricity - Needs to understand where it is came from
+fuel_MTOE_coeff = Data.Electricity_DataBase.fuel_MTOE_coeff;
+fuel_LPG_coeff = Data.Electricity_DataBase.fuel_LPG_coeff;
+
 % food
-meatRows = [53, 54, 55, 56, 57, 59, 60, 61];
+meatRows = Data.Food_DataBase.meatRows;
 
 % Extracting values from the ScenariosTable for each factor
 PopulationGrowthPercentage = ScenariosTable{1,:};
@@ -64,22 +72,6 @@ TransitionToElectricBus = ScenariosTable{17,:};
 %%Scenario18 = ScenariosTable{18,:}; %% vehicles improved emissions coefficients
 WaterSaving = ScenariosTable{19,:};
 ReducingMeatConsumptionPercentage = ScenariosTable{20,:};
-
-% Initialize the Results calculated data-base
-% Initialize the row names
-Emission_RowNames = {'Food', 'Electricity - Direct', 'Electricity - Indirect', 'Transportation - Direct', 'Train Emissions','Transportation - Indirect', 'Construction', 'Consumption Emissions' ,'Fuel for Industry', 'Sewege Treatment'}; %, 'Water from food'
-%temp_row_num = find(strcmpi(consumption_RowNames, 'Fuel for Industry'));
-consumption_RowNames = {'Water', 'Fuels For Electriciy Manufacturing', 'Fuels For Transportation Amounts', 'Materials For Construction', 'Fuels For Energy Industry'};
-Resources_RowNames = {'Area For Electricity', 'Cumulative Area','Area For Food', 'Operating Costs', 'Setting Costs', 'Fuels Costs', 'Cost Of Area For PV','Area For Construction'};
-% Initialize the table row numbers
-Emission_Row_Num = numel(Emission_RowNames);
-consumption_Row_Num = numel(consumption_RowNames);
-Resources_Row_Num = numel(Resources_RowNames);
-% Initialize the final tables
-EmissionsByYears = cell(Emission_Row_Num,Years);  % Initialize the emissions table for each year
-ConsumptionAmounts = cell(consumption_Row_Num,Years); % Initialize the consumption table for each year
-Resources = cell(Resources_Row_Num, Years);  % Initialize the resources table for each year
-
 
 
 %% Calculate Base Consumptions (No scenario)
@@ -226,7 +218,7 @@ end
 
 %%change in vehicle amounts
 VehicleAmountsCell = CalulateChangeInVehicleAmountsTransitionToPublicTransport(TransportationConsumptionTable, VehicleAmountsCell);
-ElectricityConsumptionEmissionsInTransportation = Data.ElectricityConsumptionEmissionsInTransportation;
+ElectricityConsumptionEmissionsInTransportation = DataBase.Electricity_DataBase.ElectricityConsumptionEmissionsInTransportation;
 
 KWHForElectricCar = zeros(1,Years);
 KWHForElectricVan = zeros(1,Years);
@@ -287,7 +279,7 @@ for i = 1:Years
 end
 
 % percentage of renewable energies - scenario 6
-InitialPercentage = Data.InitialPercentage;
+InitialPercentage = DataBase.Electricity_DataBase.InitialPercentage;
 PercentageOfElectricitySourcesByYears = CalculatePercentageOfElectricitySourcesByYears(IncreaseInEnergyConsumptionFromRenewableEnergiesPercentage, IncreaseInEnergyConsumptionFromNaturalGasPercentage, InitialPercentage);
 ElectricityFromWaterCell = CalculateElectricityFromWaterAllYears(Data, WaterConsumptionCell,Years);
 for i = 1:Years
@@ -363,7 +355,7 @@ for i=1:Years
     CurrentElectricityFromWater = ElectricityFromWaterCell{i};
     TotalElectricityFromWater = CurrentElectricityFromWater{6,1};
     CurrentYearElectricity(6) = TotalElectricityFromWater;
-    CurrentYearElectricity(7,1) = sum(WaterFromFoodCell{1,i}{1,3:4})*(Drillind_Water_Coeff); % The electricity coefficient discount is for producing and transporting fresh water
+    CurrentYearElectricity(7,1) = sum(WaterFromFoodCell{1,i}{1,3:4})*(Data.Water_DataBase.Electricity_Drillind_Water_Coeff); % The electricity coefficient discount is for producing and transporting fresh water
     % The amount of water for global food per cubic meter is twice the electricity coefficients for global water in KWH per cubic meter.
     ElectricityConsumptionTable{6,i} = CurrentYearElectricity(6);
 
@@ -392,17 +384,17 @@ end
 Renewable_Electricity_row_num = numel(Renewable_Electricity_row_names);
 KWForElectricity = array2table(zeros(Renewable_Electricity_row_num,Years));
 for i = 1:Years
-    KWForElectricity{1:(Renewable_Electricity_row_num-1),i} = CalcKWFromKwh(ElectricityBySources{1:3,i}, Data.KWToKwh, Data.RenewablePercents{1,:});
+    KWForElectricity{1:(Renewable_Electricity_row_num-1),i} = CalcKWFromKwh(ElectricityBySources{1:3,i}, Data.Area_DataBase.KWToKwh, Data.Area_DataBase.RenewablePercents{1,:});
     KWForElectricity{Renewable_Electricity_row_num,i} = sum(KWForElectricity{1:Renewable_Electricity_row_num,i});
 end
 KWForElectricity.Properties.RowNames = Renewable_Electricity_row_names;
 KWForElectricity.Properties.VariableNames = YearsStringsForColNames;
 
 % Take the match PV Type to Distribution
-if(Data.PVType == "Ground")
-    RenewableDistribution = Data.AreaDistribution.GroundPV;
+if(Data.Area_DataBase.PVType == "Ground")
+    RenewableDistribution = Data.Area_DataBase.AreaDistribution.GroundPV;
 else
-    RenewableDistribution = Data.AreaDistribution.DualPV;
+    RenewableDistribution = Data.Area_DataBase.AreaDistribution.DualPV;
 end  
 
 % Electricity Installed Power
@@ -425,9 +417,9 @@ DeltaKW.Properties.VariableNames = YearsStringsForColNames;
 TotalArea = 0;
 
 for i = 1:Years
-    CurrentAreaCoefficient = Data.AreaForSolarEnergyCoefficients{i,:}; % AreaForSolarEnergyCoefficients need a re-name
-    AreaForElectricity = CalcAreaForElectricity(DeltaKW{:,i}, CurrentAreaCoefficient, RenewableDistribution, Data.AreaDistribution{:,3});
-    %AreaForElectricity = CalcAreaForElectricity(KWForElectricity{:,i}, CurrentAreaCoefficient, RenewableDistribution, Data.AreaDistribution{:,3});
+    CurrentAreaCoefficient = Data.Area_DataBase.AreaForSolarEnergyCoefficients{i,:}; % AreaForSolarEnergyCoefficients need a re-name
+    AreaForElectricity = CalcAreaForElectricity(DeltaKW{:,i}, CurrentAreaCoefficient, RenewableDistribution, Data.Area_DataBase.AreaDistribution{:,3});
+    %AreaForElectricity = CalcAreaForElectricity(KWForElectricity{:,i}, CurrentAreaCoefficient, RenewableDistribution, Data.Area_DataBase.AreaDistribution{:,3});
     AreaForElectricity{:,:} = AreaForElectricity{:,:}/1000;%% km^2
     TotalArea = sum(AreaForElectricity{1,:}) + TotalArea;
 
@@ -442,7 +434,7 @@ end
 % Area for food
 temp_row_num = find(strcmpi(Resources_RowNames, 'Area For Food'));
 for i = 1:Years
-    CurrentAreaForFood = CalcAreaForFoodConsumption(FoodConsumptionCell{i}, Data.AreaForFoodCoefficients);
+    CurrentAreaForFood = CalcAreaForFoodConsumption(FoodConsumptionCell{i},  Data.Food_DataBase.AreaForFoodCoefficients);
     CurrentAreaForFood{:,:} = CurrentAreaForFood{:,:}/1000;%% km^2
     Resources{temp_row_num,i} = CurrentAreaForFood; 
 end
@@ -473,8 +465,8 @@ end
 % end
 % 
 % % cost of area - UPDATED
-% GroundDist = Data.AreaDistribution.GroundPV;
-% DualDist = Data.AreaDistribution.DualPV;
+% GroundDist = Data.Area_DataBase.AreaDistribution.GroundPV;
+% DualDist = Data.Area_DataBase.AreaDistribution.DualPV;
 % for i = 1:Years
 %      Resources{7,i} = CalcCostOfArea(Resources{1,i}{1,3:4}, Data.AreaCostForElectricity{i,:}, GroundDist, DualDist);
 % end
@@ -482,7 +474,7 @@ end
 
 % Construction area 
 temp_row_num = find(strcmpi(Resources_RowNames, 'Area For Construction')); % Find the match row for contruction
-InitBuiltArea = Data.TotalBuiltArea;
+InitBuiltArea = Data.Const_DataBase.TotalBuiltArea;
 Resources{temp_row_num,1} = InitBuiltArea;
 for i = 2:Years
     if (orderIndex == 2 && ConstructionTable{height(ConstructionTable),1} ~= ConstructionTable{height(ConstructionTable),width(ConstructionTable)}) || orderIndex ~= 2
@@ -492,7 +484,8 @@ for i = 2:Years
     end
 end
 
-
+% Lidor add it - just so we can see the output
+Data.Water_DataBase.WaterConsumptionCell = WaterConsumptionCell;
 %% Create Final Table
 EmissionsByYears = cell2table(EmissionsByYears, 'RowNames', Emission_RowNames);
 EmissionsByYears.Properties.VariableNames = YearsStringsForColNames;
@@ -641,5 +634,8 @@ for i=2:width(TrasnportationConsumptionTable)
 end
 end
 
+clear fuel_LPG_coeff  fuel_MTOE_coeff Crude_Oil_To_Electricity ElectricityBySources_row_names
 
 end
+
+

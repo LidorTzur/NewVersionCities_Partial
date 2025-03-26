@@ -37,8 +37,8 @@ parse(q, varargin{:});
 %% Prepare data for analysis
 
 %% Define the current situation of energy consumption based on data (e.g., electricity consumption)
-CurrentEnergyConsumptionFromRenewableEnergies = Data.InitialPercentage(3); % 0.05
-CurrentEnergyConsumptionFromNaturalGas = Data.InitialPercentage(2); % 0.636
+CurrentEnergyConsumptionFromRenewableEnergies = Data.Electricity_DataBase.InitialPercentage(3); % 0.05
+CurrentEnergyConsumptionFromNaturalGas = Data.Electricity_DataBase.InitialPercentage(2); % 0.636
 
 %% Define row names for each parameter (e.g., population growth, food loss, electric vehicles, etc.)
 RowNames = {'Population Growth', 'Increased Electricity Per Capita', 'Increase in Desalinared Water', ...

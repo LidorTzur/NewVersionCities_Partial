@@ -25,9 +25,9 @@ Electricity_From_Gas_Improvements = ImprovementValues{3,1};
 
 
 %% 1. Electric Vehicles Improvements ((kWh/KM))
-ElectricityConsumptionEmissionsInTransportationTable = array2table(zeros(height(DataBase.ElectricityConsumptionEmissionsInTransportation),Years));
+ElectricityConsumptionEmissionsInTransportationTable = array2table(zeros(height(DataBase.Electricity_DataBase.ElectricityConsumptionEmissionsInTransportation),Years));
 ElectricVehicleImprovements = ReductionVectorCalc(BaseYear, TargetYear_global, Electric_Vehicles_Improvements);
-ElectricityConsumptionEmissionsInTransportationTable{:,1} = DataBase.ElectricityConsumptionEmissionsInTransportation;
+ElectricityConsumptionEmissionsInTransportationTable{:,1} = DataBase.Electricity_DataBase.ElectricityConsumptionEmissionsInTransportation;
 for i = 1:Years
     ElectricityConsumptionEmissionsInTransportationTable{1,i} = ElectricityConsumptionEmissionsInTransportationTable{1,1}*ElectricVehicleImprovements(i);
     ElectricityConsumptionEmissionsInTransportationTable{2,i} = ElectricityConsumptionEmissionsInTransportationTable{2,1}*ElectricVehicleImprovements(i);
@@ -40,8 +40,8 @@ DataBase.ElectricityConsumptionEmissionsInTransportation = ElectricityConsumptio
 
 %% 2. Water Desalination Improvements
 WaterDesalinationImprovements = ReductionVectorCalc(BaseYear,TargetYear_global, Water_Desalination_Improvements);
-ElectricityFromWaterCoefficientsTable = array2table(zeros(height(DataBase.ElectricityConsumptionCoefficients),Years)); %create a table in a size of 6 on number of years
-ElectricityFromWaterCoefficientsTable{:,1} = DataBase.ElectricityConsumptionCoefficients; % insert to the 2019 year (first column) the ElectricityConsumptionCoefficients we have
+ElectricityFromWaterCoefficientsTable = array2table(zeros(height(DataBase.Water_DataBase.ElectricityConsumptionCoefficients),Years)); %create a table in a size of 6 on number of years
+ElectricityFromWaterCoefficientsTable{:,1} = DataBase.Water_DataBase.ElectricityConsumptionCoefficients; % insert to the 2019 year (first column) the ElectricityConsumptionCoefficients we have
 for i = 1:Years
     ElectricityFromWaterCoefficientsTable{1,i} = ElectricityFromWaterCoefficientsTable{1,1}.*WaterDesalinationImprovements(i);
     ElectricityFromWaterCoefficientsTable{2,i} = ElectricityFromWaterCoefficientsTable{2,1};
@@ -84,3 +84,7 @@ Rate = nthroot(FutureValue/GrowthVector(1),Period-1);
         GrowthVector(i) = GrowthVector(1)*((Rate)^(i-1));
     end
 end
+
+
+%%% cleaning
+clear ElectricityConsumptionEmissionsInTransportationTable Electricity_Transportation_ColumnNames Electricity_Transportation_RowNames ElectricityFromWaterCoefficientsTable ElectricityFromWaterCoefficientsTable_RowNames ElectricVehicleImprovements 
