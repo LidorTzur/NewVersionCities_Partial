@@ -19,19 +19,30 @@ function [EmissionsByYears,ConsumptionAmounts, Resources, WaterFromFoodCell] = F
 global BaseYear
 addpath("CalcFunctions");
 
+%% Initialize the Results calculated data-base
+% Initialize the row names
+Emission_RowNames = {'Food', 'Electricity - Direct', 'Electricity - Indirect', 'Transportation - Direct', 'Train Emissions','Transportation - Indirect', 'Construction', 'Consumption Emissions' ,'Fuel for Industry', 'Sewege Treatment'}; %, 'Water from food'
+consumption_RowNames = {'Water', 'Fuels For Electriciy Manufacturing', 'Fuels For Transportation Amounts', 'Materials For Construction', 'Fuels For Energy Industry'};
+Resources_RowNames = {'Area For Electricity', 'Cumulative Area','Area For Food', 'Operating Costs', 'Setting Costs', 'Fuels Costs', 'Cost Of Area For PV','Area For Construction'};
+% Initialize the final tables
+EmissionsByYears = cell(numel(Emission_RowNames),Years);  % Initialize the emissions table for each year
+ConsumptionAmounts = cell(numel(consumption_RowNames),Years); % Initialize the consumption table for each year
+Resources = cell(numel(Resources_RowNames), Years);  % Initialize the resources table for each year
+
+%% Inputs
 % Fuel for energy in the industry & others
 FuelConsumption_RowNames = Data.Materials_DataBase.FuelConsumption_RowNames;
 FuelConsumption_ColNames = Data.Materials_DataBase.FuelConsumption_ColNames;
+BusCarRatio_global = Data.Trans_DataBase.BusCarRatio;
 
 % Electricity_Emissions 
-ElectricityBySources_row_names = 
+ElectricityBySources_row_names = Data.Electricity_DataBase.ElectricityBySources_row_names;
 ElectricityBySources = array2table(zeros(numel(ElectricityBySources_row_names),Years));
 ElectricityBySources.Properties.RowNames = ElectricityBySources_row_names;
 
 % Renewable Sources Electricity table
-Renewable_Electricity_row_names = {'Coal','Natural Gas','PV', 'Wind', 'Biomass', 'Thermo Solar', 'Total'};
+Renewable_Electricity_row_names = Data.Electricity_DataBase.Renewable_Electricity_row_names;
 Renewable_Electricity_row_num = numel(Renewable_Electricity_row_names);
-
 
 % Electricity Fuels coeff
 Crude_Oil_To_Electricity = Data.Electricity_DataBase.Crude_Oil_To_Electricity; % Crude oil to electricity - Needs to understand where it is came from
@@ -39,7 +50,10 @@ fuel_MTOE_coeff = Data.Electricity_DataBase.fuel_MTOE_coeff;
 fuel_LPG_coeff = Data.Electricity_DataBase.fuel_LPG_coeff;
 
 % food
-meatRows = [53, 54, 55, 56, 57, 59, 60, 61];
+meatRows = Data.Food_DataBase.meatRows;
+
+% Transportation
+RidesPerDay_global = Data.Trans_DataBase.RidesPerDay;
 
 % Extracting values from the ScenariosTable for each factor
 PopulationGrowthPercentage = ScenariosTable{1,:};
@@ -62,22 +76,6 @@ TransitionToElectricBus = ScenariosTable{17,:};
 %%Scenario18 = ScenariosTable{18,:}; %% vehicles improved emissions coefficients
 WaterSaving = ScenariosTable{19,:};
 ReducingMeatConsumptionPercentage = ScenariosTable{20,:};
-
-% Initialize the Results calculated data-base
-% Initialize the row names
-Emission_RowNames = {'Food', 'Electricity - Direct', 'Electricity - Indirect', 'Transportation - Direct', 'Train Emissions','Transportation - Indirect', 'Construction', 'Consumption Emissions' ,'Fuel for Industry', 'Sewege Treatment'}; %, 'Water from food'
-%temp_row_num = find(strcmpi(consumption_RowNames, 'Fuel for Industry'));
-consumption_RowNames = {'Water', 'Fuels For Electriciy Manufacturing', 'Fuels For Transportation Amounts', 'Materials For Construction', 'Fuels For Energy Industry'};
-Resources_RowNames = {'Area For Electricity', 'Cumulative Area','Area For Food', 'Operating Costs', 'Setting Costs', 'Fuels Costs', 'Cost Of Area For PV','Area For Construction'};
-% Initialize the table row numbers
-Emission_Row_Num = numel(Emission_RowNames);
-consumption_Row_Num = numel(consumption_RowNames);
-Resources_Row_Num = numel(Resources_RowNames);
-% Initialize the final tables
-EmissionsByYears = cell(Emission_Row_Num,Years);  % Initialize the emissions table for each year
-ConsumptionAmounts = cell(consumption_Row_Num,Years); % Initialize the consumption table for each year
-Resources = cell(Resources_Row_Num, Years);  % Initialize the resources table for each year
-
 
 
 %% Calculate Base Consumptions (No scenario)
@@ -504,6 +502,14 @@ Resources.Properties.RowNames = Resources_RowNames;
 Resources.Properties.VariableNames = YearsStringsForColNames;
 
 
+
+
+%% Inputs to the functions
+TransRowNames = Data.Trans_DataBase.Vehicle_Amounts_RowNames;
+TransColNames = Data.Trans_DataBase.Vehicle_Amounts_ColNames;
+TransRow_Num = numel(TransRowNames);
+TransColNum = numel(TransColNames);
+
 %% Other Functions
 
 function ElectricityFromWater = CalculateElectricityFromWaterAllYears(Data, WaterConsumptionCell, Years) %% in data file - needs to multiply the electricity by 1.18336
@@ -552,9 +558,9 @@ for i = 2:Years
 end
 end
 
-% !!!!!!!!!!!!!!!!!! Lidor changed from 1.5/20 to global BusCarRatio_global
+
 function PercentageByYears = CalculateBusPercentages(ChangeByYears)
-global BusCarRatio_global
+BusCarRatio_global = Data.Trans_DataBase.BusCarRatio;
 Years = width(ChangeByYears);
 PercentageByYears = zeros(1,width(ChangeByYears));
 PercentageByYears(1) = 1;
@@ -572,75 +578,76 @@ end
 function NewVehicleAmountCell = CalulateChangeInVehicleAmountsTransitionToPublicTransport(TrasnportationConsumptionTable, VehicleAmountCell)
 NewVehicleAmountCell = cell(1,width(TrasnportationConsumptionTable));
 NewVehicleAmountCell{1} = VehicleAmountCell{1};
-global RidesPerDay_global;
+
+disp(TransRowNames, TransColNames)
+
 KMPerCar = TrasnportationConsumptionTable{2,1}/VehicleAmountCell{1}{1,2};
 KMPerBus = TrasnportationConsumptionTable{1,1}/VehicleAmountCell{1}{1,1};
-RowNames = {'Quantity', 'Gasoline', 'Diesel', 'Drive Per Day', 'Drive Per Year', 'Cars Per Year'};
-NewVehicleAmountCell{1} = array2table(zeros(6,6), 'RowNames', RowNames);
+NewVehicleAmountCell{1} = array2table(zeros(TransRow_Num,TransColNum), 'RowNames', TransRowNames);
 NewVehicleAmountCell{1}{:,:} = VehicleAmountCell{1}{:,:};
-ColNames = {'Bus','Car','Minibus','Motorcycle', 'Truck', 'LCV'};
-NewVehicleAmountCell{1}.Properties.VariableNames = ColNames;
+NewVehicleAmountCell{1}.Properties.VariableNames = TransColNames;
 
 for i=2:width(TrasnportationConsumptionTable)
-    NewVehicleAmountCell{i} = array2table(zeros(6,6), 'RowNames', RowNames);
+    NewVehicleAmountCell{i} = array2table(zeros(TransRow_Num,TransColNum), 'RowNames', TransRowNames);
     NewVehicleAmountCell{i}{:,:} = VehicleAmountCell{i}{:,:};
     NewVehicleAmountCell{i}{1,1} = ceil((TrasnportationConsumptionTable{1,i}-TrasnportationConsumptionTable{1,i-1})/KMPerBus) + NewVehicleAmountCell{i-1}{1,1};
     NewVehicleAmountCell{i}{4,1} = NewVehicleAmountCell{i}{1,1}*RidesPerDay_global;
-    NewVehicleAmountCell{i}{5,1} = NewVehicleAmountCell{i}{4,1}*365;
-    NewVehicleAmountCell{i}{6,1} = NewVehicleAmountCell{i}{1,1}*365;
+    NewVehicleAmountCell{i}{5,1} = NewVehicleAmountCell{i}{4,1}*Data.Days_In_Year;
+    NewVehicleAmountCell{i}{6,1} = NewVehicleAmountCell{i}{1,1}*Data.Days_In_Year;
 
     NewVehicleAmountCell{i}{1,2} = NewVehicleAmountCell{i-1}{1,2} - floor((TrasnportationConsumptionTable{2,i-1}-TrasnportationConsumptionTable{2,i})/KMPerCar);
     NewVehicleAmountCell{i}{4,2} = NewVehicleAmountCell{i}{1,2}*RidesPerDay_global;
-    NewVehicleAmountCell{i}{5,2} = NewVehicleAmountCell{i}{4,2}*365;
-    NewVehicleAmountCell{i}{6,2} = NewVehicleAmountCell{i}{1,2}*365;
+    NewVehicleAmountCell{i}{5,2} = NewVehicleAmountCell{i}{4,2}*Data.Days_In_Year;
+    NewVehicleAmountCell{i}{6,2} = NewVehicleAmountCell{i}{1,2}*Data.Days_In_Year;
 
-    NewVehicleAmountCell{i}.Properties.VariableNames = ColNames;
+    NewVehicleAmountCell{i}.Properties.VariableNames = TransColNames;
 end
 end
 
 function NewVehicleAmountCell = ChangesInVehicelAmountsAfterElectricVehicels(TrasnportationConsumptionTable, VehicleAmountCell)
-global RidesPerDay_global;
-    NewVehicleAmountCell = cell(1,width(VehicleAmountCell));
+NewVehicleAmountCell = cell(1,width(VehicleAmountCell));
 NewVehicleAmountCell{1} = VehicleAmountCell{1};
 KMPerCar = TrasnportationConsumptionTable{2,1}/VehicleAmountCell{1}{1,2};
 KMPerBus = TrasnportationConsumptionTable{1,1}/VehicleAmountCell{1}{1,1};
 KMPerTruck = TrasnportationConsumptionTable{5,1}/VehicleAmountCell{1}{1,5};
 KMPerVan = TrasnportationConsumptionTable{6,1}/VehicleAmountCell{1}{1,6};
-RowNames = {'Quantity', 'Gasoline', 'Diesel', 'Drive Per Day', 'Drive Per Year', 'Cars Per Year'};
-NewVehicleAmountCell{1} = array2table(zeros(6,6), 'RowNames', RowNames);
+
+disp(TransRowNames, TransColNames)
+
+NewVehicleAmountCell{1} = array2table(zeros(TransRow_Num,TransColNum), 'RowNames', TransRowNames);
+NewVehicleAmountCell{1}.Properties.VariableNames = TransColNames;
 NewVehicleAmountCell{1}{:,:} = VehicleAmountCell{1}{:,:};
-ColNames = {'Bus','Car','Minibus','Motorcycle', 'Truck', 'LCV'};
-NewVehicleAmountCell{1}.Properties.VariableNames = ColNames;
+
 
 for i=2:width(TrasnportationConsumptionTable)
-    NewVehicleAmountCell{i} = array2table(zeros(6,6), 'RowNames', RowNames);
+    NewVehicleAmountCell{i} = array2table(zeros(numel(RowNames),numel(ColNames)), 'RowNames', RowNames);
     NewVehicleAmountCell{i}{:,:} = VehicleAmountCell{i}{:,:};
     %buses
     NewVehicleAmountCell{i}{1,1} = NewVehicleAmountCell{i-1}{1,1} - floor((TrasnportationConsumptionTable{1,i-1}-TrasnportationConsumptionTable{1,i})/KMPerBus); %x
     NewVehicleAmountCell{i}{4,1} = NewVehicleAmountCell{i}{1,1}*RidesPerDay_global; %4x
-    NewVehicleAmountCell{i}{5,1} = NewVehicleAmountCell{i}{4,1}*365; % 4x*365
-    NewVehicleAmountCell{i}{6,1} = NewVehicleAmountCell{i}{1,1}*365; % 365x
+    NewVehicleAmountCell{i}{5,1} = NewVehicleAmountCell{i}{4,1}*Data.Days_In_Year; % 4x*365
+    NewVehicleAmountCell{i}{6,1} = NewVehicleAmountCell{i}{1,1}*Data.Days_In_Year; % 365x
     %cars
     NewVehicleAmountCell{i}{1,2} = NewVehicleAmountCell{i-1}{1,2} - floor((TrasnportationConsumptionTable{2,i-1}-TrasnportationConsumptionTable{2,i})/KMPerCar);
     NewVehicleAmountCell{i}{4,2} = NewVehicleAmountCell{i}{1,2}*RidesPerDay_global;
-    NewVehicleAmountCell{i}{5,2} = NewVehicleAmountCell{i}{4,2}*365;
-    NewVehicleAmountCell{i}{6,2} = NewVehicleAmountCell{i}{1,2}*365;
+    NewVehicleAmountCell{i}{5,2} = NewVehicleAmountCell{i}{4,2}*Data.Days_In_Year;
+    NewVehicleAmountCell{i}{6,2} = NewVehicleAmountCell{i}{1,2}*Data.Days_In_Year;
     %trucks
     NewVehicleAmountCell{i}{1,5} = NewVehicleAmountCell{i-1}{1,5} - floor((TrasnportationConsumptionTable{5,i-1}-TrasnportationConsumptionTable{5,i})/KMPerTruck);
     NewVehicleAmountCell{i}{4,5} = NewVehicleAmountCell{i}{1,5}*RidesPerDay_global;
-    NewVehicleAmountCell{i}{5,5} = NewVehicleAmountCell{i}{4,5}*365;
-    NewVehicleAmountCell{i}{6,5} = NewVehicleAmountCell{i}{1,5}*365;
+    NewVehicleAmountCell{i}{5,5} = NewVehicleAmountCell{i}{4,5}*Data.Days_In_Year;
+    NewVehicleAmountCell{i}{6,5} = NewVehicleAmountCell{i}{1,5}*Data.Days_In_Year;
     %vans
     NewVehicleAmountCell{i}{1,6} = ceil(NewVehicleAmountCell{i-1}{1,6} - ((TrasnportationConsumptionTable{6,i-1}-TrasnportationConsumptionTable{6,i})/KMPerVan));
     NewVehicleAmountCell{i}{4,6} = NewVehicleAmountCell{i}{1,6}*RidesPerDay_global;
-    NewVehicleAmountCell{i}{5,6} = NewVehicleAmountCell{i}{4,6}*365;
-    NewVehicleAmountCell{i}{6,6} = NewVehicleAmountCell{i}{1,6}*365;
+    NewVehicleAmountCell{i}{5,6} = NewVehicleAmountCell{i}{4,6}*Data.Days_In_Year;
+    NewVehicleAmountCell{i}{6,6} = NewVehicleAmountCell{i}{1,6}*Data.Days_In_Year;
 
     NewVehicleAmountCell{i}.Properties.VariableNames = ColNames;
 end
 end
 
-clear fuel_LPG_coeff  fuel_MTOE_coeff Crude_Oil_To_Electricity
+clear fuel_LPG_coeff  fuel_MTOE_coeff Crude_Oil_To_Electricity ElectricityBySources_row_names
 
 end
 

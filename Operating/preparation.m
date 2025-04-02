@@ -1,11 +1,18 @@
 
 %% General Inputs
+Days_In_Year = 365;
 global TargetYear_global;
 TargetYear_global = 2050;
 global BaseYear;
 BaseYear = 2019;
 ScenarioNumber = 19; % For 2035 - water saving
 Years = TargetYear_global-BaseYear+1; %השנים שבין שנת הבסיס לשנת המטרה
+
+%% Data about the current year in order to accurate the model data (that based on the 2019 year)
+CurrentYearReal = 2020;
+RenewableEnergies_CurrentYear = 0.06;
+NaturalGas_CurrentYear = 0.68;
+
 
 %% Lidor: population data, for the "populationCal" script
 global PopulationStartYear_global;
@@ -24,11 +31,14 @@ GrowthRate_global = GrowthRate_global{1};
 GrowthRate_global = str2double(GrowthRate_global); 
 GrowthRate_global = 1 + GrowthRate_global; 
 
-
-%% Food lost
+%% Food
+% Food lost
 % The assumption was that 33% of the food manufactured is lost
 global current_food_lost_global;
 current_food_lost_global = 1/3;  
+% meat rows in the excel
+meatRows = [53, 54, 55, 56, 57, 59, 60, 61];
+WaterFromFoodCategories = {'Local Water For Humans','Local Water For Animals', 'Global Water For Humans', 'Global Water For Animals'};
 
 %% Waste incinaration values 
 WasteToElectricity = 0.807; % How much waste needed to burn to get 1 kWh of electricity
@@ -42,15 +52,30 @@ TransitionToTrain = 1- TransitionToBus;
 % The maximum theoretical efficiency of a solar cell using a single p-n junction to collect power from the cell where the only loss mechanism is radiative recombination in the solar cell.
 LowerBoundForArea = 6; %% according to shockley-queisser limit
 PVType = 'Dual';
+RenewablePercents = [1 0 0 0];
 
 %% Number of rides per day we determine
 global RidesPerDay_global;
 RidesPerDay_global = 4;
 
+% For the creation of the transportation table data
+Vehicle_Amounts_RowNames = {'Quantity', 'Gasoline', 'Diesel', 'Drive Per Day', 'Drive Per Year', 'Cars Per Year'};
+Vehicle_Amounts_ColNames = {'Bus','Car','Minibus','Motorcycle', 'Truck', 'LCV'};
+Electricity_Sources = {'Coal', 'Natural Gas', 'Renewable', 'Soler', 'Mazut'};
+
 % Define the ratio between car to bus use
 global BusCarRatio_global
 BusCarRatio_global = readtable(Data,'Sheet','TransportationConsumption','Range','B24:B24','ReadVariableNames',false);
 BusCarRatio_global = BusCarRatio_global{1,1}; 
+
+% EV scenario rows number of electric vehicles
+EvSenarioLines = [14 15 16 17];
+
+ScenarioRowNames = {'Population Growth', 'Increased Electricity Per Capita', 'Increase in Desalinared Water', ...
+    'Reducing Beef Consumption', 'Preventing Food Loss', 'Change In Energy Consumption From Renewable Energies', ...
+    'Electricity Production by Natural Gas', 'Electricity Saving', 'Fuel for Energy', 'Recycled Waste', 'Burning Waste', ...
+    'Reduction Of Mileage', 'Transition To Public Transportation', 'Transition to Electric Car', 'Transition to Electric Van', ...
+    'Transition to Electric Truck', 'Transition to Electric Bus', '18', 'Water Saving', 'Vegetarians'};
 
 % for SensitivityAnalysis (in runningSteps) - Needs to be Changed!!!!!!!!!!!!!!
 %PopulationGrowth = {0, 0.45, 0.9};
@@ -79,16 +104,22 @@ TechnologicalImprovements;
 % OnlyOneAnalysis.Properties.RowNames = Analysis_Row_Names;
 % OnlyOneAnalysis.Properties.VariableNames = OnlyOneAnalysis_Variable_Names;
 
-% Lidor: In the "populationCal" script - not sure if we need it here too
-population  = array2table(zeros(4,Years));
-population_RowNames = {'Num','Years', 'Israel population', 'Palestinian Authority population'};
-pop.Properties.RowNames = population_RowNames;
-% Filling the Data to every year (By option A in the excel sheet)
-for i =1:Years
-    population(1,i) = {i};
-    population(2,i) = {i+BaseYear-1};
-    population(3,i) = {PopulationStartYear_global*GrowthRate_global^(i-1)};
-    population(4,i) = {palestinians_base_pop_global*0^(i-1)}; % No palestinian in beer sheva..
-end
+% %% Lidor: In the "populationCal" script - not sure if we need it here too
+% population_RowNames = {'Num','Years', 'Israel population', 'Palestinian Authority population'};
+% population  = array2table(zeros(numel(population_RowNames),Years));
+% population.Properties.RowNames = population_RowNames;
+% 
+% % Filling the Data to every year (By option A in the excel sheet)
+% for i =1:Years
+%     population(1,i) = {i};
+%     population(2,i) = {i+BaseYear-1};
+%     population(3,i) = {PopulationStartYear_global*GrowthRate_global^(i-1)};
+%     population(4,i) = {palestinians_base_pop_global*0^(i-1)}; % No palestinian in beer sheva..
+% end
+% 
+% fprintf('Population table in the main is:\n');
+% disp(population);
+
 
 beep;
+clear i 

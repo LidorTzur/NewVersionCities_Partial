@@ -25,12 +25,17 @@ MDB = DataBase.Materials_DataBase;
 ADB = DataBase.Area_DataBase;
 MONDB = DataBase.Money_DataBase;
 Data = "Data.xlsx";
+ 
 
 %% Insert data to the DataBase from the "prepatation" script
 DataBase.WasteToElectricity = WasteToElectricity;
 DataBase.IncinarationEmissionCoefficient = IncinarationEmissionCoefficient;
 DataBase.TransitionToBus = TransitionToBus;
 DataBase.TransitionToTrain = TransitionToTrain;
+DataBase.CurrentYearReal = CurrentYearReal;
+DataBase.ScenarioRowNames = ScenarioRowNames;
+DataBase.EvSenarioLines = EvSenarioLines;
+DataBase.Days_In_Year = 365; 
 
 %% ------------------------------------- ELECTRICITY ------------------------------------------------
 
@@ -39,7 +44,8 @@ Electricity_Consumption_RowNames = {'Home', 'Public & Commercial', 'Industrial',
 Electricity_Consumption_Row_Num = int32(numel(Electricity_Consumption_RowNames));
 % Elctricity - Energy type
 ElctricityFromNatualGasCoeff_RowNames = {'Converted', 'Combined Cycle'};
-
+% Electricity sources for the fullScenario script
+EDB.Electricity_Sources = Electricity_Sources;
 % Electricity - Consumption For Water
 ElectricityConsumptionForWater_RowNames = {'Natural Water', 'Urban Consumption','Diselinated Water','Treated Waste Water', 'Sewege'};
 ElectricityConsumptionForWater_Row_Num = int32(numel(ElectricityConsumptionForWater_RowNames));
@@ -98,6 +104,9 @@ EDB.ElectrictyManufacturingCoefficients = table2array(readtable(Data,'Sheet','El
 % The Ratio between crude oil to Manufactured Fuel
 EDB.CrudeOilToFuelRatio = readmatrix('Data.xlsx', 'Sheet','ElectricityManufactureEmissions','Range','R28:R28'); 
 
+% Current Year Data
+EDB.RenewableEnergies_CurrentYear = RenewableEnergies_CurrentYear;
+EDB.NaturalGas_CurrentYear = NaturalGas_CurrentYear;
 
 
 %% ------------------------------------- TRANSPORTATION ------------------------------------------------
@@ -105,9 +114,10 @@ EDB.CrudeOilToFuelRatio = readmatrix('Data.xlsx', 'Sheet','ElectricityManufactur
 % Transportation - Consumption
 Transportation_Consumption_RowNames = {'Bus', 'Car', 'Minibus', 'Motorcycle', 'Truck', 'LCV', 'PassengerTrain','Freight Train', 'Total'};
 Transportation_Consumption_Row_Num = int32(numel(Transportation_Consumption_RowNames));
+
 % Transportation - Vehicle Amounts By type
-Vehicle_Amounts_RowNames = {'Quantity', 'Gasoline', 'Diesel', 'Drive Per Day', 'Drive Per Year', 'Cars Per Year'};
-Vehicle_Amounts_ColNames = {'Bus','Car','Minibus','Motorcycle', 'Truck', 'LCV'};
+TDB.Vehicle_Amounts_RowNames = Vehicle_Amounts_RowNames;
+TDB.Vehicle_Amounts_ColNames = Vehicle_Amounts_ColNames;
 Vehicle_Amounts_Row_Num = int32(numel(Vehicle_Amounts_RowNames));
 Vehicle_Amounts_Col_Num = int32(numel(Vehicle_Amounts_ColNames));
 % Fuels
@@ -178,6 +188,10 @@ TDB.NaturalGasForFuelRefining = readmatrix('Data.xlsx', 'Sheet','FuelProductionE
 % Coefficients from mining and fuel manufacturing for Mazut only
 TDB.EmissionsCoefficientsUpstream = table2array(readtable(Data,'Sheet','FuelProductionEmissionsForTrans','Range','B50:H56','ReadVariableNames',false))'; %% array(6,7)
 
+% Rides per day
+TDB.RidesPerDay = RidesPerDay_global;
+% Car Bus Ratio
+TDB.BusCarRatio = BusCarRatio_global;
 
 
 %% ---------------------------------------- WATER ------------------------------------------------
@@ -273,6 +287,14 @@ Food_Consumption_ColNames = {'Humans and Other - Local','Animals - Local','Human
 Food_Consumption_Row_Num = int32(numel(Food_Consumption_RowNames));
 Food_Consumption_Col_Num = int32(numel(Food_Consumption_ColNames));
 
+%%%%%%% For function uses
+% Meat rows in the excel table
+FDB.meatRows = meatRows;
+% Food Loss
+FDB.current_food_lost = current_food_lost_global;
+% {'Local Water For Humans','Local Water For Animals', 'Global Water For Humans', 'Global Water For Animals'}
+FDB.WaterFromFoodCategories = WaterFromFoodCategories;
+
 %%%%%%%%%%%% Food Cosnumption
 % This is a one-demantional array that contain columns for each year.
 % Ideally each cell of it will contain a table with the year data of the number of food. For now its just the first cell that contain the table (for 2019)
@@ -285,9 +307,6 @@ FDB.FoodConsumptionCell{1}.Properties.VariableNames = Food_Consumption_ColNames;
 FDB.FoodRowName = table2cell(readtable(Data,'Sheet','Food','Range','A5:A68','ReadVariableNames',false))';
 % the maximal value possible in order to keep the area for food in Israel under 4500000 m^2.
 FDB.TotalGrowthForLocalFood = readmatrix('Data.xlsx', 'Sheet','Food','Range','AJ3:AJ3');  % Save it in the DataBase
-
-%%% Meat rows in the excel table
-FDB.meatRows = [53, 54, 55, 56, 57, 59, 60, 61];
 
 %%%%% Water for food percentages (distribution of Nature Water, Diselinated Water, Brackish Water, Reclaimed Water, Flood Water)
 FDB.WaterForFoodPercentages = table2array(readtable(Data,'Sheet','Food','Range','T6:T10','ReadVariableNames',false))';
@@ -319,7 +338,6 @@ FDB.OrganicWasteAmountsCell{1}.Properties.RowNames = OrganicWasteAmounts_RowName
 
 %%%%%% area for food coefficient (m^2/kg)
 FDB.AreaForFoodCoefficients = readtable(Data,'Sheet','Food','Range','W3:X67','ReadVariableNames',true);
-
 
 
 %% ---------------------------------------- CONSTRUCTION ------------------------------------------------
@@ -406,7 +424,7 @@ MDB.ExportWasteForRecyclingPercentage = table2array(readtable(Data,'Sheet','Mate
 
 %%%% Resources - Area
 ADB.AreaForSolarEnergyCoefficients = readtable(Data,'Sheet','Area','Range','A1:E33','ReadVariableNames',true, 'ReadRowNames',true);
-ADB.RenewablePercents = [1 0 0 0];
+ADB.RenewablePercents = RenewablePercents;
 ADB.RenewablePercents = array2table(ADB.RenewablePercents);
 ADB.RenewablePercents.Properties.VariableNames = {'PV','Wind', 'Biomass', 'Thermo Solar'};
 
@@ -457,4 +475,8 @@ clear Electricity_Consumption_RowNames Electricity_Consumption_Row_Num Elctricit
 clear Construction_Row_Num Construction_RowNames
 clear WateAndRecycling_RowNames WateAndRecycling_ColNames WateAndRecycling_Row_Num WateAndRecycling_Col_Num WateAndRecyclingCell
 clear TDB FDB EDB WDB CDB MDB ADB MONDB
-clear M FuelConsumptionCoefficients
+clear M FuelConsumptionCoefficients Days_In_Year
+clear s1 s2 OrganicWasteAmounts_RowNames PVType RidesPerDay_global current_food_lost_global BusCarRatio_global LowerBoundForArea
+clear i ColumnNames IncinarationEmissionCoefficient WaterFromFoodCategories
+clear RenewableEnergies_CurrentYear NaturalGas_CurrentYear Electricity_Sources
+clear TransitionToBus TransitionToTrain WasteToElectricity meatRows RenewablePercents ScenarioRowNames EvSenarioLines

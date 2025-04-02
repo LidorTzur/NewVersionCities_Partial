@@ -96,8 +96,14 @@ switch orderIndex
         % Bussiness as usual - all the column (changes)
         % The changes vectors to all years
         [FullScenariosTable1] = AllButOneChangesByScenarios(DataBase, 0, Years, ScenariosAndValues{:,4}, 'MileStones', false); %% AllButOneChangesByScenarios(Data, ScenarioNumber, Years, S, varargin)
+        %fprintf('The changing vectors to all years (inclusing population) is:\n');
+        %disp(FullScenariosTable1);
         [population] = populationCal(FullScenariosTable1);
+        %fprintf('Population table:\n');
+        %disp(population);
+
         [EmissionsByYearsTest1, ConsumptionAmounts1, Resources1, WaterFromFood1] = FullScenario(DataBase, FullScenariosTable1,Years,population,orderIndex,0);
+        
         % 
         % % Moderate
         % [FullScenariosTable2] = AllButOneChangesByScenarios(DataBase, 0, Years, ScenariosAndValues{:,7}, 'MileStones', false);
@@ -275,6 +281,7 @@ switch orderIndex
 end
 
 beep;
+
 
 
 

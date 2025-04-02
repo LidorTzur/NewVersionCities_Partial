@@ -14,20 +14,28 @@ DataBase.Trans_DataBase = struct();
 DataBase.Food_DataBase = struct();
 DataBase.Const_DataBase = struct();
 DataBase.Materials_DataBase = struct();
+DataBase.Area_DataBase = struct();
+DataBase.Money_DataBase = struct();
 WDB = DataBase.Water_DataBase;
 EDB = DataBase.Electricity_DataBase;
 TDB = DataBase.Trans_DataBase;
 FDB = DataBase.Food_DataBase;
 CDB = DataBase.Const_DataBase;
 MDB = DataBase.Materials_DataBase;
-
+ADB = DataBase.Area_DataBase;
+MONDB = DataBase.Money_DataBase;
 Data = "Data.xlsx";
+Electricity_Sources
 
 %% Insert data to the DataBase from the "prepatation" script
 DataBase.WasteToElectricity = WasteToElectricity;
 DataBase.IncinarationEmissionCoefficient = IncinarationEmissionCoefficient;
 DataBase.TransitionToBus = TransitionToBus;
 DataBase.TransitionToTrain = TransitionToTrain;
+DataBase.CurrentYearReal = CurrentYearReal;
+DataBase.ScenarioRowNames = ScenarioRowNames;
+DataBase.EvSenarioLines = EvSenarioLines;
+DataBase.Days_In_Year = 365; 
 
 %% ------------------------------------- ELECTRICITY ------------------------------------------------
 
@@ -36,11 +44,15 @@ Electricity_Consumption_RowNames = {'Home', 'Public & Commercial', 'Industrial',
 Electricity_Consumption_Row_Num = int32(numel(Electricity_Consumption_RowNames));
 % Elctricity - Energy type
 ElctricityFromNatualGasCoeff_RowNames = {'Converted', 'Combined Cycle'};
-
+% Electricity sources for the fullScenario script
+EDB.Electricity_Sources = Electricity_Sources;
 % Electricity - Consumption For Water
 ElectricityConsumptionForWater_RowNames = {'Natural Water', 'Urban Consumption','Diselinated Water','Treated Waste Water', 'Sewege'};
 ElectricityConsumptionForWater_Row_Num = int32(numel(ElectricityConsumptionForWater_RowNames));
 
+%%% For later calculations
+EDB.ElectricityBySources_row_names = {'KWh From Coal', 'KWh From Natural Gas', 'KWh From Renewable Energies', 'KWh From Soler', 'KWh From Mazut', 'KWh From Waste Incinaration', 'Total'};
+EDB.Renewable_Electricity_row_names = {'Coal','Natural Gas','PV', 'Wind', 'Biomass', 'Thermo Solar', 'Total'};
 
 % Electricity Consumption - UPDATED 
 % create a table in the DataBase that contain the Electricity consumption for every year to the target year
@@ -59,6 +71,11 @@ EDB.ElectricityConsumptionTable{1:(Electricity_Consumption_Row_Num-1), 1} = tabl
 % Import more variables
 EDB.IndustryElectricityConsumptionChange = readmatrix('Data.xlsx', 'Sheet','ElectricityConsumption','Range','R5:R5'); % Save the single Datumn in the DataBase as single value
 EDB.ElectricityLossRatio = readmatrix('Data.xlsx', 'Sheet','ElectricityConsumption','Range','B17:B17'); % Save the single Datumn in the DataBase as single value
+
+% Electricity Fuels coeff
+EDB.Crude_Oil_To_Electricity = 11.63; % Crude oil to electricity - Needs to understand where it is came from
+EDB.fuel_MTOE_coeff = 2.5;
+EDB.fuel_LPG_coeff = 2.9;
 
 % Electricity Consumption Emissions In Transportation (taken from the ElectricityConsumption sheet)
 % Electricity: Electricity Consumption for Electric Vehicle (kWh/KM)
@@ -87,6 +104,9 @@ EDB.ElectrictyManufacturingCoefficients = table2array(readtable(Data,'Sheet','El
 % The Ratio between crude oil to Manufactured Fuel
 EDB.CrudeOilToFuelRatio = readmatrix('Data.xlsx', 'Sheet','ElectricityManufactureEmissions','Range','R28:R28'); 
 
+% Current Year Data
+EDB.RenewableEnergies_CurrentYear = RenewableEnergies_CurrentYear;
+EDB.NaturalGas_CurrentYear = NaturalGas_CurrentYear;
 
 
 %% ------------------------------------- TRANSPORTATION ------------------------------------------------
@@ -94,9 +114,10 @@ EDB.CrudeOilToFuelRatio = readmatrix('Data.xlsx', 'Sheet','ElectricityManufactur
 % Transportation - Consumption
 Transportation_Consumption_RowNames = {'Bus', 'Car', 'Minibus', 'Motorcycle', 'Truck', 'LCV', 'PassengerTrain','Freight Train', 'Total'};
 Transportation_Consumption_Row_Num = int32(numel(Transportation_Consumption_RowNames));
+
 % Transportation - Vehicle Amounts By type
-Vehicle_Amounts_RowNames = {'Quantity', 'Gasoline', 'Diesel', 'Drive Per Day', 'Drive Per Year', 'Cars Per Year'};
-Vehicle_Amounts_ColNames = {'Bus','Car','Minibus','Motorcycle', 'Truck', 'LCV'};
+TDB.Vehicle_Amounts_RowNames = Vehicle_Amounts_RowNames;
+TDB.Vehicle_Amounts_ColNames = Vehicle_Amounts_ColNames;
 Vehicle_Amounts_Row_Num = int32(numel(Vehicle_Amounts_RowNames));
 Vehicle_Amounts_Col_Num = int32(numel(Vehicle_Amounts_ColNames));
 % Fuels
@@ -167,6 +188,10 @@ TDB.NaturalGasForFuelRefining = readmatrix('Data.xlsx', 'Sheet','FuelProductionE
 % Coefficients from mining and fuel manufacturing for Mazut only
 TDB.EmissionsCoefficientsUpstream = table2array(readtable(Data,'Sheet','FuelProductionEmissionsForTrans','Range','B50:H56','ReadVariableNames',false))'; %% array(6,7)
 
+% Rides per day
+TDB.RidesPerDay = RidesPerDay_global;
+% Car Bus Ratio
+TDB.BusCarRatio = BusCarRatio_global;
 
 
 %% ---------------------------------------- WATER ------------------------------------------------
@@ -244,12 +269,14 @@ WDB.Electricity_DataBase.ElectricityConsumptionForWaterCell{1}{:,1} = table2arra
 
 % Calc Electricity for water
 % Electricity For Water Coefficints (kwh/m^3)
-WDB.ElectricityConsumptionCoefficients = table2array(readtable(Data,'Sheet','Water','Range','B12:B17','ReadVariableNames',false));
+WDB.ElectricityConsumptionCoefficients = readmatrix(Data, 'Sheet', 'WaterNew', 'Range', 'B12:B17');
+
 % % Distribution in uses of Urban SHAPIRIM 
 % WDB.UrbanConsumptionPercentages = table2array(readtable(Data,'Sheet','Water','Range','M20:R20','ReadVariableNames',false));
 % % Distribution of Brackish Water to Gardening and Trade and Crafts
 % WDB.RatioForBrackishWater = table2array(readtable(Data,'Sheet','Water','Range','P23:Q23','ReadVariableNames',false));
-% 
+
+WDB.Electricity_Drillind_Water_Coeff = WDB.ElectricityConsumptionCoefficients(2,1) + WDB.ElectricityConsumptionCoefficients(6,1); % Electricity water coeff
 
 
 %% ---------------------------------------- FOOD ------------------------------------------------
@@ -272,6 +299,9 @@ FDB.FoodConsumptionCell{1}.Properties.VariableNames = Food_Consumption_ColNames;
 FDB.FoodRowName = table2cell(readtable(Data,'Sheet','Food','Range','A5:A68','ReadVariableNames',false))';
 % the maximal value possible in order to keep the area for food in Israel under 4500000 m^2.
 FDB.TotalGrowthForLocalFood = readmatrix('Data.xlsx', 'Sheet','Food','Range','AJ3:AJ3');  % Save it in the DataBase
+
+%%% Meat rows in the excel table
+FDB.meatRows = meatRows;
 
 %%%%% Water for food percentages (distribution of Nature Water, Diselinated Water, Brackish Water, Reclaimed Water, Flood Water)
 FDB.WaterForFoodPercentages = table2array(readtable(Data,'Sheet','Food','Range','T6:T10','ReadVariableNames',false))';
@@ -304,10 +334,11 @@ FDB.OrganicWasteAmountsCell{1}.Properties.RowNames = OrganicWasteAmounts_RowName
 %%%%%% area for food coefficient (m^2/kg)
 FDB.AreaForFoodCoefficients = readtable(Data,'Sheet','Food','Range','W3:X67','ReadVariableNames',true);
 
+% Food Loss
+FDB.current_food_lost = current_food_lost_global;
 
 
 %% ---------------------------------------- CONSTRUCTION ------------------------------------------------
-
 
 %%%% temp variables
 Construction_RowNames = {'Agriculture', 'Other Public Buildings', 'Helathcare', 'Education', 'Industry and Storage', 'Transportation and Communications', 'Trade', 'Offices', 'Hosting', 'Residential', 'Total'};
@@ -351,6 +382,10 @@ WateAndRecycling_ColNames = {'Local Authorities - Waste', 'Local Authorities - R
 WateAndRecycling_Row_Num = int64(numel(WateAndRecycling_RowNames));
 WateAndRecycling_Col_Num = int64(numel(WateAndRecycling_ColNames));
 
+%%% Names Fuel for energy in the industry & others
+MDB.FuelConsumption_RowNames = {'Crude Oil Products - For Energy', 'LPG - Home', 'LPG - Commertiel'  };
+MDB.FuelConsumption_ColNames = {'Naptha', 'Mazut','Diesel','Kerosene','GWDB.Electricity_Drillind_Wateasoline','Liquified Petroleum Gas', 'Other'};
+
 %%%% Materials - generated waste and recycling - on hold, Need to Update!!!!!!!!!!!!!!!!!!!!!!!!!!!
 WateAndRecyclingCell = cell(1,Years);
 WateAndRecyclingCell{1} =  array2table(zeros(WateAndRecycling_Row_Num,WateAndRecycling_Col_Num), 'RowNames', WateAndRecycling_RowNames);
@@ -383,38 +418,37 @@ MDB.ExportWasteForRecyclingPercentage = table2array(readtable(Data,'Sheet','Mate
 
 
 
+%% ---------------------------------------- AREA ------------------------------------------------
 
-
-
-
-
-
-
-%% Resources - Area
-DataBase.AreaForSolarEnergyCoefficients = readtable(Data,'Sheet','Area','Range','A1:E33','ReadVariableNames',true, 'ReadRowNames',true);
-% We usw only PV energy in the project - maybe put this variable in a excel...!!!!!!!!!!!!!!!!!!!!!
-DataBase.RenewablePercents = [1 0 0 0];
-DataBase.RenewablePercents = array2table(DataBase.RenewablePercents);
-DataBase.RenewablePercents.Properties.VariableNames = {'PV','Wind', 'Biomass', 'Thermo Solar'};
+%%%% Resources - Area
+ADB.AreaForSolarEnergyCoefficients = readtable(Data,'Sheet','Area','Range','A1:E33','ReadVariableNames',true, 'ReadRowNames',true);
+ADB.RenewablePercents = RenewablePercents;
+ADB.RenewablePercents = array2table(ADB.RenewablePercents);
+ADB.RenewablePercents.Properties.VariableNames = {'PV','Wind', 'Biomass', 'Thermo Solar'};
 
 % Insert the maximum theoretical efficiency of a solar cell
-DataBase.LowerBoundForArea = LowerBoundForArea; 
-DataBase.KWToKwh = readtable(Data,'Sheet','Area','Range','N39:O44','ReadRowNames',true);
-DataBase.PVType = PVType;
+ADB.LowerBoundForArea = LowerBoundForArea; 
+ADB.KWToKwh = readtable(Data,'Sheet','Area','Range','N39:O44','ReadRowNames',true);
+ADB.PVType = PVType;
 
 %area distribution
-DataBase.AreaDistribution = readtable(Data,'Sheet','Area','Range','H1:K6','ReadVariableNames',true, 'ReadRowNames',true);
-% Do we need to calculate money?!!!!!!!!!!!!!!!!!!!!!!!
-DataBase.AreaCostForElectricity = readtable(Data,'Sheet','Money','Range','N37:Q71','ReadVariableNames',true, 'ReadRowNames',true);
+ADB.AreaDistribution = readtable(Data,'Sheet','Area','Range','H1:K6','ReadVariableNames',true, 'ReadRowNames',true);
 
 
-%% Money
+%% ---------------------------------------- MONEY ------------------------------------------------
+
+MONDB.AreaCostForElectricity = readtable(Data,'Sheet','Money','Range','N37:Q71','ReadVariableNames',true, 'ReadRowNames',true);
+
 % Setting costs (ILS\KW)
-DataBase.SettingCosts = readtable(Data,'Sheet','Money','Range','A2:I36','ReadVariableNames',true, 'ReadRowNames',true);
+MONDB.SettingCosts = readtable(Data,'Sheet','Money','Range','A2:I36','ReadVariableNames',true, 'ReadRowNames',true);
 % Operating Costs (ILS\KW)
-DataBase.OperatingCosts = readtable(Data,'Sheet','Money','Range','A41:I75','ReadVariableNames',true, 'ReadRowNames',true);
+MONDB.OperatingCosts = readtable(Data,'Sheet','Money','Range','A41:I75','ReadVariableNames',true, 'ReadRowNames',true);
 % ILS/Ton Fuel Manufacturing and Fuel Transportation
-DataBase.ILSPerTon = readtable(Data,'Sheet','Money','Range','L19:O23','ReadVariableNames',false, 'ReadRowNames',true);
+MONDB.ILSPerTon = readtable(Data,'Sheet','Money','Range','L19:O23','ReadVariableNames',false, 'ReadRowNames',true);
+
+
+
+%% ---------------------------------------- RESULTS AND CLEANING ------------------------------------------------
 
 DataBase.Water_DataBase = WDB;
 DataBase.Electricity_DataBase = EDB;
@@ -422,6 +456,8 @@ DataBase.Trans_DataBase = TDB;
 DataBase.Food_DataBase = FDB;
 DataBase.Const_DataBase = CDB;
 DataBase.Materials_DataBase = MDB;
+DataBase.Area_DataBase = ADB;
+DataBase.Money_DataBase = MONDB;
 
 %% read the trends in consumption for the target year (empty)- Needs to change!!!!!!!!!!!!!!!!!!
 DataBase.ChnageStruct = struct;
@@ -430,11 +466,15 @@ DataBase.ChnageStruct.Water = readtable("The Three Scenarios.xlsx",'Sheet','Chan
 DataBase.ChnageStruct.Transportation = readtable("The Three Scenarios.xlsx",'Sheet','ChangesInConsumptionType','Range','A15:B21','ReadRowNames',true);
 DataBase.ChnageStruct.Food = readtable("The Three Scenarios.xlsx",'Sheet','ChangesInConsumptionType','Range','D2:E65','ReadRowNames',true);
 
-
 %%%% Delete all the temps
 clear Transportation_Consumption_RowNames Transportation_Consumption_Row_Num Vehicle_Amounts_RowNames Vehicle_Amounts_ColNames Vehicle_Amounts_Row_Num Vehicle_Amounts_Col_Num AmountsOfFuels_RowNames AmountsOfFuels_ColNames AmountsOfFuels_Row_Num AmountsOfFuels_Col_Num FuelConsumptionCoefficients_RowNames FuelConsumptionCoefficients_Row_Num FuelConsumptionCoefficients_Col_Num
 clear Food_Consumption_RowNames Food_Consumption_ColNames Food_Consumption_Row_Num Food_Consumption_Col_Num
 clear Electricity_Consumption_RowNames Electricity_Consumption_Row_Num ElctricityFromNatualGasCoeff_RowNames ElectricityConsumptionForWater_RowNames ElectricityConsumptionForWater_Row_Num
 clear Construction_Row_Num Construction_RowNames
 clear WateAndRecycling_RowNames WateAndRecycling_ColNames WateAndRecycling_Row_Num WateAndRecycling_Col_Num WateAndRecyclingCell
-clear TDB FDB EDB WDB CDB MDB
+clear TDB FDB EDB WDB CDB MDB ADB MONDB
+clear M FuelConsumptionCoefficients Days_In_Year
+clear s1 s2 OrganicWasteAmounts_RowNames PVType RidesPerDay_global current_food_lost_global BusCarRatio_global LowerBoundForArea
+clear i ColumnNames IncinarationEmissionCoefficient
+clear RenewableEnergies_CurrentYear NaturalGas_CurrentYear Electricity_Sources
+clear TransitionToBus TransitionToTrain WasteToElectricity meatRows RenewablePercents ScenarioRowNames EvSenarioLines

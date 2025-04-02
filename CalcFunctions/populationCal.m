@@ -24,10 +24,12 @@ population_Column_In_Vector = 1;
 population  = array2table(zeros(population_Row_Num,(Years)));
 population.Properties.RowNames = population_RowNames;
 
-% Filling the Data to every year (By option A in the excel sheet)
+% Filling the Data to every year (By option A in the excel Scenario sheet)
 for i =1:Years
     population(1,i) = {i};
     population(2,i) = {i+BaseYear-1};
     population(3,i) = {PopulationStartYear_global * PrecentegeByTheYears{population_Column_In_Vector,i}};
     population(4,i) = {palestinians_base_pop_global * PrecentegeByTheYears{population_Column_In_Vector,i}}; 
 end
+%fprintf('Population table in the pupolationCal is:\n');
+%disp(population);
