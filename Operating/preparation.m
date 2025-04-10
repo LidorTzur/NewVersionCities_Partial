@@ -7,11 +7,18 @@ global BaseYear;
 BaseYear = 2019;
 ScenarioNumber = 19; % For 2035 - water saving
 Years = TargetYear_global-BaseYear+1; %השנים שבין שנת הבסיס לשנת המטרה
+Conversion_Liter_To_Kg = 0.85;
 
 %% Data about the current year in order to accurate the model data (that based on the 2019 year)
 CurrentYearReal = 2020;
 RenewableEnergies_CurrentYear = 0.06;
 NaturalGas_CurrentYear = 0.68;
+
+%% Electricty assumptions
+PVLifeCycle = 25;
+NewPV_PercentageBaseYear = 16/100;
+GroundPVPercentage = 0.3;
+DualPVPercentage = 0.7;
 
 
 %% Lidor: population data, for the "populationCal" script
@@ -44,24 +51,21 @@ WaterFromFoodCategories = {'Local Water For Humans','Local Water For Animals', '
 WasteToElectricity = 0.807; % How much waste needed to burn to get 1 kWh of electricity
 IncinarationEmissionCoefficient = 1.01; % Emission coefficient of waste incineration
 
-%% Transition to buses and trains 
+%% Transportation
+
+% Transition to buses and trains 
 TransitionToBus = 0.5;
 TransitionToTrain = 1- TransitionToBus;
 
-%% PV Data
+% PV Data
 % The maximum theoretical efficiency of a solar cell using a single p-n junction to collect power from the cell where the only loss mechanism is radiative recombination in the solar cell.
 LowerBoundForArea = 6; %% according to shockley-queisser limit
 PVType = 'Dual';
 RenewablePercents = [1 0 0 0];
 
-%% Number of rides per day we determine
+% Number of rides per day we determine
 global RidesPerDay_global;
 RidesPerDay_global = 4;
-
-% For the creation of the transportation table data
-Vehicle_Amounts_RowNames = {'Quantity', 'Gasoline', 'Diesel', 'Drive Per Day', 'Drive Per Year', 'Cars Per Year'};
-Vehicle_Amounts_ColNames = {'Bus','Car','Minibus','Motorcycle', 'Truck', 'LCV'};
-Electricity_Sources = {'Coal', 'Natural Gas', 'Renewable', 'Soler', 'Mazut'};
 
 % Define the ratio between car to bus use
 global BusCarRatio_global
@@ -70,6 +74,12 @@ BusCarRatio_global = BusCarRatio_global{1,1};
 
 % EV scenario rows number of electric vehicles
 EvSenarioLines = [14 15 16 17];
+
+% The emission table from transportation settings
+%TransEmissionNumRows = 15;
+%TransEmissionNumCols = 7; 
+
+%% Scenario Table
 
 ScenarioRowNames = {'Population Growth', 'Increased Electricity Per Capita', 'Increase in Desalinared Water', ...
     'Reducing Beef Consumption', 'Preventing Food Loss', 'Change In Energy Consumption From Renewable Energies', ...

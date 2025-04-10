@@ -27,6 +27,7 @@ MONDB = DataBase.Money_DataBase;
 Data = "Data.xlsx";
  
 
+
 %% Insert data to the DataBase from the "prepatation" script
 DataBase.WasteToElectricity = WasteToElectricity;
 DataBase.IncinarationEmissionCoefficient = IncinarationEmissionCoefficient;
@@ -35,17 +36,18 @@ DataBase.TransitionToTrain = TransitionToTrain;
 DataBase.CurrentYearReal = CurrentYearReal;
 DataBase.ScenarioRowNames = ScenarioRowNames;
 DataBase.EvSenarioLines = EvSenarioLines;
+DataBase.Conversion_Liter_To_Kg = Conversion_Liter_To_Kg;
 DataBase.Days_In_Year = 365; 
 
 %% ------------------------------------- ELECTRICITY ------------------------------------------------
 
 % Define the names
-Electricity_Consumption_RowNames = {'Home', 'Public & Commercial', 'Industrial', 'Other', 'Transportation', 'Water Supply and Seweage Treatment', 'Total'};
-Electricity_Consumption_Row_Num = int32(numel(Electricity_Consumption_RowNames));
+EDB.Electricity_Consumption_RowNames = {'Home', 'Public & Commercial', 'Industrial', 'Other', 'Transportation', 'Water Supply and Seweage Treatment', 'Total'};
+Electricity_Consumption_Row_Num = int32(numel(EDB.Electricity_Consumption_RowNames));
 % Elctricity - Energy type
 ElctricityFromNatualGasCoeff_RowNames = {'Converted', 'Combined Cycle'};
 % Electricity sources for the fullScenario script
-EDB.Electricity_Sources = Electricity_Sources;
+EDB.Electricity_Sources = {'Coal', 'Natural Gas', 'Renewable', 'Soler', 'Mazut'};
 % Electricity - Consumption For Water
 ElectricityConsumptionForWater_RowNames = {'Natural Water', 'Urban Consumption','Diselinated Water','Treated Waste Water', 'Sewege'};
 ElectricityConsumptionForWater_Row_Num = int32(numel(ElectricityConsumptionForWater_RowNames));
@@ -53,10 +55,11 @@ ElectricityConsumptionForWater_Row_Num = int32(numel(ElectricityConsumptionForWa
 %%% For later calculations
 EDB.ElectricityBySources_row_names = {'KWh From Coal', 'KWh From Natural Gas', 'KWh From Renewable Energies', 'KWh From Soler', 'KWh From Mazut', 'KWh From Waste Incinaration', 'Total'};
 EDB.Renewable_Electricity_row_names = {'Coal','Natural Gas','PV', 'Wind', 'Biomass', 'Thermo Solar', 'Total'};
+EDB.ElectricityEmissionTypes = {'Co2', 'CH4', 'Nitrous Oxide (N2O)', 'NOX', 'PM', 'SO2', 'Other Air Pollutants', 'Sewage', 'Co2e'};
 
 % Electricity Consumption - UPDATED 
 % create a table in the DataBase that contain the Electricity consumption for every year to the target year
-EDB.ElectricityConsumptionTable = array2table(zeros(Electricity_Consumption_Row_Num, Years),'RowNames',Electricity_Consumption_RowNames);
+EDB.ElectricityConsumptionTable = array2table(zeros(Electricity_Consumption_Row_Num, Years),'RowNames',EDB.Electricity_Consumption_RowNames);
 ColumnNames = cell(1,Years);
 % Add the name for each year column
 s1 = "KWH for "; 
@@ -107,7 +110,10 @@ EDB.CrudeOilToFuelRatio = readmatrix('Data.xlsx', 'Sheet','ElectricityManufactur
 % Current Year Data
 EDB.RenewableEnergies_CurrentYear = RenewableEnergies_CurrentYear;
 EDB.NaturalGas_CurrentYear = NaturalGas_CurrentYear;
-
+EDB.PVLifeCycle = PVLifeCycle;
+EDB.NewPV_PercentageBaseYear = NewPV_PercentageBaseYear;
+EDB.GroundPVPercentage = GroundPVPercentage;
+EDB.DualPVPercentage = DualPVPercentage;
 
 %% ------------------------------------- TRANSPORTATION ------------------------------------------------
 %%%%%% TEMPS
@@ -116,17 +122,24 @@ Transportation_Consumption_RowNames = {'Bus', 'Car', 'Minibus', 'Motorcycle', 'T
 Transportation_Consumption_Row_Num = int32(numel(Transportation_Consumption_RowNames));
 
 % Transportation - Vehicle Amounts By type
-TDB.Vehicle_Amounts_RowNames = Vehicle_Amounts_RowNames;
-TDB.Vehicle_Amounts_ColNames = Vehicle_Amounts_ColNames;
-Vehicle_Amounts_Row_Num = int32(numel(Vehicle_Amounts_RowNames));
-Vehicle_Amounts_Col_Num = int32(numel(Vehicle_Amounts_ColNames));
+TDB.Vehicle_Amounts_RowNames = {'Quantity', 'Gasoline', 'Diesel', 'Drive Per Day', 'Drive Per Year', 'Cars Per Year'};
+TDB.Vehicle_Amounts_ColNames = {'Bus','Car','Minibus','Motorcycle', 'Truck', 'LCV'};
+TDB.Train_Names = {'Passenger Train', 'Friehgt Train'};
+TDB.Train_EmissionTypes = {'NOX' , 'CO','NMVOC', 'NH3', 'TSP', 'PM10', 'PM2.5', 'N2O', 'CH4', 'SO2', 'CO2', 'CO2E'};
+TDB.TransEmissionTypes = {'c6h6', 'ch2o', 'ch4', 'co', 'n2o', 'nh3', 'nmvoc', 'no2', 'nox', 'PM2.5', 'PM10', 'so2', 'co2', 'Fuel Consumption', 'Total Air Pollutants', 'Co2e'};
+TDB.TransEnergy_type = {'Mazut', 'Diesel', 'Kerosene', 'Gasoline','Liquefied Petroleum Gas', 'Crude Oil', 'Natural Gas', 'Battery Manufacturing'};
+TDB.TransEmission_Manu_type = {'CH4', 'CO2','Hydroflour Carbon','Air Pollutants','Mining Waste','Waste Water','CO2E'};
+Vehicle_Amounts_Row_Num = int32(numel(TDB.Vehicle_Amounts_RowNames));
+Vehicle_Amounts_Col_Num = int32(numel(TDB.Vehicle_Amounts_ColNames));
+
 % Fuels
 AmountsOfFuels_RowNames = {'Crude Oil Products - Not for Energy', 'Crude Oil For Export', 'Crude Oil Import','Crude Oil Products - For Energy', 'LPG - Home', 'LPG - Commertiel'  };
 AmountsOfFuels_ColNames = {'Naptha', 'Mazut','Diesel','Kerosene','Gasoline','Liquified Petroleum Gas', 'Other'};
 AmountsOfFuels_Row_Num = int64(numel(AmountsOfFuels_RowNames));
 AmountsOfFuels_Col_Num = int64(numel(AmountsOfFuels_ColNames));
+
 % Fuel - Consumption Coefficients
-FuelConsumptionCoefficients_RowNames = {'Hot Emissions', 'Cold Emissions', 'Evaporation Emissions', 'Evaporation Emissions - After Driving', 'Evaporation Emissions - Every Day', 'Grinding Emissiobs'};
+FuelConsumptionCoefficients_RowNames = {'Hot Emissions', 'Cold Emissions', 'Evaporation Emissions', 'Evaporation Emissions - After Driving', 'Evaporation Emissions - Every Day', 'Grinding Emissions'};
 FuelConsumptionCoefficients.Properties.VariableNames = {'Bus', 'Car', 'Minibus', 'Motorcycle', 'Truck', 'LCV', 'Train'};
 FuelConsumptionCoefficients_Row_Num = int64(numel(FuelConsumptionCoefficients_RowNames));
 FuelConsumptionCoefficients_Col_Num = int64(numel(FuelConsumptionCoefficients.Properties.VariableNames ));
@@ -149,13 +162,14 @@ TDB.TransportationConsumptionTable{Transportation_Consumption_Row_Num, 1} = sum(
 % This is a one-demantional array that contain columns for each year.
 % Ideally each cell of it will contain a table with the year data of the number of vehicle. For now its just the first cell that contain the table (for 2019)
 TDB.VehicleAmountsCell = cell(1,Years);
-TDB.VehicleAmountsCell{1} = array2table(zeros(Vehicle_Amounts_Row_Num,Vehicle_Amounts_Col_Num), 'RowNames', Vehicle_Amounts_RowNames);
+TDB.VehicleAmountsCell{1} = array2table(zeros(Vehicle_Amounts_Row_Num,Vehicle_Amounts_Col_Num), 'RowNames', TDB.Vehicle_Amounts_RowNames);
 % Read the 2019 Data from the Data File
 TDB.VehicleAmountsCell{1}{:,:} = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','B14:G19','ReadVariableNames',false));
-TDB.VehicleAmountsCell{1}.Properties.VariableNames = Vehicle_Amounts_ColNames;
+TDB.VehicleAmountsCell{1}.Properties.VariableNames = TDB.Vehicle_Amounts_ColNames;
 
 
-%%%%%%%%%%%%%%%%% Calc transportation consumption
+%%%%%%%%%%%% Calc transportation consumption
+
 % All the Emissions Coefficients for different kindes of emission
 TDB.TransportationHotEmissionsCoefficients = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','K25:Q38','ReadVariableNames',false));
 TDB.TransportationColdEmissionsCoefficients = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','T25:Z38','ReadVariableNames',false));
@@ -163,6 +177,13 @@ TDB.TransportationEvaporationEmissionsWhileDriving = table2array(readtable(Data,
 TDB.TransportationEvaporationEmissionsAfterDriving = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','AL25:AR38','ReadVariableNames',false));
 TDB.TransportationEvaporationEmissionsEveryDay = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','AU25:BA38','ReadVariableNames',false));
 TDB.TransportationGridingEmissions = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','BD25:BJ38','ReadVariableNames',false));
+
+% The table settings (15*7) (we added one more col and one more row to what exist in the excel)
+[TDB.TransEmissionNumRows, TDB.TransEmissionNumCols] = size(TDB.TransportationHotEmissionsCoefficients);
+TDB.TransEmissionNumRows = TDB.TransEmissionNumRows + 1;  % First row is a header 
+TDB.TransEmissionNumCols = TDB.TransEmissionNumCols + 1;  % Last col- The sum of the row
+TDB.MainEmissionTypesRows = 12; % The main Types of emissions in the excel
+
 % Train Emissions Coefficients (g/KM)
 TDB.PassengerTrainEmissionCoefficients = table2array(readtable(Data,'Sheet','FuelProductionEmissionsForTrans','Range','L55:L66','ReadVariableNames',false));
 TDB.PassengerTrainEmissionCoefficients(11, :) = []; % Deletes the 11th line (Total Pollutants)
@@ -201,6 +222,8 @@ WDB.water_Names = {'Water for Domestic & Industrial', 'Water for Agriculture', '
 WDB.WaterConsumptionTableNew = readtable('Data.xlsx','Sheet', 'WaterNew','ReadVariableNames', false, 'ReadRowNames', true,'Range', 'A2:D9');  
 WDB.WaterConsumptionTableNew.Properties.VariableNames = {'2017','2019','2022'};
 WDB.WaterConsumptionTableNew.Properties.RowNames = WDB.water_Names;
+
+WDB.Water_Electricity_Types = {'Drilling Water', 'Desalinated Water', 'Moving Reclaimed Wastewater', 'Reclaimed Wastewater','Moving Brackish water, fresh and non-fresh reservoir water', 'Total'};
 
 WDB.WaterConsumptionCell = cell(1,Years); 
 WDB.WaterConsumptionCell{1} = array2table(zeros(1,numel(WDB.water_Names)), 'VariableNames', WDB.water_Names);
@@ -346,6 +369,11 @@ FDB.AreaForFoodCoefficients = readtable(Data,'Sheet','Food','Range','W3:X67','Re
 Construction_RowNames = {'Agriculture', 'Other Public Buildings', 'Helathcare', 'Education', 'Industry and Storage', 'Transportation and Communications', 'Trade', 'Offices', 'Hosting', 'Residential', 'Total'};
 Construction_Row_Num = int64(numel(Construction_RowNames));
 
+%%%% Construction Settings
+CDB.ConstructionTypes = {'Agriculture', 'Other Public Buldings', 'Healthcare', 'Education', 'Industry and Storage', 'Transportation and Communications', 'Trade', 'Offices', 'Hosting', 'Residential', 'Total For Construction', 'Local Cement For Other Uses', 'Imported Cement For Other Uses'};
+CDB.MaterialsForConstruction = {'Gravel', 'Sand', 'Calcite', 'Plaster', 'Clay', 'Other Constructionn Materials'};
+CDB.ConstructionEmissionTypes = {'Mining Waste', 'CO2', 'NOX', 'PM10', 'SO2', 'CO2E From Mortar Production'};
+
 %%%% Consumption table
 CDB.ConstructionTable = array2table(zeros(Construction_Row_Num,Years), 'RowNames', Construction_RowNames);
 s1 = "Area for Construction ";
@@ -469,7 +497,7 @@ DataBase.ChnageStruct.Transportation = readtable("The Three Scenarios.xlsx",'She
 DataBase.ChnageStruct.Food = readtable("The Three Scenarios.xlsx",'Sheet','ChangesInConsumptionType','Range','D2:E65','ReadRowNames',true);
 
 %%%% Delete all the temps
-clear Transportation_Consumption_RowNames Transportation_Consumption_Row_Num Vehicle_Amounts_RowNames Vehicle_Amounts_ColNames Vehicle_Amounts_Row_Num Vehicle_Amounts_Col_Num AmountsOfFuels_RowNames AmountsOfFuels_ColNames AmountsOfFuels_Row_Num AmountsOfFuels_Col_Num FuelConsumptionCoefficients_RowNames FuelConsumptionCoefficients_Row_Num FuelConsumptionCoefficients_Col_Num
+clear Transportation_Consumption_RowNames Transportation_Consumption_Row_Num Vehicle_Amounts_Row_Num Vehicle_Amounts_Col_Num AmountsOfFuels_RowNames AmountsOfFuels_ColNames AmountsOfFuels_Row_Num AmountsOfFuels_Col_Num FuelConsumptionCoefficients_RowNames FuelConsumptionCoefficients_Row_Num FuelConsumptionCoefficients_Col_Num
 clear Food_Consumption_RowNames Food_Consumption_ColNames Food_Consumption_Row_Num Food_Consumption_Col_Num
 clear Electricity_Consumption_RowNames Electricity_Consumption_Row_Num ElctricityFromNatualGasCoeff_RowNames ElectricityConsumptionForWater_RowNames ElectricityConsumptionForWater_Row_Num
 clear Construction_Row_Num Construction_RowNames
@@ -478,5 +506,7 @@ clear TDB FDB EDB WDB CDB MDB ADB MONDB
 clear M FuelConsumptionCoefficients Days_In_Year
 clear s1 s2 OrganicWasteAmounts_RowNames PVType RidesPerDay_global current_food_lost_global BusCarRatio_global LowerBoundForArea
 clear i ColumnNames IncinarationEmissionCoefficient WaterFromFoodCategories
-clear RenewableEnergies_CurrentYear NaturalGas_CurrentYear Electricity_Sources
+clear RenewableEnergies_CurrentYear NaturalGas_CurrentYear
 clear TransitionToBus TransitionToTrain WasteToElectricity meatRows RenewablePercents ScenarioRowNames EvSenarioLines
+clear Conversion_Liter_To_Kg PVLifeCycle NewPV_PercentageBaseYear
+clear GroundPVPercentage DualPVPercentage

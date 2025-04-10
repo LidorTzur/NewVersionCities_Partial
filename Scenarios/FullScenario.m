@@ -233,7 +233,7 @@ end
 
 %%change in vehicle amounts
 VehicleAmountsCell = CalulateChangeInVehicleAmountsTransitionToPublicTransport(TransportationConsumptionTable, VehicleAmountsCell);
-ElectricityConsumptionEmissionsInTransportation = Data.Electricity_DataBase.ElectricityConsumptionEmissionsInTransportation;
+ElectricityConsumptionEmissionsInTransportation = num2cell(Data.Electricity_DataBase.ElectricityConsumptionEmissionsInTransportation);
 
 KWHForElectricCar = zeros(1,Years);
 KWHForElectricVan = zeros(1,Years);
@@ -241,33 +241,22 @@ KWHForElectricTruck = zeros(1,Years);
 KWHForElectricBus = zeros(1,Years);
 KMTraveledByElectricCar = zeros(1,Years);
 
+%% Transition to EV - consider the electricity and emission from it (Lidor)
+for i = 1:Years
 
-
-
-
-
-
-
-
-
-
-%% ------------------------------------- STOPPED HERE --------------------
-% after make sure that the water is good!
-
-
-for i = 1:Years  
     % chnging the annual travel of each regular vehicle base on the
     % tranistion to electric one (the precentage vector of tranisition is given in the scenario)
+    % Calculate the amount of Km that transform to an electric Km by the precentage vector (to every year)
     [KMTraveledByElectricCar(i), TransportationConsumptionTable{2,i}] = CalcTransitionToEV(TransportationConsumptionTable{2,i},TransitionToElectricCar(i));
     [KMTraveledByElectricVan, TransportationConsumptionTable{6,i}] = CalcTransitionToEV(TransportationConsumptionTable{6,i},TransitionToElectricVan(i));
     [KMTraveledByElectricTruck, TransportationConsumptionTable{5,i}] = CalcTransitionToEV(TransportationConsumptionTable{5,i},TransitionToElectricTruck(i));
     [KMTraveledByElectricBus, TransportationConsumptionTable{1,i}] = CalcTransitionToEV(TransportationConsumptionTable{1,i},TransitionToElectricBus(i));
 
     % electricity consumption from ev = total KM the vehicle drived X the coefficint of KWh for km. consumption = (0.215, 0.9, 1.2, 1.2). )
-    KWHForElectricCar(i) = (KMTraveledByElectricCar(i))*ElectricityConsumptionEmissionsInTransportation{1,i};
-    KWHForElectricVan(i) = (KMTraveledByElectricVan)*ElectricityConsumptionEmissionsInTransportation{2,i};
-    KWHForElectricTruck(i) = (KMTraveledByElectricTruck)*ElectricityConsumptionEmissionsInTransportation{3,i};
-    KWHForElectricBus(i) = (KMTraveledByElectricBus)*ElectricityConsumptionEmissionsInTransportation{4,i};
+    KWHForElectricCar(i) = (KMTraveledByElectricCar(i))*ElectricityConsumptionEmissionsInTransportation{1};
+    KWHForElectricVan(i) = (KMTraveledByElectricVan)*ElectricityConsumptionEmissionsInTransportation{2};
+    KWHForElectricTruck(i) = (KMTraveledByElectricTruck)*ElectricityConsumptionEmissionsInTransportation{3};
+    KWHForElectricBus(i) = (KMTraveledByElectricBus)*ElectricityConsumptionEmissionsInTransportation{4};
     % indirect emissions from ev
 
 end
@@ -308,7 +297,7 @@ for i = 1:Years
 end
 
 % percentage of renewable energies - scenario 6
-InitialPercentage = DataBase.Electricity_DataBase.InitialPercentage;
+InitialPercentage = Data.Electricity_DataBase.InitialPercentage;
 PercentageOfElectricitySourcesByYears = CalculatePercentageOfElectricitySourcesByYears(IncreaseInEnergyConsumptionFromRenewableEnergiesPercentage, IncreaseInEnergyConsumptionFromNaturalGasPercentage, InitialPercentage);
 ElectricityFromWaterCell = CalculateElectricityFromWaterAllYears(Data, WaterConsumptionCell,Years);
 for i = 1:Years
@@ -447,8 +436,8 @@ TotalArea = 0;
 
 for i = 1:Years
     CurrentAreaCoefficient = Data.Area_DataBase.AreaForSolarEnergyCoefficients{i,:}; % AreaForSolarEnergyCoefficients need a re-name
-    AreaForElectricity = CalcAreaForElectricity(DeltaKW{:,i}, CurrentAreaCoefficient, RenewableDistribution, Data.Area_DataBase.AreaDistribution{:,3});
-    %AreaForElectricity = CalcAreaForElectricity(KWForElectricity{:,i}, CurrentAreaCoefficient, RenewableDistribution, Data.Area_DataBase.AreaDistribution{:,3});
+    AreaForElectricity = CalcAreaForElectricity(Data, DeltaKW{:,i}, CurrentAreaCoefficient, RenewableDistribution, Data.Area_DataBase.AreaDistribution{:,3});
+    %AreaForElectricity = CalcAreaForElectricity(Data, KWForElectricity{:,i}, CurrentAreaCoefficient, RenewableDistribution, Data.Area_DataBase.AreaDistribution{:,3});
     AreaForElectricity{:,:} = AreaForElectricity{:,:}/1000;%% km^2
     TotalArea = sum(AreaForElectricity{1,:}) + TotalArea;
 
@@ -515,6 +504,7 @@ end
 
 % Lidor add it - just so we can see the output
 Data.Water_DataBase.WaterConsumptionCell = WaterConsumptionCell;
+
 %% Create Final Table
 EmissionsByYears = cell2table(EmissionsByYears, 'RowNames', Emission_RowNames);
 EmissionsByYears.Properties.VariableNames = YearsStringsForColNames;
