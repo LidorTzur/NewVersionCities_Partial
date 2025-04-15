@@ -80,6 +80,13 @@ switch orderIndex
 
 
 
+
+
+
+
+
+
+
     case 4  %% All the steps together
 
 %   calculates 3 times: For:
@@ -92,35 +99,27 @@ switch orderIndex
         % Returns: total Co2 by category, amounts of water/fuels/construction materials, all other resources by category, water for food.
         % ([EmissionsByYearsTest1, ConsumptionAmounts1, Resources1, WaterFromFood1])
 
-        
-        % Bussiness as usual - all the column (changes)
-        % The changes vectors to all years
+        % BAU
         [FullScenariosTable1] = AllButOneChangesByScenarios(DataBase, 0, Years, ScenariosAndValues{:,4}, 'MileStones', false); %% AllButOneChangesByScenarios(Data, ScenarioNumber, Years, S, varargin)
-        %fprintf('The changing vectors to all years (inclusing population) is:\n');
-        %disp(FullScenariosTable1);
         [population] = populationCal(FullScenariosTable1);
-        %fprintf('Population table:\n');
-        %disp(population);
-
         [EmissionsByYearsTest1, ConsumptionAmounts1, Resources1, WaterFromFood1] = FullScenario(DataBase, FullScenariosTable1,Years,population,orderIndex,0);
-        
-        % 
-        % % Moderate
-        % [FullScenariosTable2] = AllButOneChangesByScenarios(DataBase, 0, Years, ScenariosAndValues{:,7}, 'MileStones', false);
-        % [population] = populationCal(FullScenariosTable2);
-        % [EmissionsByYearsTest2, ConsumptionAmounts2, Resources2, WaterFromFood2] = FullScenarioCompare(DataBase, FullScenariosTable2,Years,population,WaterFromFood1,orderIndex);
-        % 
-        % % Advanced
-        % [FullScenariosTable3] = AllButOneChangesByScenarios(DataBase, 0, Years, ScenariosAndValues{:,8}, 'MileStones', false);
-        % [population] = populationCal(FullScenariosTable3);
-        % [EmissionsByYearsTest3, ConsumptionAmounts3, Resources3, WaterFromFood3] = FullScenarioCompare(DataBase, FullScenariosTable3,Years,population,WaterFromFood1,orderIndex);
-        disp(FullScenariosTable1)
-        disp(population)
-        disp(EmissionsByYearsTest1)
-        disp(ConsumptionAmounts1)
-        disp(Resources1)
-        disp(WaterFromFood1)
-        disp('All the steps together');
+        %fprintf('The changing vectors to all years (inclusing population) is:\n', FullScenariosTable1);
+        %fprintf('Population table:\n', population);
+
+        % Moderate
+        [FullScenariosTable2] = AllButOneChangesByScenarios(DataBase, 0, Years, ScenariosAndValues{:,7}, 'MileStones', false);
+        [population] = populationCal(FullScenariosTable2);
+        [EmissionsByYearsTest2, ConsumptionAmounts2, Resources2, WaterFromFood2] = FullScenario(DataBase, FullScenariosTable2,Years,population,orderIndex, 0, WaterFromFood1);
+        %[EmissionsByYearsTest2, ConsumptionAmounts2, Resources2, WaterFromFood2] = FullScenarioCompare(DataBase, FullScenariosTable2,Years,population,WaterFromFood1,orderIndex);
+
+        % Advanced
+        [FullScenariosTable3] = AllButOneChangesByScenarios(DataBase, 0, Years, ScenariosAndValues{:,8}, 'MileStones', false);
+        [population] = populationCal(FullScenariosTable3);
+        [EmissionsByYearsTest3, ConsumptionAmounts3, Resources3, WaterFromFood3] = FullScenario(DataBase, FullScenariosTable3,Years,population,orderIndex, 0, WaterFromFood1);
+        %[EmissionsByYearsTest3, ConsumptionAmounts3, Resources3, WaterFromFood3] = FullScenarioCompare(DataBase, FullScenariosTable3,Years,population,WaterFromFood1,orderIndex);
+
+
+
 
 
     case 5 %% Buisness as usual
@@ -173,6 +172,12 @@ switch orderIndex
     %     [population] = populationCal(FullScenariosTable3);
     %     [EmissionsByYearsTest3, ConsumptionAmounts3, Resources3, WaterFromFood3] = FullScenarioCompare(DataBase, FullScenariosTable3,Years,population,WaterFromFood1,orderIndex);
     % 
+
+
+
+
+
+    
     % case 8 % Sensitivity Analysis - +- 10%
     % 
     %     % preperations: define the new scenario precentages and the year.

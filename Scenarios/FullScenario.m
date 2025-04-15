@@ -1,4 +1,5 @@
-function [EmissionsByYears,ConsumptionAmounts, Resources, WaterFromFoodCell] = FullScenario(Data,ScenariosTable,Years,pop,orderIndex, index)
+function [EmissionsByYears,ConsumptionAmounts, Resources, WaterFromFoodCell] = FullScenario(Data,ScenariosTable,Years,pop,orderIndex, index, varargin)
+
 % INPUTS:
 % - Data: Structure with base environmental data.
 % - ScenariosTable: Table with percentage changes per year.
@@ -6,12 +7,22 @@ function [EmissionsByYears,ConsumptionAmounts, Resources, WaterFromFoodCell] = F
 % - pop: Population-related factor.
 % - orderIndex: Scenario execution order.
 % - index: Scenario selection parameter.
-%
+% - varargin{1} (optional): WaterFromFood_BAU for comparison mode
+
 % OUTPUTS:
 % - EmissionsByYears: Emissions data per year.
 % - ConsumptionAmounts: Fuel, water, and material consumption.
 % - Resources: Land use, electricity, and costs.
 % - WaterFromFoodCell: Water use from food scenarios.
+
+% ------------------------------------------ COMPARE -------------------
+%% Handle optional comparison input
+if nargin > 6
+    WaterFromFood_BAU = varargin{1};
+else
+    WaterFromFood_BAU = [];
+end
+
 
 %% Preperations
 
@@ -80,7 +91,8 @@ ReducingMeatConsumptionPercentage = ScenariosTable{20,:};
 
 %% Calculate Base Consumptions (No scenario)
 % Calculate the base consumption data based on population growth
-[ElectricityConsumptionTable, TransportationConsumptionTable, VehicleAmountsCell, FoodConsumptionCell, WaterConsumptionCell, ConstructionTable,WasteAndRecyclingCell,AmountsOfFuelsCells, OrganicWasteCell] = ConsumptionChanges(Data,ScenariosTable, Years,pop,orderIndex);
+[ElectricityConsumptionTable, TransportationConsumptionTable, VehicleAmountsCell, FoodConsumptionCell, WaterConsumptionCell, ConstructionTable,WasteAndRecyclingCell,AmountsOfFuelsCells, OrganicWasteCell] = ConsumptionChanges(Data,ScenariosTable, Years, pop, orderIndex);
+
 
 %% Create the years column names (based on the years)
 YearsStringsForColNames = cell(1,Years);
@@ -145,7 +157,20 @@ for i = 1:Years
 
 
     % Calculate water consumption based on the updated food consumption data
-    WaterFromFoodCell{i} = CalcWaterForFoodConsumption(Data, CurrentFoodConsumption);    
+    WaterFromFoodCell{i} = CalcWaterForFoodConsumption(Data, CurrentFoodConsumption); 
+
+    % ------------------------------------- COMPARE ---------------------
+    % >>> BAU COMPARISON: Adjust WaterConsumptionCell based on gap from BAU <<<
+    % Because we have 'prevent food loss' in the scenario table for Moderate and Advanced, so we take the diff form the BAU
+
+    if ~isempty(WaterFromFood_BAU)
+        A =  sum(WaterFromFood_BAU{i}{1,1:2}) / 10^6;
+        B =  sum(WaterFromFoodCell{i}{1,1:2}) / 10^6;
+        gap = A - B;
+        WaterConsumptionCell{i}{1,8} =  WaterConsumptionCell{i}{1,8} - gap;
+    end
+
+
     % Compute emissions from food consumption based on the updated values
     EmissionsFromFood = CalcCo2eFromFoodConsumption(Data, CurrentFoodConsumption, OrganicWasteCell{i});    
     % Store the emissions in the corresponding year
@@ -154,10 +179,6 @@ for i = 1:Years
     % Update the food consumption table after applying the modifications
     FoodConsumptionCell{i} = CurrentFoodConsumption;
 end
-
-
-
-
 
 
 
@@ -185,6 +206,13 @@ for i =1:Years
 end ConsumptionAmounts{1
 %}
 
+
+
+
+
+
+
+
 % water saving - scenario 19
 temp_row_num = find(strcmpi(consumption_RowNames, 'Water'));
 for i=1:Years
@@ -200,6 +228,7 @@ for i = 1:Years
     NewCurrentWater = array2table(zeros(height(CurrentWater)+1,width(CurrentWater)));
     NewCurrentWater{1:height(NewCurrentWater)-1,:} = CurrentWater{:,:};
     NewCurrentWater.Properties.VariableNames = CurrentWater.Properties.VariableNames;
+
     for j = 1:width(NewCurrentWater)
         NewCurrentWater{1,j} = sum(NewCurrentWater{1,j});
     end
@@ -207,7 +236,6 @@ for i = 1:Years
     %NewCurrentWater{:,:} = NewCurrentWater{:,:}/1000000;%% m^3 * 10^6
     ConsumptionAmounts{temp_row_num,i} = (NewCurrentWater); 
 end    
-
 
 %% Transportation - Downstream
 
@@ -241,16 +269,27 @@ KWHForElectricTruck = zeros(1,Years);
 KWHForElectricBus = zeros(1,Years);
 KMTraveledByElectricCar = zeros(1,Years);
 
+
+
 %% Transition to EV - consider the electricity and emission from it (Lidor)
 for i = 1:Years
 
     % chnging the annual travel of each regular vehicle base on the
     % tranistion to electric one (the precentage vector of tranisition is given in the scenario)
     % Calculate the amount of Km that transform to an electric Km by the precentage vector (to every year)
+
+    % printWithCommas('BEFORE: Km Traveled by car', i + 2018, TransportationConsumptionTable{2,i});
+
     [KMTraveledByElectricCar(i), TransportationConsumptionTable{2,i}] = CalcTransitionToEV(TransportationConsumptionTable{2,i},TransitionToElectricCar(i));
     [KMTraveledByElectricVan, TransportationConsumptionTable{6,i}] = CalcTransitionToEV(TransportationConsumptionTable{6,i},TransitionToElectricVan(i));
     [KMTraveledByElectricTruck, TransportationConsumptionTable{5,i}] = CalcTransitionToEV(TransportationConsumptionTable{5,i},TransitionToElectricTruck(i));
     [KMTraveledByElectricBus, TransportationConsumptionTable{1,i}] = CalcTransitionToEV(TransportationConsumptionTable{1,i},TransitionToElectricBus(i));
+    
+    % % printing the results to control them
+    % printWithCommas('AFTER: Km Traveled by car', i + 2018, TransportationConsumptionTable{2,i});
+    % fprintf('%s for year: %d is: %s\n', 'TransitionToElectricCar', i+2018, TransitionToElectricCar(i));
+    % %printWithCommas('TransitionToElectricCar', i + 2018, TransitionToElectricCar(i));
+    % printWithCommas('KMTraveledByElectricCar', i + 2018, KMTraveledByElectricCar(i), 'km');
 
     % electricity consumption from ev = total KM the vehicle drived X the coefficint of KWh for km. consumption = (0.215, 0.9, 1.2, 1.2). )
     KWHForElectricCar(i) = (KMTraveledByElectricCar(i))*ElectricityConsumptionEmissionsInTransportation{1};
@@ -362,11 +401,13 @@ for i=1:Years
         addKWHfromFuels{1,i} = (sum(AmountsOfFuelsCells{1,1}{4,:}) - sum(AmountsOfFuelsCells{1,i}{4,:}))*Crude_Oil_To_Electricity; % Conversion of the amount of fuels to electricity in the case of industrial fuels
         addKWHfromFuels{2,i} = (sum(AmountsOfFuelsCells{1,i}{5,:})-  sum(AmountsOfFuelsCells{1,i}{5,:})*ScenariosTable{9,i} )*Crude_Oil_To_Electricity; % Conversion of the amount of fuel to electricity in the case of home LPG
         addKWHfromFuels{3,i} = (sum(AmountsOfFuelsCells{1,i}{6,:})-  sum(AmountsOfFuelsCells{1,i}{6,:})*ScenariosTable{9,i} )*Crude_Oil_To_Electricity; % Conversion of the amount of fuel to electricity in the case of Commercial LPG
-    %{
-        ElectricityConsumptionTable{1,i} = ElectricityConsumptionTable{1,i} + (sum(AmountsOfFuelsCells{1,i}{5,:})-  sum(AmountsOfFuelsCells{1,i}{5,:})*ScenariosTable{9,i} )*Crude_Oil_To_Electricity;
-        ElectricityConsumptionTable{2,i} = ElectricityConsumptionTable{2,i} + (sum(AmountsOfFuelsCells{1,i}{6,:})-  sum(AmountsOfFuelsCells{1,i}{6,:})*ScenariosTable{9,i} )*Crude_Oil_To_Electricity;
-        ElectricityConsumptionTable{3,i} = ElectricityConsumptionTable{3,i} + (sum(AmountsOfFuelsCells{1,1}{4,:}) - sum(AmountsOfFuelsCells{1,i}{4,:}))*Crude_Oil_To_Electricity;
-    %}
+        % ----------------------------------------- COMPARE ------------------
+        % >>> COMPARE: Add electricity from fuels if BAU comparison is on
+        if ~isempty(WaterFromFood_BAU)
+            ElectricityConsumptionTable{1,i} = ElectricityConsumptionTable{1,i} + (sum(AmountsOfFuelsCells{1,i}{5,:})-  sum(AmountsOfFuelsCells{1,i}{5,:})*ScenariosTable{9,i} )*Crude_Oil_To_Electricity;
+            ElectricityConsumptionTable{2,i} = ElectricityConsumptionTable{2,i} + (sum(AmountsOfFuelsCells{1,i}{6,:})-  sum(AmountsOfFuelsCells{1,i}{6,:})*ScenariosTable{9,i} )*Crude_Oil_To_Electricity;
+            ElectricityConsumptionTable{3,i} = ElectricityConsumptionTable{3,i} + (sum(AmountsOfFuelsCells{1,1}{4,:}) - sum(AmountsOfFuelsCells{1,i}{4,:}))*Crude_Oil_To_Electricity;
+        end
     end
 
     CurrentYearElectricity = ElectricityConsumptionTable{:,i};
@@ -533,6 +574,22 @@ function ElectricityFromWater = CalculateElectricityFromWaterAllYears(Data, Wate
         ElectricityFromWater{i} = CalcElectricityForWater(Data, WaterConsumptionCell{i}, Data.ElectricityConsumptionCoefficients{:,i});
     end
 end
+
+
+function printWithCommas(varName, year, value, unit)
+    % פונקציה שמדפיסה ערכים עם פסיקים ויחידה אם צריך
+
+    if nargin < 4
+        unit = '';
+    end
+
+    % הפורמט עם פסיקים
+    formattedValue = regexprep(sprintf('%.0f', value), '\d(?=(\d{3})+$)', '$&,');
+
+    % הדפסה
+    fprintf('%s for year: %d is: %s %s\n', varName, year, formattedValue, unit);
+end
+
 
 function PercentageByYears = CalculatePercentageOfElectricitySourcesByYears(RenewableEnergiesPercentage, NaturalGasPercentage, Percentage)
 
