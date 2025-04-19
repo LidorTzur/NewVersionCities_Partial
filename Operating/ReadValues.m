@@ -69,43 +69,44 @@ for i=1:Years
 end
 EDB.ElectricityConsumptionTable.Properties.VariableNames = cellstr(ColumnNames); % Convert the column names to string
 % Read the 2019 Data from the Data File
-EDB.ElectricityConsumptionTable{1:(Electricity_Consumption_Row_Num-1), 1} = table2array(readtable(Data,'Sheet','ElectricityConsumption','Range','B3:B8','ReadVariableNames',false));
+EDB.ElectricityConsumptionTable{1:(Electricity_Consumption_Row_Num-1), 1} = table2array(readtable(Data,'Sheet','ElectricityConsumption','Range','B2:B7','ReadVariableNames',false));
 
 % Import more variables
-EDB.IndustryElectricityConsumptionChange = readmatrix('Data.xlsx', 'Sheet','ElectricityConsumption','Range','R5:R5'); % Save the single Datumn in the DataBase as single value
-EDB.ElectricityLossRatio = readmatrix('Data.xlsx', 'Sheet','ElectricityConsumption','Range','B17:B17'); % Save the single Datumn in the DataBase as single value
+EDB.IndustryElectricityConsumptionChange = readmatrix('Data.xlsx', 'Sheet','ElectricityConsumption','Range','E4:E4'); % Save the single Datumn in the DataBase as single value
+EDB.ElectricityLossRatio = readmatrix('Data.xlsx', 'Sheet','ElectricityConsumption','Range','E2:E2'); % Save the single Datumn in the DataBase as single value
 
 % Electricity Fuels coeff
-EDB.Crude_Oil_To_Electricity = 11.63; % Crude oil to electricity - Needs to understand where it is came from
-EDB.fuel_MTOE_coeff = 2.5;
-EDB.fuel_LPG_coeff = 2.9;
+EDB.Crude_Oil_To_Electricity = readmatrix('Data.xlsx', 'Sheet','Materials','Range','L37:L37');  %11.63; % Crude oil to electricity
+% Emission coefficient per ton fuel burning
+EDB.fuel_MTOE_coeff = 2.5; % CO₂ Emission Factor per Ton of Burning Fuel (Ton/Ton)
+EDB.fuel_LPG_coeff = 2.9; % CO₂ Emission Factor per Ton of Burning LPG Fuel (Ton/Ton)
 
 % Electricity Consumption Emissions In Transportation (taken from the ElectricityConsumption sheet)
 % Electricity: Electricity Consumption for Electric Vehicle (kWh/KM)
-EDB.ElectricityConsumptionEmissionsInTransportation = table2array(readtable(Data,'Sheet','ElectricityConsumption','Range','I22:I25','ReadVariableNames',false)); %% all zeroes at the moment
+EDB.ElectricityConsumptionEmissionsInTransportation = table2array(readtable(Data,'Sheet','ElectricityConsumption','Range','H4:H7','ReadVariableNames',false)); 
 % Electricity: Emissions Coefficeints from Battery Manufacturing (gCo2/km)
-EDB.EmissionsCoefficientsFromBatteryManufacturing = table2array(readtable(Data,'Sheet','ElectricityConsumption','Range','K22:K22','ReadVariableNames',false)); %% all zeroes at the moment
+EDB.EmissionsCoefficientsFromBatteryManufacturing = table2array(readtable(Data,'Sheet','ElectricityConsumption','Range','H2:H2','ReadVariableNames',false)); 
 % initial percentage (Electricity Fuels Consumption distribution in base year)
-EDB.InitialPercentage = table2array(readtable(Data,'Sheet','ElectricityConsumption','Range','B13:F13','ReadVariableNames',false));
+EDB.InitialPercentage = table2array(readtable(Data,'Sheet','ElectricityConsumption','Range','B12:F12','ReadVariableNames',false));
 
 % Calc Electricity Consumption
 % Emissions g/KWh of differnt types of fuels for electricity
-EDB.EmissionsFromElectricityConsumption = table2array(readtable(Data,'Sheet','ElectricityConsumption','Range','I12:P18','ReadVariableNames',true));
+EDB.EmissionsFromElectricityConsumption = table2array(readtable(Data,'Sheet','ElectricityConsumption','Range','B15:I21','ReadVariableNames',true));
 % Emissions from Natural Gas g/KWh from two power-plant
 EDB.ElctricityFromNatualGasCoeff = array2table(zeros(2,1));
 EDB.ElctricityFromNatualGasCoeff.Properties.RowNames = ElctricityFromNatualGasCoeff_RowNames;
 
-EDB.ElctricityFromNatualGasCoeff{1,1}  = readmatrix('Data.xlsx', 'Sheet','ElectricityConsumption','Range','I29:I29'); 
-EDB.ElctricityFromNatualGasCoeff{2,1}  = readmatrix('Data.xlsx', 'Sheet','ElectricityConsumption','Range','I30:I30'); 
+EDB.ElctricityFromNatualGasCoeff{1,1}  = readmatrix('Data.xlsx', 'Sheet','ElectricityConsumption','Range','I11:I11'); 
+EDB.ElctricityFromNatualGasCoeff{2,1}  = readmatrix('Data.xlsx', 'Sheet','ElectricityConsumption','Range','I12:I12'); 
 
 % Calc Electricity manufacturing
 DataBase.EmissionsCoefficientsForPv = readtable(Data,'Sheet','PVEmissions','Range','I8:J40','ReadVariableNames',true);
 % Coefficients from mining and fuel manufacturing 
-EDB.EmissionsCoefficientsUpstreamElectricity = table2array(readtable(Data,'Sheet','ElectricityManufactureEmissions','Range','B37:G43','ReadVariableNames',false))';
+EDB.EmissionsCoefficientsUpstreamElectricity = table2array(readtable(Data,'Sheet','ElectricityManufactureEmissions','Range','B15:G21','ReadVariableNames',false))';
 % How many tons of fuel is needed for 1 kwh of electricity
-EDB.ElectrictyManufacturingCoefficients = table2array(readtable(Data,'Sheet','ElectricityManufactureEmissions','Range','B33:E33','ReadVariableNames',false));
+EDB.ElectrictyManufacturingCoefficients = table2array(readtable(Data,'Sheet','ElectricityManufactureEmissions','Range','B7:E7','ReadVariableNames',false));
 % The Ratio between crude oil to Manufactured Fuel
-EDB.CrudeOilToFuelRatio = readmatrix('Data.xlsx', 'Sheet','ElectricityManufactureEmissions','Range','R28:R28'); 
+EDB.CrudeOilToFuelRatio = readmatrix('Data.xlsx', 'Sheet','ElectricityManufactureEmissions','Range','K2:K2'); 
 
 % Current Year Data
 EDB.RenewableEnergies_CurrentYear = RenewableEnergies_CurrentYear;
@@ -155,7 +156,7 @@ for i=1:Years
     ColumnNames{i} = strcat(s1, s2);
 end
 TDB.TransportationConsumptionTable.Properties.VariableNames = cellstr(ColumnNames);
-TDB.TransportationConsumptionTable{1:(Transportation_Consumption_Row_Num-1), 1} = table2array(readtable(Data,'Sheet','FuelProductionEmissionsForTrans','Range','B3:B10','ReadVariableNames',false));
+TDB.TransportationConsumptionTable{1:(Transportation_Consumption_Row_Num-1), 1} = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','B3:B10','ReadVariableNames',false));
 TDB.TransportationConsumptionTable{Transportation_Consumption_Row_Num, 1} = sum(TDB.TransportationConsumptionTable{1:(Transportation_Consumption_Row_Num-1),1}); % Create a sum row for the table
 
 %%%%%%%%%%%% Vehicle Amounts - Needs to Updates with Trains!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -164,19 +165,19 @@ TDB.TransportationConsumptionTable{Transportation_Consumption_Row_Num, 1} = sum(
 TDB.VehicleAmountsCell = cell(1,Years);
 TDB.VehicleAmountsCell{1} = array2table(zeros(Vehicle_Amounts_Row_Num,Vehicle_Amounts_Col_Num), 'RowNames', TDB.Vehicle_Amounts_RowNames);
 % Read the 2019 Data from the Data File
-TDB.VehicleAmountsCell{1}{:,:} = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','B14:G19','ReadVariableNames',false));
+TDB.VehicleAmountsCell{1}{:,:} = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','E3:J8','ReadVariableNames',false));
 TDB.VehicleAmountsCell{1}.Properties.VariableNames = TDB.Vehicle_Amounts_ColNames;
 
 
 %%%%%%%%%%%% Calc transportation consumption
 
 % All the Emissions Coefficients for different kindes of emission
-TDB.TransportationHotEmissionsCoefficients = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','K25:Q38','ReadVariableNames',false));
-TDB.TransportationColdEmissionsCoefficients = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','T25:Z38','ReadVariableNames',false));
-TDB.TransportationEvaporationEmissionsWhileDriving = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','AC25:AI38','ReadVariableNames',false));
-TDB.TransportationEvaporationEmissionsAfterDriving = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','AL25:AR38','ReadVariableNames',false));
-TDB.TransportationEvaporationEmissionsEveryDay = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','AU25:BA38','ReadVariableNames',false));
-TDB.TransportationGridingEmissions = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','BD25:BJ38','ReadVariableNames',false));
+TDB.TransportationHotEmissionsCoefficients = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','B20:H33','ReadVariableNames',false));
+TDB.TransportationColdEmissionsCoefficients = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','K20:Q33','ReadVariableNames',false));
+TDB.TransportationEvaporationEmissionsWhileDriving = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','T20:Z33','ReadVariableNames',false));
+TDB.TransportationEvaporationEmissionsAfterDriving = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','AC20:AI33','ReadVariableNames',false));
+TDB.TransportationEvaporationEmissionsEveryDay = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','AL20:AR33','ReadVariableNames',false));
+TDB.TransportationGridingEmissions = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','AU20:BA33','ReadVariableNames',false));
 
 % The table settings (15*7) (we added one more col and one more row to what exist in the excel)
 [TDB.TransEmissionNumRows, TDB.TransEmissionNumCols] = size(TDB.TransportationHotEmissionsCoefficients);
@@ -185,29 +186,29 @@ TDB.TransEmissionNumCols = TDB.TransEmissionNumCols + 1;  % Last col- The sum of
 TDB.MainEmissionTypesRows = 12; % The main Types of emissions in the excel
 
 % Train Emissions Coefficients (g/KM)
-TDB.PassengerTrainEmissionCoefficients = table2array(readtable(Data,'Sheet','FuelProductionEmissionsForTrans','Range','L55:L66','ReadVariableNames',false));
+TDB.PassengerTrainEmissionCoefficients = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','B77:B88','ReadVariableNames',false));
 TDB.PassengerTrainEmissionCoefficients(11, :) = []; % Deletes the 11th line (Total Pollutants)
-TDB.FreightTrainEmissionCoefficients = table2array(readtable(Data,'Sheet','FuelProductionEmissionsForTrans','Range','N55:N66','ReadVariableNames',false));
+TDB.FreightTrainEmissionCoefficients = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','C77:C88','ReadVariableNames',false));
 TDB.FreightTrainEmissionCoefficients(11,:) = []; % Deletes the 11th line (Total Pollutants)
 
 %%%%%%%%%%%%%%%%%%%%%% Calc transportation manufacturing
 % Fuel Consumption coefficients (g/Km) for every kind of emission in transportation
 TDB.FuelConsumptionCoefficients = array2table(zeros(FuelConsumptionCoefficients_Row_Num, FuelConsumptionCoefficients_Col_Num), 'RowNames', FuelConsumptionCoefficients_RowNames);
-TDB.FuelConsumptionCoefficients{1,1:6} = table2array(readtable(Data,'Sheet','FuelProductionEmissionsForTrans','Range','U17:Z17','ReadVariableNames',false));
-TDB.FuelConsumptionCoefficients{2,1:6} = table2array(readtable(Data,'Sheet','FuelProductionEmissionsForTrans','Range','AD17:AI17','ReadVariableNames',false));
-TDB.FuelConsumptionCoefficients{3,1:6} = table2array(readtable(Data,'Sheet','FuelProductionEmissionsForTrans','Range','AM17:AR17','ReadVariableNames',false));
-TDB.FuelConsumptionCoefficients{4,1:6} = table2array(readtable(Data,'Sheet','FuelProductionEmissionsForTrans','Range','AV17:BA17','ReadVariableNames',false));
-TDB.FuelConsumptionCoefficients{5,1:6} = table2array(readtable(Data,'Sheet','FuelProductionEmissionsForTrans','Range','BE17:BJ17','ReadVariableNames',false));
-TDB.FuelConsumptionCoefficients{6,1:6} = table2array(readtable(Data,'Sheet','FuelProductionEmissionsForTrans','Range','BN17:BS17','ReadVariableNames',false));
+TDB.FuelConsumptionCoefficients{1,1:6} = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','B33:G33','ReadVariableNames',false));
+TDB.FuelConsumptionCoefficients{2,1:6} = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','K33:P33','ReadVariableNames',false));
+TDB.FuelConsumptionCoefficients{3,1:6} = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','T33:Y33','ReadVariableNames',false));
+TDB.FuelConsumptionCoefficients{4,1:6} = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','AC33:AH33','ReadVariableNames',false));
+TDB.FuelConsumptionCoefficients{5,1:6} = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','AL33:AQ33','ReadVariableNames',false));
+TDB.FuelConsumptionCoefficients{6,1:6} = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','AU33:AZ33','ReadVariableNames',false));
 % Train Fuel Consumption Coefficients (Diesel/KM) 
-TDB.TrainFuelConsumptionCoefficints = table2array(readtable(Data,'Sheet','FuelProductionEmissionsForTrans','Range','K73:K74','ReadVariableNames',false))';
+TDB.TrainFuelConsumptionCoefficints = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','F77:F78','ReadVariableNames',false))';
 
 % Soler/amount ratio - CBS Coeeficients 2011
-TDB.InflationCoefficient = readmatrix('Data.xlsx', 'Sheet','FuelProductionEmissionsForTrans','Range','P53:P53');
+TDB.InflationCoefficient = readmatrix('Data.xlsx', 'Sheet','TransportationConsumption','Range','G93:G93');
 % Fuel Amounts For Transportation - Natural Gas to Fuel Refining for transportation (Ton)
-TDB.NaturalGasForFuelRefining = readmatrix('Data.xlsx', 'Sheet','FuelProductionEmissionsForTrans','Range','I35:I35');
+TDB.NaturalGasForFuelRefining = readmatrix('Data.xlsx', 'Sheet','TransportationConsumption','Range','I63:I63');
 % Coefficients from mining and fuel manufacturing for Mazut only
-TDB.EmissionsCoefficientsUpstream = table2array(readtable(Data,'Sheet','FuelProductionEmissionsForTrans','Range','B50:H56','ReadVariableNames',false))'; %% array(6,7)
+TDB.EmissionsCoefficientsUpstream = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','N3:T9','ReadVariableNames',false))'; %% array(6,7)
 
 % Rides per day
 TDB.RidesPerDay = RidesPerDay_global;
@@ -288,7 +289,7 @@ WDB.SewegeTreatmentEmissionsCoefficitns.Properties.VariableNames = {'Air Polluta
 % Read the electricity consumption as a result of water beeing desalinated,pump, moving, Seweage Treatment...
 WDB.ElectricityConsumptionForWaterCell = cell(1,1);
 WDB.ElectricityConsumptionForWaterCell{1} = array2table(zeros(ElectricityConsumptionForWater_Row_Num,1), 'RowNames', ElectricityConsumptionForWater_RowNames);
-WDB.Electricity_DataBase.ElectricityConsumptionForWaterCell{1}{:,1} = table2array(readtable(Data,'Sheet','Water','Range','I33:I37','ReadVariableNames',false));
+%WDB.Electricity_DataBase.ElectricityConsumptionForWaterCell{1}{:,1} = table2array(readtable(Data,'Sheet','Water','Range','I33:I37','ReadVariableNames',false));
 
 % Calc Electricity for water
 % Electricity For Water Coefficints (kwh/m^3)
@@ -384,7 +385,7 @@ for i=1:Years
 end
 CDB.ConstructionTable.Properties.VariableNames = cellstr(ColumnNames); % Convert column names to string
 % Put the values to the Base Year (first cell in the years-array)
-CDB.ConstructionTable{1:(Construction_Row_Num-1), 1} = table2array(readtable(Data,'Sheet','Construction','Range','C3:C12','ReadVariableNames',false));
+CDB.ConstructionTable{1:(Construction_Row_Num-1), 1} = table2array(readtable(Data,'Sheet','Construction','Range','B3:B12','ReadVariableNames',false));
 CDB.ConstructionTable{Construction_Row_Num, 1} = sum(CDB.ConstructionTable{1:(Construction_Row_Num-1), 1});
 
 %%%% Variables

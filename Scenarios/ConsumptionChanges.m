@@ -278,7 +278,7 @@ for i =2:Years
     WateAndRecyclingCell{i} = CurrentRecyclingAndWate;
 end
 
-%% Organic Waste
+%% Organic Waste (From food)
 
 OrganicWasteAmount =  Data.Food_DataBase.OrganicWasteAmountsCell;
 RowNames = {'Local Authorities', 'Food Industry', 'Agriculture'};
@@ -290,11 +290,13 @@ for i = 2:Years
 end    
 
 
-%% Amounts of Fuels
+%% Amounts of Fuels (for industry)
 RowNames = {'Crude Oil Products - Not for Energy', 'Crude Oil For Export', 'Crude Oil Import', 'Crude Oil Products - For Energy', 'LPG - Home', 'LPG - Commertiel' };
 ColNames = {'Naptha', 'Mazut','Diesel','Kerosene','Gasoline','Liquified Petroleum Gas', 'Other'};
 AmountsOfFuelsCells = Data.Materials_DataBase.AmountsOfFuelsCells;
-AmountsOfFuelsCells{1,1}{4,:} = AmountsOfFuelsCells{1,1}{4,:}*2;%Completion to an estimated size of 1.5 MTOE Because currently the data is 0.75
+% Crude Oil Products - For Energy
+% ---------------------------------- Why multiple by 2????----------------
+AmountsOfFuelsCells{1,1}{4,:} = AmountsOfFuelsCells{1,1}{4,:}*2; % Completion to an estimated size of 1.5 MTOE Because currently the data is 0.75
 for i = 1:Years
     CurrentFuelConsumption = array2table(zeros(6,7),'RowNames', RowNames);
     CurrentFuelConsumption.Properties.VariableNames = ColNames;

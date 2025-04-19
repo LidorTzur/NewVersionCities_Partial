@@ -65,11 +65,11 @@ RenewablePercents = [1 0 0 0];
 
 % Number of rides per day we determine
 global RidesPerDay_global;
-RidesPerDay_global = 4;
+RidesPerDay_global = readmatrix('Data.xlsx','Sheet','TransportationConsumption','Range','A13:A13'); % 4
 
 % Define the ratio between car to bus use
 global BusCarRatio_global
-BusCarRatio_global = readtable(Data,'Sheet','TransportationConsumption','Range','B24:B24','ReadVariableNames',false);
+BusCarRatio_global = readtable(Data,'Sheet','TransportationConsumption','Range','F12:F12','ReadVariableNames',false);
 BusCarRatio_global = BusCarRatio_global{1,1}; 
 
 % EV scenario rows number of electric vehicles

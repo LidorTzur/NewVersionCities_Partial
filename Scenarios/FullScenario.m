@@ -207,12 +207,6 @@ end ConsumptionAmounts{1
 %}
 
 
-
-
-
-
-
-
 % water saving - scenario 19
 temp_row_num = find(strcmpi(consumption_RowNames, 'Water'));
 for i=1:Years
@@ -401,8 +395,12 @@ for i=1:Years
         addKWHfromFuels{1,i} = (sum(AmountsOfFuelsCells{1,1}{4,:}) - sum(AmountsOfFuelsCells{1,i}{4,:}))*Crude_Oil_To_Electricity; % Conversion of the amount of fuels to electricity in the case of industrial fuels
         addKWHfromFuels{2,i} = (sum(AmountsOfFuelsCells{1,i}{5,:})-  sum(AmountsOfFuelsCells{1,i}{5,:})*ScenariosTable{9,i} )*Crude_Oil_To_Electricity; % Conversion of the amount of fuel to electricity in the case of home LPG
         addKWHfromFuels{3,i} = (sum(AmountsOfFuelsCells{1,i}{6,:})-  sum(AmountsOfFuelsCells{1,i}{6,:})*ScenariosTable{9,i} )*Crude_Oil_To_Electricity; % Conversion of the amount of fuel to electricity in the case of Commercial LPG
-        % ----------------------------------------- COMPARE ------------------
-        % >>> COMPARE: Add electricity from fuels if BAU comparison is on
+        
+        % ----------------------------------------- Incremental to BAU ------------------
+        % >>> Adding to the electricity from the basic scenario 
+        % the diff of the electricy in the new scenario that are used for energy
+        % Because in the BAU scenario the crude oil for energy rises by 0% from the base year
+        % Add electricity from fuels if BAU comparison is on
         if ~isempty(WaterFromFood_BAU)
             ElectricityConsumptionTable{1,i} = ElectricityConsumptionTable{1,i} + (sum(AmountsOfFuelsCells{1,i}{5,:})-  sum(AmountsOfFuelsCells{1,i}{5,:})*ScenariosTable{9,i} )*Crude_Oil_To_Electricity;
             ElectricityConsumptionTable{2,i} = ElectricityConsumptionTable{2,i} + (sum(AmountsOfFuelsCells{1,i}{6,:})-  sum(AmountsOfFuelsCells{1,i}{6,:})*ScenariosTable{9,i} )*Crude_Oil_To_Electricity;
@@ -429,6 +427,7 @@ for i=1:Years
     PreviousYearElectricity = CurrentYearElectricity; % updating for the next iteration
 end
 
+% --------------- RECICLING WASTE---------------------------------
 %% Waste and Recicling - emissions from consumption - on hold until further analysis
 % WasteAndRecyclingSummaryCell = cell(1,Years);
 % for i=1:Years
