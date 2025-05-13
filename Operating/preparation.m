@@ -10,9 +10,9 @@ Years = TargetYear_global-BaseYear+1; %השנים שבין שנת הבסיס ל�
 Conversion_Liter_To_Kg = 0.85;
 
 %% Data about the current year in order to accurate the model data (that based on the 2019 year)
-CurrentYearReal = 2020;
-RenewableEnergies_CurrentYear = 0.06;
-NaturalGas_CurrentYear = 0.68;
+CurrentYearReal = 2023;
+RenewableEnergies_CurrentYear = 0.091;
+NaturalGas_CurrentYear = 0.706;
 
 %% Electricty assumptions
 PVLifeCycle = 25;

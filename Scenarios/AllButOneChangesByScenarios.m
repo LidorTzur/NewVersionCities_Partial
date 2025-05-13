@@ -127,13 +127,13 @@ AllButOneScenariosTable{5,:} = CalcChangeVector(MilesTonesTable{5,:}, Years, Foo
 MilesTonesTable{6, 1} = CurrentEnergyConsumptionFromRenewableEnergies;
 AllButOneScenariosTable{6,1} = CurrentEnergyConsumptionFromRenewableEnergies;
 MilesTonesTable{6,Years} = S(6); % Renewable energy change for final year
-MilesTonesTable{6,YearsAfterAnalysis} = RenewableEnergies; % Renewable energy assumption for 2020
+MilesTonesTable{6,YearsAfterAnalysis} = RenewableEnergies; % Renewable energy assumption for 2023
 AllButOneScenariosTable{6,:} = CalcChangeVector(MilesTonesTable{6,:}, Years, S(6)); % Apply renewable energy changes
 
 % Apply changes in natural gas consumption for electricity production
 MilesTonesTable{7, 1} = CurrentEnergyConsumptionFromNaturalGas;
 MilesTonesTable{7,Years} = S(7); % Natural gas change for final year
-MilesTonesTable{7,YearsAfterAnalysis} = NaturalGas; % Natural gas assumption for 2020
+MilesTonesTable{7,YearsAfterAnalysis} = NaturalGas; % Natural gas assumption for 2023
 AllButOneScenariosTable{7,:} = CalcChangeVector(MilesTonesTable{7,:}, Years, S(7)); % Apply natural gas changes
 
 % Apply changes for electric vehicles and other transportation

@@ -1,4 +1,4 @@
-function [MaterialConsumption, TotalConstructionEmissionsAndWaste] = CalcConstruction(Data, CurrentYearConstruction)
+function [MaterialConsumption, TotalConstructionEmissionsAndWaste] = CalcConstruction(Data, CurrentYearConstruction, CurrentConstructionFootprint)
 
 % Description:
 %   Calculates the annual material consumption and associated emissions/waste
@@ -14,47 +14,84 @@ function [MaterialConsumption, TotalConstructionEmissionsAndWaste] = CalcConstru
 %% Inputs
 
 EmissionCoefficients = Data.Const_DataBase.CostructionEmissionCoefficients;
-MaterialCoefficients = Data.Const_DataBase.ConstructionMaterialCoefficients;
-MortarProductionCO2ECoefficient = Data.Const_DataBase.MortarProductionCO2ECoefficient;
+%MaterialCoefficients = Data.Const_DataBase.ConstructionMaterialCoefficients;
+%MortarProductionCO2ECoefficient = Data.Const_DataBase.MortarProductionCO2ECoefficient;
 
-% 'Agriculture', 'Other Public Buldings', 'Healthcare', 'Education', 'Industry and Storage', 'Transportation and Communications', 'Trade', 'Offices', 'Hosting', 'Residential', 'Total For Construction', 'Local Cement For Other Uses', 'Imported Cement For Other Uses'
+% Lidor's addition
+ConstructionECO2Coefficients_ByMaterial = Data.Const_DataBase.ConstructionECO2Coefficients_ByMaterial;
+ConstructionMaterialCoefficients_HighDensity = Data.Const_DataBase.ConstructionMaterialCoefficients_HighDensity;
+ConstructionMaterialCoefficients_LowDensity = Data.Const_DataBase.ConstructionMaterialCoefficients_LowDensity;
+%Mining_Waste = Data.Const_DataBase.Mining_Waste;
+
+% Table Names
+% 'Agriculture', 'Other Public Buldings', 'Healthcare', 'Education', 'Industry and Storage', 'Transportation and Communications', 'Trade', 'Offices', 'Hosting', 'Residential - High-Density Construction', 'Residential - Low-Density Construction', 'Total'
 RowNames = Data.Const_DataBase.ConstructionTypes;
-% 'Gravel', 'Sand', 'Calcite', 'Plaster', 'Clay', 'Other Constructionn Materials'
+% 'Steel', 'Concrete', 'Asphalt', 'Autoclaved Aerated Concrete', 'Ceramic flooring', 'Gypsum plaster', 'Exterior cladding'
 ColNames = Data.Const_DataBase.MaterialsForConstruction;
 
 %% Materials Consumption Table
 
+% Define the materials table
 MaterialConsumption = array2table(zeros(numel(RowNames),numel(ColNames)), 'RowNames', RowNames);
-for i=1:width(MaterialConsumption) %%1-6
-    for j = 1:height(MaterialConsumption)-3 %%1-10
-        MaterialConsumption{j,i} = CurrentYearConstruction(j)*MaterialCoefficients(i); % tons of materials
+
+% Lidor's addition
+% Calculate the Ratio between the all area to the floor area to get thr avg number of floors - to match the materials coefficient properly
+Ratio = CurrentYearConstruction ./ CurrentConstructionFootprint;
+isHighDensity = Ratio > 3;
+Categories_to_run = height(MaterialConsumption)-3;
+
+for i=1:width(MaterialConsumption) %%1-7 Materials
+    for j = 1:Categories_to_run %%1-9 - construction categories
+        if isHighDensity(j)
+            coeff = ConstructionMaterialCoefficients_HighDensity(i);
+        else
+            coeff = ConstructionMaterialCoefficients_LowDensity(i);
+        end
+        MaterialConsumption{j,i} = CurrentYearConstruction(j) * coeff; % tons of materials
+        %MaterialConsumption{j,i} = CurrentYearConstruction(j)*MaterialCoefficients(i); % tons of materials
     end
-    MaterialConsumption{11, i} = sum(MaterialConsumption{1:10, i});
+    % Lidor: Enter the residential Data (separate from the rest)
+    MaterialConsumption{10, i} = CurrentYearConstruction(10)* ConstructionMaterialCoefficients_HighDensity(i);
+    MaterialConsumption{11, i} = CurrentYearConstruction(11)* ConstructionMaterialCoefficients_LowDensity(i);
+    % The sum row
+    MaterialConsumption{12, i} = sum(MaterialConsumption{1:11, i});
 end
-MaterialConsumption{12:13, :} = Data.Const_DataBase.MaterialConsumption;
+%MaterialConsumption{13:14, :} = Data.Const_DataBase.MaterialConsumption;
 MaterialConsumption.Properties.VariableNames = ColNames;
 
 
 %% emissions table
 
 % Create the table
-ColNames = Data.Const_DataBase.ConstructionEmissionTypes; % 'Mining Waste', 'CO2', 'NOX', 'PM10', 'SO2', 'CO2E From Mortar Production'
+%ColNames = Data.Const_DataBase.ConstructionEmissionTypes; % 'Mining Waste', 'CO2', 'NOX', 'PM10', 'SO2', 'CO2E From Mortar Production'
+ColNames = Data.Const_DataBase.ConstructionEmissionTypes; % 'Mining Waste', 'NOX', 'PM10', 'SO2'
 TotalConstructionEmissionsAndWaste = array2table(zeros(numel(RowNames),numel(ColNames)), 'RowNames', RowNames);
 
 % Fill the table
-for i = 1:width(TotalConstructionEmissionsAndWaste)-1 %% 1-5
-    for j = 1:height(TotalConstructionEmissionsAndWaste) %% 1-13
-        TotalConstructionEmissionsAndWaste{j,i} = EmissionCoefficients(i)*sum(MaterialConsumption{j, 3:5}); % million tons  
+for i = 1:width(TotalConstructionEmissionsAndWaste) %% 1-4
+    for j = 1:height(TotalConstructionEmissionsAndWaste) %% 1-12
+        TotalConstructionEmissionsAndWaste{j,i} = EmissionCoefficients(i)*sum(MaterialConsumption{j, :}); % million tons  
     end
 end
 
 TotalConstructionEmissionsAndWaste.Properties.VariableNames = ColNames;
 
-%% Emissions from mortar manufacturing
+%% Emissions from eco2 from materials unique coefficient 
 
-for j = 1:height(TotalConstructionEmissionsAndWaste)
-    TotalConstructionEmissionsAndWaste{j,6} = sum(MaterialConsumption{j, 3:5})*MortarProductionCO2ECoefficient;
-end
+% Extract the table to matrix
+materialAmounts = MaterialConsumption{:,:}; % גודל: N×M
+% Calculate the Total emission
+totalEmissions = materialAmounts * ConstructionECO2Coefficients_ByMaterial'; % N×1
+% Add the emission of eCO2 to the final emission table
+TotalConstructionEmissionsAndWaste = addvars(TotalConstructionEmissionsAndWaste, totalEmissions, 'Before', 2, 'NewVariableNames', 'CO2Emission_tons');
+
+
+%%% Emission from mortar
+% for j = 1:height(TotalConstructionEmissionsAndWaste)
+%     TotalConstructionEmissionsAndWaste{j,6} = sum(MaterialConsumption{j, 3:5})*MortarProductionCO2ECoefficient;
+% end
+
+
 
 end
 

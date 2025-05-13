@@ -33,7 +33,9 @@ addpath("CalcFunctions");
 % Initialize the row names
 Emission_RowNames = {'Food', 'Electricity - Direct', 'Electricity - Indirect', 'Transportation - Direct', 'Train Emissions','Transportation - Indirect', 'Construction', 'Consumption Emissions' ,'Fuel for Industry', 'Sewege Treatment'}; %, 'Water from food'
 consumption_RowNames = {'Water', 'Fuels For Electriciy Manufacturing', 'Fuels For Transportation Amounts', 'Materials For Construction', 'Fuels For Energy Industry'};
-Resources_RowNames = {'Area For Electricity', 'Cumulative Area','Area For Food', 'Operating Costs', 'Setting Costs', 'Fuels Costs', 'Cost Of Area For PV','Area For Construction'};
+%Resources_RowNames = {'Area For Electricity', 'Cumulative Area','Area For Food', 'Operating Costs', 'Setting Costs', 'Fuels Costs', 'Cost Of Area For PV','Area For Construction'};
+Resources_RowNames = {'Area For Electricity', 'Cumulative Area','Area For Food', 'Area For Construction'};
+
 % Initialize the final tables
 EmissionsByYears = cell(numel(Emission_RowNames),Years);  % Initialize the emissions table for each year
 ConsumptionAmounts = cell(numel(consumption_RowNames),Years); % Initialize the consumption table for each year
@@ -91,8 +93,9 @@ ReducingMeatConsumptionPercentage = ScenariosTable{20,:};
 
 %% Calculate Base Consumptions (No scenario)
 % Calculate the base consumption data based on population growth
-[ElectricityConsumptionTable, TransportationConsumptionTable, VehicleAmountsCell, FoodConsumptionCell, WaterConsumptionCell, ConstructionTable,WasteAndRecyclingCell,AmountsOfFuelsCells, OrganicWasteCell] = ConsumptionChanges(Data,ScenariosTable, Years,pop,orderIndex);
-disp(TransportationConsumptionTable);
+[ElectricityConsumptionTable, TransportationConsumptionTable, VehicleAmountsCell, FoodConsumptionCell, WaterConsumptionCell, ConstructionTable, ConstructionFootprintTable ,WasteAndRecyclingCell,AmountsOfFuelsCells, OrganicWasteCell] = ConsumptionChanges(Data,ScenariosTable, Years, pop, orderIndex);
+disp(ConstructionTable)
+disp(ConstructionFootprintTable)
 
 
 %% Create the years column names (based on the years)
@@ -208,12 +211,6 @@ end ConsumptionAmounts{1
 %}
 
 
-
-
-
-
-
-
 % water saving - scenario 19
 temp_row_num = find(strcmpi(consumption_RowNames, 'Water'));
 for i=1:Years
@@ -237,7 +234,6 @@ for i = 1:Years
     %NewCurrentWater{:,:} = NewCurrentWater{:,:}/1000000;%% m^3 * 10^6
     ConsumptionAmounts{temp_row_num,i} = (NewCurrentWater); 
 end    
-
 
 %% Transportation - Downstream
 
@@ -350,7 +346,9 @@ end
 
 for i = 1:Years
     CurrentConstruction = ConstructionTable{:,i};
-    [ConsumptionAmounts{4,i},EmissionsByYears{7,i}] = CalcConstruction(Data, CurrentConstruction);
+    prevConstruction = ConstructionTable{:,i-1};
+    CurrentConstructionFootprint = ConstructionFootprintTable{:, i};
+    [ConsumptionAmounts{4,i},EmissionsByYears{7,i}] = CalcConstruction(Data, CurrentConstruction, CurrentConstructionFootprint);
 end
 
 %% waste minimization - scenario 9
@@ -403,8 +401,12 @@ for i=1:Years
         addKWHfromFuels{1,i} = (sum(AmountsOfFuelsCells{1,1}{4,:}) - sum(AmountsOfFuelsCells{1,i}{4,:}))*Crude_Oil_To_Electricity; % Conversion of the amount of fuels to electricity in the case of industrial fuels
         addKWHfromFuels{2,i} = (sum(AmountsOfFuelsCells{1,i}{5,:})-  sum(AmountsOfFuelsCells{1,i}{5,:})*ScenariosTable{9,i} )*Crude_Oil_To_Electricity; % Conversion of the amount of fuel to electricity in the case of home LPG
         addKWHfromFuels{3,i} = (sum(AmountsOfFuelsCells{1,i}{6,:})-  sum(AmountsOfFuelsCells{1,i}{6,:})*ScenariosTable{9,i} )*Crude_Oil_To_Electricity; % Conversion of the amount of fuel to electricity in the case of Commercial LPG
-        % ----------------------------------------- COMPARE ------------------
-        % >>> COMPARE: Add electricity from fuels if BAU comparison is on
+        
+        % ----------------------------------------- Incremental to BAU ------------------
+        % >>> Adding to the electricity from the basic scenario 
+        % the diff of the electricy in the new scenario that are used for energy
+        % Because in the BAU scenario the crude oil for energy rises by 0% from the base year
+        % Add electricity from fuels if BAU comparison is on
         if ~isempty(WaterFromFood_BAU)
             ElectricityConsumptionTable{1,i} = ElectricityConsumptionTable{1,i} + (sum(AmountsOfFuelsCells{1,i}{5,:})-  sum(AmountsOfFuelsCells{1,i}{5,:})*ScenariosTable{9,i} )*Crude_Oil_To_Electricity;
             ElectricityConsumptionTable{2,i} = ElectricityConsumptionTable{2,i} + (sum(AmountsOfFuelsCells{1,i}{6,:})-  sum(AmountsOfFuelsCells{1,i}{6,:})*ScenariosTable{9,i} )*Crude_Oil_To_Electricity;
@@ -431,6 +433,7 @@ for i=1:Years
     PreviousYearElectricity = CurrentYearElectricity; % updating for the next iteration
 end
 
+% --------------- RECICLING WASTE---------------------------------
 %% Waste and Recicling - emissions from consumption - on hold until further analysis
 % WasteAndRecyclingSummaryCell = cell(1,Years);
 % for i=1:Years
@@ -535,13 +538,13 @@ end
 
 % Construction area 
 temp_row_num = find(strcmpi(Resources_RowNames, 'Area For Construction')); % Find the match row for contruction
-InitBuiltArea = Data.Const_DataBase.TotalBuiltArea;
-Resources{temp_row_num,1} = InitBuiltArea;
+InitBuiltArea = Data.Const_DataBase.TotalBuiltArea; % The initial built Area in the Base year
+Resources{temp_row_num,1} = InitBuiltArea; % For the first year
 for i = 2:Years
-    if (orderIndex == 2 && ConstructionTable{height(ConstructionTable),1} ~= ConstructionTable{height(ConstructionTable),width(ConstructionTable)}) || orderIndex ~= 2
-     Resources{temp_row_num,i} = ConstructionTable{height(ConstructionTable),i}/1000 + Resources{temp_row_num,i-1};
+    if (orderIndex == 2 && ConstructionFootprintTable{height(ConstructionFootprintTable),1} ~= ConstructionFootprintTable{height(ConstructionFootprintTable),width(ConstructionFootprintTable)}) || orderIndex ~= 2
+        Resources{temp_row_num,i} = ConstructionFootprintTable{height(ConstructionFootprintTable),i} - Resources{temp_row_num,i-1};
     else
-            Resources{temp_row_num,i} = InitBuiltArea;
+        Resources{temp_row_num,i} = InitBuiltArea;
     end
 end
 

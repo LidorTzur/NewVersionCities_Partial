@@ -1,4 +1,4 @@
- function [ElectricityConsumptionTable, TransportationConsumptionTable, VehicleAmountsCell, FoodConsumptionCell, WaterConsumptionCell, ConstructionTable,WateAndRecyclingCell, AmountsOfFuelsCells, OrganicWasteAmount] = ConsumptionChanges(Data, ScenariosTable,Years,pop,orderIndex, varargin)
+ function [ElectricityConsumptionTable, TransportationConsumptionTable, VehicleAmountsCell, FoodConsumptionCell, WaterConsumptionCell, ConstructionTable, ConstructionFootprintTable, WateAndRecyclingCell, AmountsOfFuelsCells, OrganicWasteAmount] = ConsumptionChanges(Data, ScenariosTable,Years,pop,orderIndex, varargin)
 % This function calculates consumption changes based on population growth and predefined coefficients.
 % Input:
 %   - Data: Structure containing base data for various consumption categories.
@@ -258,12 +258,30 @@ Data.Water_DataBase = WDB;
 
 
 
-%% Construction
+%% Construction Tables
 ConstructionTable = Data.Const_DataBase.ConstructionTable;
-ConstructionInitialization = ConstructionTable{1:10,1};
+ConstructionTable_numRows = height(ConstructionTable) - 1;
+ConstructionInitialization = ConstructionTable{1:ConstructionTable_numRows,1};
+% Lidor's addition
+ConstructionFootprintTable = Data.Const_DataBase.ConstructionFootprintTable;
+ConstructionFootprint_numRows = height(ConstructionFootprintTable) - 1;
+ConstructionFootprintInitialization = ConstructionFootprintTable{1:ConstructionFootprint_numRows,1};
+
 for i=2:Years
-    ConstructionTable{1:10, i} = ScenariosTable{1,i}*ConstructionInitialization;
-    ConstructionTable{11, i} = sum(ConstructionTable{1:10, i});
+    % subtraction the last year from the third year
+    if i>2
+        Does_Reduce_Last_Year = 1;
+    else
+        Does_Reduce_Last_Year = 0;
+    end
+
+    ConstructionTable{1:ConstructionTable_numRows, i} = (ScenariosTable{1,i}*ConstructionInitialization) - ConstructionInitialization - (Does_Reduce_Last_Year*ConstructionTable{1:ConstructionTable_numRows, i-1});
+    ConstructionTable{ConstructionTable_numRows+1, i} = sum(ConstructionTable{1:ConstructionTable_numRows, i});
+
+    % Lidor's addition
+    ConstructionFootprintTable{1:ConstructionFootprint_numRows, i} = (ScenariosTable{1,i}*ConstructionFootprintInitialization) - ConstructionFootprintInitialization - (Does_Reduce_Last_Year*ConstructionFootprintTable{1:ConstructionFootprint_numRows, i-1});
+    ConstructionFootprintTable{ConstructionFootprint_numRows+1, i} = sum(ConstructionFootprintTable{1:ConstructionFootprint_numRows, i});
+
 end
 
 %% Materials - generated waste and recycling
@@ -294,8 +312,9 @@ end
 RowNames = {'Crude Oil Products - Not for Energy', 'Crude Oil For Export', 'Crude Oil Import', 'Crude Oil Products - For Energy', 'LPG - Home', 'LPG - Commertiel' };
 ColNames = {'Naptha', 'Mazut','Diesel','Kerosene','Gasoline','Liquified Petroleum Gas', 'Other'};
 AmountsOfFuelsCells = Data.Materials_DataBase.AmountsOfFuelsCells;
+
 % Crude Oil Products - For Energy
-% ---------------------------------- Why multiple by 2????----------------
+% multiple by 2- so it match to the data of raziel (this is what tal did and matched to raziel data)
 AmountsOfFuelsCells{1,1}{4,:} = AmountsOfFuelsCells{1,1}{4,:}*2; % Completion to an estimated size of 1.5 MTOE Because currently the data is 0.75
 for i = 1:Years
     CurrentFuelConsumption = array2table(zeros(6,7),'RowNames', RowNames);
@@ -316,12 +335,14 @@ if (orderIndex >= 7 && width(ScenariosTable) < Years)
    FoodConsumptionCell = FoodConsumptionCell(:, 1:Years);
    WaterConsumptionCell = WaterConsumptionCell(:, 1:Years);
    ConstructionTable = ConstructionTable(:, 1:Years);
+   ConstructionFootprintTable = ConstructionFootprintTable(:, 1:Years);
    WateAndRecyclingCell = WateAndRecyclingCell(:, 1:Years);
    AmountsOfFuelsCells = AmountsOfFuelsCells(:, 1:Years);
    OrganicWasteAmount =OrganicWasteAmount(:, 1:Years);
 end
 
- 
+Data.Const_DataBase.ConstructionTable = ConstructionTable;
+Data.Const_DataBase.ConstructionFootprintTable = ConstructionFootprintTable;
 
 %%
 function PercentVector = CalcChangeVector(MileStoneVector, Years, S, varargin)

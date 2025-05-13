@@ -367,42 +367,61 @@ FDB.AreaForFoodCoefficients = readtable(Data,'Sheet','Food','Range','W3:X67','Re
 %% ---------------------------------------- CONSTRUCTION ------------------------------------------------
 
 %%%% temp variables
-Construction_RowNames = {'Agriculture', 'Other Public Buildings', 'Helathcare', 'Education', 'Industry and Storage', 'Transportation and Communications', 'Trade', 'Offices', 'Hosting', 'Residential', 'Total'};
+Construction_RowNames = {'Agriculture', 'Other Public Buildings', 'Helathcare', 'Education', 'Industry and Storage', 'Transportation and Communications', 'Trade', 'Offices', 'Hosting', 'Residential - High-Density Construction', 'Residential - Low-Density Construction', 'Total'};
 Construction_Row_Num = int64(numel(Construction_RowNames));
 
 %%%% Construction Settings
-CDB.ConstructionTypes = {'Agriculture', 'Other Public Buldings', 'Healthcare', 'Education', 'Industry and Storage', 'Transportation and Communications', 'Trade', 'Offices', 'Hosting', 'Residential', 'Total For Construction', 'Local Cement For Other Uses', 'Imported Cement For Other Uses'};
-CDB.MaterialsForConstruction = {'Gravel', 'Sand', 'Calcite', 'Plaster', 'Clay', 'Other Constructionn Materials'};
-CDB.ConstructionEmissionTypes = {'Mining Waste', 'CO2', 'NOX', 'PM10', 'SO2', 'CO2E From Mortar Production'};
+%CDB.ConstructionTypes = {'Agriculture', 'Other Public Buildings', 'Helathcare', 'Education', 'Industry and Storage', 'Transportation and Communications', 'Trade', 'Offices', 'Hosting', 'Residential - High-Density Construction', 'Residential - Low-Density Construction', 'Total for Construction', Improted Cement', 'Local Cement' };
+CDB.ConstructionTypes = Construction_RowNames;
+CDB.MaterialsForConstruction = {'Steel', 'Concrete', 'Asphalt', 'Autoclaved Aerated Concrete', 'Ceramic flooring', 'Gypsum plaster', 'Exterior cladding'};
+%CDB.ConstructionEmissionTypes = {'Mining Waste', 'CO2', 'NOX', 'PM10', 'SO2', 'CO2E From Mortar Production'};
+CDB.ConstructionEmissionTypes = {'Mining Waste', 'NOX', 'PM10', 'SO2'};
 
-%%%% Consumption table
+%%%% Consumption table and floor_footprint table 
+% (Lidor's add)
 CDB.ConstructionTable = array2table(zeros(Construction_Row_Num,Years), 'RowNames', Construction_RowNames);
+CDB.ConstructionFootprintTable = array2table(zeros(Construction_Row_Num,Years), 'RowNames', Construction_RowNames);
 s1 = "Area for Construction ";
+s2 = "Floor Area for Constructure";
 ColumnNames = cell(1,Years);
 for i=1:Years
-    s2 = num2str(i+BaseYear-1);
-    ColumnNames{i} = strcat(s1, s2);
+    s3 = num2str(i+BaseYear-1);
+    ColumnNames{i} = strcat(s1, s3);
+    ColumnNames2{i} = strcat(s2, s3);
 end
-CDB.ConstructionTable.Properties.VariableNames = cellstr(ColumnNames); % Convert column names to string
+% Convert column names to string
+CDB.ConstructionTable.Properties.VariableNames = cellstr(ColumnNames); 
+CDB.ConstructionFootprintTable.Properties.VariableNames = cellstr(ColumnNames2); 
 % Put the values to the Base Year (first cell in the years-array)
-CDB.ConstructionTable{1:(Construction_Row_Num-1), 1} = table2array(readtable(Data,'Sheet','Construction','Range','B3:B12','ReadVariableNames',false));
+% The total area
+CDB.ConstructionTable{1:(Construction_Row_Num-1), 1} = table2array(readtable(Data,'Sheet','Construction','Range','B3:B13','ReadVariableNames',false));
 CDB.ConstructionTable{Construction_Row_Num, 1} = sum(CDB.ConstructionTable{1:(Construction_Row_Num-1), 1});
+% The floor area
+CDB.ConstructionFootprintTable{1:(Construction_Row_Num-1), 1} = table2array(readtable(Data,'Sheet','Construction','Range','C3:C13','ReadVariableNames',false));
+CDB.ConstructionFootprintTable{Construction_Row_Num, 1} = sum(CDB.ConstructionFootprintTable{1:(Construction_Row_Num-1), 1});
 
 %%%% Variables
-CDB.TotalBuiltArea = readmatrix('Data.xlsx', 'Sheet','Construction','Range','R18:R18');   % square kilometer
+% Lidor's addition
+%CDB.Mining_Waste = readmatrix('Data.xlsx', 'Sheet','Construction','Range','A26:A26');	
+CDB.TotalBuiltArea = readmatrix('Data.xlsx', 'Sheet','Construction','Range','H2:H2');   % square kilometer
 %Mortar Production Emissions Coefficients - CO2E (KG/KG)
-CDB.MortarProductionCO2ECoefficient = readmatrix('Data.xlsx', 'Sheet','Construction','Range','L36:L36');
+%CDB.MortarProductionCO2ECoefficient = readmatrix('Data.xlsx', 'Sheet','Construction','Range','L36:L36');
 
 %%%%%% Calc Construction Area Emission Coefficient, Material Waste Coefficients, Material consumption
 % Waste Coefficients (KG/KG) - Materials that are leftover during the peocess of extracting minerals.
-CDB.CostructionEmissionCoefficients = table2array(readtable(Data,'Sheet','Construction','Range','A24:F24','ReadVariableNames',false));
-% The required amount needed per Square Meter of contruction (KG/M^2)
-CDB.ConstructionMaterialCoefficients = table2array(readtable(Data,'Sheet','Construction','Range','A19:F19','ReadVariableNames',false));
+CDB.CostructionEmissionCoefficients = table2array(readtable(Data,'Sheet','Construction','Range','A26:D26','ReadVariableNames',false));
+
+% The required amount needed per Square Meter of contruction (ton/km^2)
+%CDB.ConstructionMaterialCoefficients = table2array(readtable(Data,'Sheet','Construction','Range','B19:H19','ReadVariableNames',false));
+% Lidor
+CDB.ConstructionMaterialCoefficients_HighDensity = table2array(readtable(Data,'Sheet','Construction','Range','B19:H19','ReadVariableNames',false));
+CDB.ConstructionMaterialCoefficients_LowDensity = table2array(readtable(Data,'Sheet','Construction','Range','B20:H20','ReadVariableNames',false));
+% The emission coefficient per material type (lidor)
+CDB.ConstructionECO2Coefficients_ByMaterial = table2array(readtable(Data,'Sheet','Construction','Range','B22:H22','ReadVariableNames',false));
 
 %%%%% Material consumption table (How much Cement for construction)
 % Probably will change, due to consideration of apartments construction!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-CDB.MaterialConsumption = table2array(readtable(Data,'Sheet','Construction','Range','B41:G42','ReadVariableNames',false));
-
+%CDB.MaterialConsumption = table2array(readtable(Data,'Sheet','Construction','Range','B41:G42','ReadVariableNames',false));
 
 
 %% ---------------------------------------- MATERIALS ------------------------------------------------
@@ -511,3 +530,4 @@ clear RenewableEnergies_CurrentYear NaturalGas_CurrentYear
 clear TransitionToBus TransitionToTrain WasteToElectricity meatRows RenewablePercents ScenarioRowNames EvSenarioLines
 clear Conversion_Liter_To_Kg PVLifeCycle NewPV_PercentageBaseYear
 clear GroundPVPercentage DualPVPercentage
+clear ColumnNames2

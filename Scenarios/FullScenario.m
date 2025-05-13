@@ -33,7 +33,9 @@ addpath("CalcFunctions");
 % Initialize the row names
 Emission_RowNames = {'Food', 'Electricity - Direct', 'Electricity - Indirect', 'Transportation - Direct', 'Train Emissions','Transportation - Indirect', 'Construction', 'Consumption Emissions' ,'Fuel for Industry', 'Sewege Treatment'}; %, 'Water from food'
 consumption_RowNames = {'Water', 'Fuels For Electriciy Manufacturing', 'Fuels For Transportation Amounts', 'Materials For Construction', 'Fuels For Energy Industry'};
-Resources_RowNames = {'Area For Electricity', 'Cumulative Area','Area For Food', 'Operating Costs', 'Setting Costs', 'Fuels Costs', 'Cost Of Area For PV','Area For Construction'};
+%Resources_RowNames = {'Area For Electricity', 'Cumulative Area','Area For Food', 'Operating Costs', 'Setting Costs', 'Fuels Costs', 'Cost Of Area For PV','Area For Construction'};
+Resources_RowNames = {'Area For Electricity', 'Cumulative Area','Area For Food', 'Area For Construction', 'Cumulative Area For Construction'};
+
 % Initialize the final tables
 EmissionsByYears = cell(numel(Emission_RowNames),Years);  % Initialize the emissions table for each year
 ConsumptionAmounts = cell(numel(consumption_RowNames),Years); % Initialize the consumption table for each year
@@ -91,7 +93,9 @@ ReducingMeatConsumptionPercentage = ScenariosTable{20,:};
 
 %% Calculate Base Consumptions (No scenario)
 % Calculate the base consumption data based on population growth
-[ElectricityConsumptionTable, TransportationConsumptionTable, VehicleAmountsCell, FoodConsumptionCell, WaterConsumptionCell, ConstructionTable,WasteAndRecyclingCell,AmountsOfFuelsCells, OrganicWasteCell] = ConsumptionChanges(Data,ScenariosTable, Years, pop, orderIndex);
+[ElectricityConsumptionTable, TransportationConsumptionTable, VehicleAmountsCell, FoodConsumptionCell, WaterConsumptionCell, ConstructionTable, ConstructionFootprintTable ,WasteAndRecyclingCell,AmountsOfFuelsCells, OrganicWasteCell] = ConsumptionChanges(Data,ScenariosTable, Years, pop, orderIndex);
+disp(ConstructionTable)
+disp(ConstructionFootprintTable)
 
 
 %% Create the years column names (based on the years)
@@ -339,10 +343,16 @@ for i = 1:Years
 end
 
 %% construction waste
-
+% For the base year the consumption and emission is 0
 for i = 1:Years
     CurrentConstruction = ConstructionTable{:,i};
-    [ConsumptionAmounts{4,i},EmissionsByYears{7,i}] = CalcConstruction(Data, CurrentConstruction);
+    %prevConstruction = ConstructionTable{:,i-1};
+    CurrentConstructionFootprint = ConstructionFootprintTable{:, i};
+    %prevConstructionFootprint = ConstructionFootprintTable{:,i-1};
+    [ConsumptionAmounts{4,i},EmissionsByYears{7,i}] = CalcConstruction(Data, CurrentConstruction, CurrentConstructionFootprint);
+    % The base year has no emissions and material, cause all the next years are comparing to the first one.
+    ConsumptionAmounts{4,1} = 0;
+    EmissionsByYears{7,1} = 0;
 end
 
 %% waste minimization - scenario 9
@@ -532,13 +542,19 @@ end
 
 % Construction area 
 temp_row_num = find(strcmpi(Resources_RowNames, 'Area For Construction')); % Find the match row for contruction
-InitBuiltArea = Data.Const_DataBase.TotalBuiltArea;
-Resources{temp_row_num,1} = InitBuiltArea;
+temp_row_num2 = find(strcmpi(Resources_RowNames, 'Cumulative Area For Construction')); 
+
+InitBuiltArea = Data.Const_DataBase.TotalBuiltArea; % The initial built Area in the Base year
+
+Resources{temp_row_num,1} = 0; % For the first year
+Resources{temp_row_num2,1} = InitBuiltArea; % For the first year
+
 for i = 2:Years
-    if (orderIndex == 2 && ConstructionTable{height(ConstructionTable),1} ~= ConstructionTable{height(ConstructionTable),width(ConstructionTable)}) || orderIndex ~= 2
-     Resources{temp_row_num,i} = ConstructionTable{height(ConstructionTable),i}/1000 + Resources{temp_row_num,i-1};
+    if (orderIndex == 2 && ConstructionFootprintTable{height(ConstructionFootprintTable),1} ~= ConstructionFootprintTable{height(ConstructionFootprintTable),width(ConstructionFootprintTable)}) || orderIndex ~= 2
+        Resources{temp_row_num,i} = ConstructionFootprintTable{height(ConstructionFootprintTable),i};
+        Resources{temp_row_num2,i} = ConstructionFootprintTable{height(ConstructionFootprintTable),i} + Resources{temp_row_num2,i-1};
     else
-            Resources{temp_row_num,i} = InitBuiltArea;
+        Resources{temp_row_num,i} = InitBuiltArea;
     end
 end
 
