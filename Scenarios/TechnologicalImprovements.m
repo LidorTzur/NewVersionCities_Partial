@@ -57,7 +57,7 @@ DataBase.ElectricityConsumptionCoefficients = ElectricityFromWaterCoefficientsTa
 
 %% 3. Natural Gas Improvements
 NaturalGasImprovements = GrowthVectorCalc(BaseYear,TargetYear_global, Electricity_From_Gas_Improvements)-1;
-DataBase.NaturalGasImprovements = NaturalGasImprovements;
+DataBase.Electricity_DataBase.NaturalGasImprovements = NaturalGasImprovements;
 
 %% Other functions
 
@@ -89,4 +89,4 @@ end
 %%% cleaning
 clear ElectricityConsumptionEmissionsInTransportationTable Electricity_Transportation_ColumnNames Electricity_Transportation_RowNames ElectricityFromWaterCoefficientsTable ElectricityFromWaterCoefficientsTable_RowNames ElectricVehicleImprovements 
 clear WaterDesalinationImprovements Water_Desalination_Improvements Electricity_From_Gas_Improvements Electric_Vehicles_Improvements
-clear i ImprovementValues
+clear i ImprovementValues NaturalGasImprovements

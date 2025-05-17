@@ -6,7 +6,7 @@ function [SewegeTreatmentEmmissionsTable] = CalcSewegeEmissions(Data,WaterConsum
 
 %% Sewege
 
-SewegeEmissionsCoefficients = Data.Water_DataBase.SewegeTreatmentEmissionsCoefficitns;
+SewegeEmissionsCoefficients = Data.Water_DataBase.SewegeTreatmentEmissionsCoefficitns; % Kg/Ton
 
 % % זה מהמודל הישן בסקריפט של קריאת הנתונים. שם לא הכנסתי אותם לדאטאבייס
 % UrbanConsumptionPercentages = Data.Water_DataBase.UrbanConsumptionPercentages;

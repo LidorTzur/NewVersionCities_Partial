@@ -20,7 +20,7 @@ global BaseYear; % The base year for analysis (e.g., 2020)
 current_food_lost_global = Data.Food_DataBase.current_food_lost; % The global assumption that 33% of food manufactured is lost
 
 % Bring to current situation - 2020 (or 2025 if i have the data)
-YearsAfterAnalysis = Data.CurrentYearReal - BaseYear; % the number of years between 2020 to 2019
+YearsAfterAnalysis = Data.Electricity_DataBase.CurrentYearReal - BaseYear; % the number of years between 2023 to 2019
 RenewableEnergies = Data.Electricity_DataBase.RenewableEnergies_CurrentYear; % Percentage of renewable energy
 NaturalGas = Data.Electricity_DataBase.NaturalGas_CurrentYear; % Percentage of natural gas
 %EV = 0.06; % Percentage of electric vehicles

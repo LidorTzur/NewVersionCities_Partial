@@ -1,7 +1,7 @@
 function [TotalTransportationConsumptionEmissions, TotalTrainEmissions] = CalcTransportationConsumption(Data, CurrentYearTransportationConsumption,VehicleAmount)
     
     %% Read Emissions table data
-
+    % g/KM
     TransportationHotEmissionsCoefficients = Data.Trans_DataBase.TransportationHotEmissionsCoefficients;
     TransportationColdEmissionsCoefficients = Data.Trans_DataBase.TransportationColdEmissionsCoefficients;
     TransportationEvaporationEmissionsWhileDriving = Data.Trans_DataBase.TransportationEvaporationEmissionsWhileDriving;
@@ -16,7 +16,7 @@ function [TotalTransportationConsumptionEmissions, TotalTrainEmissions] = CalcTr
     % Define the headers ('c6h6', 'ch2o', 'ch4', 'co', 'n2o', 'nh3', 'nmvoc', 'no2', 'nox', 'PM2.5', 'PM10', 'so2', 'co2', 'Fuel Consumption', 'Total Air Pollutants', 'Co2e')
     TransEmissionTypes = Data.Trans_DataBase.TransEmissionTypes;
     % Define the Vehicles types {'Bus', 'Car', 'Minibus', 'Motorcycle', 'Truck', 'LCV'}
-    VehicleTypes = Data.Trans_DataBase.Vehicle_Amounts_RowNames;
+    VehicleTypes = Data.Trans_DataBase.Vehicle_Amounts_ColNames;
     % Define the train names ('Passenger Train', 'Friehgt Train')
     Train_Names = Data.Trans_DataBase.Train_Names;
     % Define the train emission types {'c6h6', 'ch2o', 'ch4', 'co', 'n2o', 'nh3', 'nmvoc', 'no2', 'nox', 'PM2.5', 'PM10', 'so2', 'co2', 'Fuel Consumption', 'Total Air Pollutants', 'Co2e'}
@@ -46,7 +46,8 @@ function [TotalTransportationConsumptionEmissions, TotalTrainEmissions] = CalcTr
             % Running on the emission types
             for j=1:(TransEmissionNumRows-1) % First row is a header
                 
-                % Calculate emissions in Tons by the transportation consumption
+                % Calculate emissions in Tons by the transportation
+                % consumption - Ton
                 HotEmissionsTon(j,i) = CurrentYearTransportationConsumption(i)*TransportationHotEmissionsCoefficients(j,i)/1000000;
                 EvaporationEmissionsWhileDrivingTon(j,i) = CurrentYearTransportationConsumption(i)*TransportationEvaporationEmissionsWhileDriving(j,i)/1000000;
                 GridingEmissionsTon(j,i) = CurrentYearTransportationConsumption(i)*TransportationGridingEmissions(j,i)/1000000;

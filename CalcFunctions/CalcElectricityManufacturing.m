@@ -18,11 +18,11 @@ function [ElectricityManufacturingEmissions, FuelAmounts] = CalcElectricityManuf
 assert(Year >= 1 && Year <= size(ElectricityConsumptionPercentages, 2), 'Year index out of range');
 
 %% Inputs
-EmissionsCoefficientsUpstream = Data.Electricity_DataBase.EmissionsCoefficientsUpstreamElectricity;
-EmissionsCoefficientsForPv = Data.EmissionsCoefficientsForPv;
+EmissionsCoefficientsUpstream = Data.Electricity_DataBase.EmissionsCoefficientsUpstreamElectricity; % Kg/Ton
+EmissionsCoefficientsForPv = Data.EmissionsCoefficientsForPv; % g co2/Kwh
 ElectricityConsumers = Data.Electricity_DataBase.Electricity_Consumption_RowNames;
 CrudeOilToFuelRatio = Data.Electricity_DataBase.CrudeOilToFuelRatio;
-PVLifeCycle = Data.Electricity_DataBase.PVLifeCycle;
+PVLifeCycle = Data.Electricity_DataBase.PVLifeCycle; % 25
 NewPV_PercentageBaseYear = Data.Electricity_DataBase.NewPV_PercentageBaseYear;
 
 RowNames = ElectricityConsumers;

@@ -34,7 +34,7 @@ addpath("CalcFunctions");
 Emission_RowNames = {'Food', 'Electricity - Direct', 'Electricity - Indirect', 'Transportation - Direct', 'Train Emissions','Transportation - Indirect', 'Construction', 'Consumption Emissions' ,'Fuel for Industry', 'Sewege Treatment'}; %, 'Water from food'
 consumption_RowNames = {'Water', 'Fuels For Electriciy Manufacturing', 'Fuels For Transportation Amounts', 'Materials For Construction', 'Fuels For Energy Industry'};
 %Resources_RowNames = {'Area For Electricity', 'Cumulative Area','Area For Food', 'Operating Costs', 'Setting Costs', 'Fuels Costs', 'Cost Of Area For PV','Area For Construction'};
-Resources_RowNames = {'Area For Electricity', 'Cumulative Area','Area For Food', 'Area For Construction', 'Cumulative Area For Construction'};
+Resources_RowNames = {'Area For Electricity', 'Cumulative Area For Electricity','Area For Food', 'Operating Costs', 'Setting Costs', 'Fuels Costs', 'Cost Of Area For PV', 'Area For Construction', 'Cumulative Area For Construction'};
 
 % Initialize the final tables
 EmissionsByYears = cell(numel(Emission_RowNames),Years);  % Initialize the emissions table for each year
@@ -94,9 +94,6 @@ ReducingMeatConsumptionPercentage = ScenariosTable{20,:};
 %% Calculate Base Consumptions (No scenario)
 % Calculate the base consumption data based on population growth
 [ElectricityConsumptionTable, TransportationConsumptionTable, VehicleAmountsCell, FoodConsumptionCell, WaterConsumptionCell, ConstructionTable, ConstructionFootprintTable ,WasteAndRecyclingCell,AmountsOfFuelsCells, OrganicWasteCell] = ConsumptionChanges(Data,ScenariosTable, Years, pop, orderIndex);
-disp(ConstructionTable)
-disp(ConstructionFootprintTable)
-
 
 %% Create the years column names (based on the years)
 YearsStringsForColNames = cell(1,Years);
@@ -160,7 +157,8 @@ for i = 1:Years
     end
 
 
-    % Calculate water consumption based on the updated food consumption data
+    % Calculate water consumption based on the updated food consumption
+    % data (m^3)
     WaterFromFoodCell{i} = CalcWaterForFoodConsumption(Data, CurrentFoodConsumption); 
 
     % ------------------------------------- COMPARE ---------------------
@@ -189,7 +187,7 @@ end
 
 
 %% ------------------------------------------ STOPPED HERE ----------------------------------
-% ---------------------------- NEEDS TO BE MATCHED TO DOR'S MODEL: 
+% ---------------------------- MATCHED TO DOR'S MODEL: 
 % I think I did it well, make sure with Dor---------------------
 %% Water
 
@@ -239,14 +237,14 @@ end
 
 % change in mileage - scenario 12
 for i = 1:Years
-    CurrentMileage = TransportationConsumptionTable{:,i};
+    CurrentMileage = TransportationConsumptionTable{:,i}; % Km
     CurrentMileage = CurrentMileage*ReductionOfMileage(i);
     TransportationConsumptionTable{:,i} = CurrentMileage;
 end
 
 %KM from car to bus (percentages) - scenario 13
-PercentageToBuses  = Data.TransitionToBus;
-PercentageToTrains = Data.TransitionToTrain;
+PercentageToBuses  = Data.Trans_DataBase.TransitionToBus;
+PercentageToTrains = Data.Trans_DataBase.TransitionToTrain;
 
 TransitionToBus = (1-TransitionToPublicTransportationPercentage)*PercentageToBuses;
 TransitionToTrain = (1-TransitionToPublicTransportationPercentage)*PercentageToTrains;
@@ -290,7 +288,7 @@ for i = 1:Years
     % printWithCommas('KMTraveledByElectricCar', i + 2018, KMTraveledByElectricCar(i), 'km');
 
     % electricity consumption from ev = total KM the vehicle drived X the coefficint of KWh for km. consumption = (0.215, 0.9, 1.2, 1.2). )
-    KWHForElectricCar(i) = (KMTraveledByElectricCar(i))*ElectricityConsumptionEmissionsInTransportation{1};
+    KWHForElectricCar(i) = (KMTraveledByElectricCar(i))*ElectricityConsumptionEmissionsInTransportation{1}; % Kwh
     KWHForElectricVan(i) = (KMTraveledByElectricVan)*ElectricityConsumptionEmissionsInTransportation{2};
     KWHForElectricTruck(i) = (KMTraveledByElectricTruck)*ElectricityConsumptionEmissionsInTransportation{3};
     KWHForElectricBus(i) = (KMTraveledByElectricBus)*ElectricityConsumptionEmissionsInTransportation{4};
@@ -350,9 +348,10 @@ for i = 1:Years
     CurrentConstructionFootprint = ConstructionFootprintTable{:, i};
     %prevConstructionFootprint = ConstructionFootprintTable{:,i-1};
     [ConsumptionAmounts{4,i},EmissionsByYears{7,i}] = CalcConstruction(Data, CurrentConstruction, CurrentConstructionFootprint);
-    % The base year has no emissions and material, cause all the next years are comparing to the first one.
-    ConsumptionAmounts{4,1} = 0;
-    EmissionsByYears{7,1} = 0;
+    % The base year has no emissions and material, cause all the next years
+    % are comparing to the first one. - so we give it the delta of 2020.
+    ConsumptionAmounts{4,1} = ConsumptionAmounts{4,2};
+    EmissionsByYears{7,1} = EmissionsByYears{7,2};
 end
 
 %% waste minimization - scenario 9
@@ -387,7 +386,7 @@ for i=1:Years
     CurrentWaste = WasteAndRecyclingCell{i};
     for j = 1:2:width(CurrentWaste)
         CurrentBurial = CurrentWaste{:,j};
-        NewBurial = CurrentBurial.*BurningWaste(i);
+        NewBurial = CurrentBurial.*BurningWaste(i); % Calculates the amount of waste that will remain for burial after subtracting the amount designated for incineration.
         WasteInciniration(i) = WasteInciniration(i) + sum(CurrentBurial-NewBurial); %% how much waste in incinareted
         CurrentWaste{:,j} = NewBurial;
     end
@@ -437,7 +436,7 @@ for i=1:Years
     PreviousYearElectricity = CurrentYearElectricity; % updating for the next iteration
 end
 
-% --------------- RECICLING WASTE---------------------------------
+% ---------------Emission from RECICLING WASTE, as for now we dont imply that---------------------------------
 %% Waste and Recicling - emissions from consumption - on hold until further analysis
 % WasteAndRecyclingSummaryCell = cell(1,Years);
 % for i=1:Years
@@ -494,7 +493,7 @@ for i = 1:Years
     % Insert the results to the final Resource table
     temp_row_num = find(strcmpi(Resources_RowNames, 'Area For Electricity'));
     Resources{temp_row_num,i} = AreaForElectricity; 
-    temp_row_num = find(strcmpi(Resources_RowNames, 'Cumulative Area'));
+    temp_row_num = find(strcmpi(Resources_RowNames, 'Cumulative Area For Electricity'));
     Resources{temp_row_num,i} = TotalArea;
 end
 
@@ -503,13 +502,13 @@ end
 temp_row_num = find(strcmpi(Resources_RowNames, 'Area For Food'));
 for i = 1:Years
     CurrentAreaForFood = CalcAreaForFoodConsumption(FoodConsumptionCell{i},  Data.Food_DataBase.AreaForFoodCoefficients);
-    CurrentAreaForFood{:,:} = CurrentAreaForFood{:,:}/1000;%% km^2
+    CurrentAreaForFood{:,:} = CurrentAreaForFood{:,:}/1000;%% 1000m^2 ----- 1000m^2/1000000 = 0.001 m^2 = km^2
     Resources{temp_row_num,i} = CurrentAreaForFood; 
 end
 
-% %% Money
+%% Money
 
-% %OperationCost
+%OperationCost
 % if(Data.PVType == "Ground")
 %     Data.OperatingCosts.DualPV = [];
 %     Data.SettingCosts.DualPV = [];
@@ -517,27 +516,31 @@ end
 %     Data.OperatingCosts.GroundPV = [];
 %     Data.SettingCosts.GroundPV = [];
 % end    
-% for i = 1:Years
-%     Resources{4,i} = CalcOperationCosts(KWForElectricity{:,i}, Data.OperatingCosts{i,:});
-% end
+for i = 1:Years
+    %Resources{4,i} = CalcOperationCosts(KWForElectricity{:,i}, Data.OperatingCosts{i,:});
+    Resources{4,i} = 0;
+end
 
-% %%Setting Costs
-% for i = 1:Years
-%      Resources{5,i} = CalcSettingCosts(KWForElectricity{:,i}, Data.SettingCosts{i,:});
-%    % Resources{5,i} = CalcSettingCosts(DeltaKW{:,i}, Data.SettingCosts{i,:});
-% end
-% 
-% % cost of Fuels For Electriciy Manufacturing ONLY, not include transportation
-% for i = 1:Years
-%     Resources{6,i} = CalcFuelCosts(ConsumptionAmounts{2,i}{1,:},ConsumptionAmounts{3,i}{1,:}, Data.ILSPerTon{:,1}, Data.ILSPerTon{:,3});
-% end
-% 
-% % cost of area - UPDATED
+%%Setting Costs
+for i = 1:Years
+     %Resources{5,i} = CalcSettingCosts(KWForElectricity{:,i}, Data.SettingCosts{i,:});
+     %Resources{5,i} = CalcSettingCosts(DeltaKW{:,i}, Data.SettingCosts{i,:});
+     Resources{5,i} = 0;
+end
+
+% cost of Fuels For Electriciy Manufacturing ONLY, not include transportation
+for i = 1:Years
+    %Resources{6,i} = CalcFuelCosts(ConsumptionAmounts{2,i}{1,:},ConsumptionAmounts{3,i}{1,:}, Data.ILSPerTon{:,1}, Data.ILSPerTon{:,3});
+    Resources{6,i} = 0;
+end
+
+% cost of area - UPDATED
 % GroundDist = Data.Area_DataBase.AreaDistribution.GroundPV;
 % DualDist = Data.Area_DataBase.AreaDistribution.DualPV;
-% for i = 1:Years
-%      Resources{7,i} = CalcCostOfArea(Resources{1,i}{1,3:4}, Data.AreaCostForElectricity{i,:}, GroundDist, DualDist);
-% end
+for i = 1:Years
+     %Resources{7,i} = CalcCostOfArea(Resources{1,i}{1,3:4}, Data.AreaCostForElectricity{i,:}, GroundDist, DualDist);
+     Resources{7,i} = 0;
+end
 
 
 % Construction area 
@@ -608,7 +611,6 @@ end
 
 function PercentageByYears = CalculatePercentageOfElectricitySourcesByYears(RenewableEnergiesPercentage, NaturalGasPercentage, Percentage)
 
-Years = width(RenewableEnergiesPercentage);
 ElectricityRowName = Data.Electricity_DataBase.Electricity_Sources;
 ElectricityRowNum = numel(ElectricityRowName);
 PercentageByYears = array2table(zeros(ElectricityRowNum,Years)); %% cell array that contains the percentages of manufacturing
@@ -651,8 +653,7 @@ end
 
 function PercentageByYears = CalculateBusPercentages(ChangeByYears)
 BusCarRatio_global = Data.Trans_DataBase.BusCarRatio;
-Years = width(ChangeByYears);
-PercentageByYears = zeros(1,width(ChangeByYears));
+PercentageByYears = zeros(1,Years);
 PercentageByYears(1) = 1;
 for i = 2:Years
     CurrentChange = (ChangeByYears(i)-ChangeByYears(i-1))*(BusCarRatio_global);
@@ -661,9 +662,9 @@ end
 end
 
 
-function PercentageByYears = CalculateTrainPercentages(ChangeByYears)
-PercentageByYears = zeros(1,width(ChangeByYears));
-end
+% function PercentageByYears = CalculateTrainPercentages(ChangeByYears)
+% PercentageByYears = zeros(1,Years);
+% end
 
 function NewVehicleAmountCell = CalulateChangeInVehicleAmountsTransitionToPublicTransport(TrasnportationConsumptionTable, VehicleAmountCell)
 % Inputs
@@ -672,7 +673,7 @@ TransColNames = Data.Trans_DataBase.Vehicle_Amounts_ColNames;
 TransRow_Num = numel(TransRowNames);
 TransColNum = numel(TransColNames);
 
-NewVehicleAmountCell = cell(1,width(TrasnportationConsumptionTable));
+NewVehicleAmountCell = cell(1,Years);
 NewVehicleAmountCell{1} = VehicleAmountCell{1};
 
 KMPerCar = TrasnportationConsumptionTable{2,1}/VehicleAmountCell{1}{1,2};
@@ -681,8 +682,10 @@ NewVehicleAmountCell{1} = array2table(zeros(TransRow_Num,TransColNum), 'RowNames
 NewVehicleAmountCell{1}{:,:} = VehicleAmountCell{1}{:,:};
 NewVehicleAmountCell{1}.Properties.VariableNames = TransColNames;
 
-for i=2:width(TrasnportationConsumptionTable)
+
+for i=2:Years
     NewVehicleAmountCell{i} = array2table(zeros(TransRow_Num,TransColNum), 'RowNames', TransRowNames);
+
     NewVehicleAmountCell{i}{:,:} = VehicleAmountCell{i}{:,:};
     NewVehicleAmountCell{i}{1,1} = ceil((TrasnportationConsumptionTable{1,i}-TrasnportationConsumptionTable{1,i-1})/KMPerBus) + NewVehicleAmountCell{i-1}{1,1};
     NewVehicleAmountCell{i}{4,1} = NewVehicleAmountCell{i}{1,1}*RidesPerDay_global;
@@ -705,7 +708,7 @@ TransColNames = Data.Trans_DataBase.Vehicle_Amounts_ColNames;
 TransRow_Num = numel(TransRowNames);
 TransColNum = numel(TransColNames);
 
-NewVehicleAmountCell = cell(1,width(VehicleAmountCell));
+NewVehicleAmountCell = cell(1,Years);
 NewVehicleAmountCell{1} = VehicleAmountCell{1};
 KMPerCar = TrasnportationConsumptionTable{2,1}/VehicleAmountCell{1}{1,2};
 KMPerBus = TrasnportationConsumptionTable{1,1}/VehicleAmountCell{1}{1,1};
@@ -717,7 +720,7 @@ NewVehicleAmountCell{1}.Properties.VariableNames = TransColNames;
 NewVehicleAmountCell{1}{:,:} = VehicleAmountCell{1}{:,:};
 
 
-for i=2:width(TrasnportationConsumptionTable)
+for i=2:Years
     NewVehicleAmountCell{i} = array2table(zeros(TransRow_Num,TransColNum), 'RowNames', TransRowNames);
     NewVehicleAmountCell{i}{:,:} = VehicleAmountCell{i}{:,:};
     %buses

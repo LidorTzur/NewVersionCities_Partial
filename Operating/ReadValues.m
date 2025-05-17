@@ -25,15 +25,20 @@ MDB = DataBase.Materials_DataBase;
 ADB = DataBase.Area_DataBase;
 MONDB = DataBase.Money_DataBase;
 Data = "Data.xlsx";
- 
 
+% Generel Input for the model DataBase
+GeneralInputsDataBase = struct();
+
+% For the Results Analisys
+ResultsDataBase = struct();
+ResultsDataBase.BAU_RDB = struct();
+ResultsDataBase.Moderate_RDB = struct();
+ResultsDataBase.Advanced_RDB = struct();
+
+% For the sensetivity Analisys
+SensitivityResults = struct();
 
 %% Insert data to the DataBase from the "prepatation" script
-DataBase.WasteToElectricity = WasteToElectricity;
-DataBase.IncinarationEmissionCoefficient = IncinarationEmissionCoefficient;
-DataBase.TransitionToBus = TransitionToBus;
-DataBase.TransitionToTrain = TransitionToTrain;
-DataBase.CurrentYearReal = CurrentYearReal;
 DataBase.ScenarioRowNames = ScenarioRowNames;
 DataBase.EvSenarioLines = EvSenarioLines;
 DataBase.Conversion_Liter_To_Kg = Conversion_Liter_To_Kg;
@@ -108,13 +113,22 @@ EDB.ElectrictyManufacturingCoefficients = table2array(readtable(Data,'Sheet','El
 % The Ratio between crude oil to Manufactured Fuel
 EDB.CrudeOilToFuelRatio = readmatrix('Data.xlsx', 'Sheet','ElectricityManufactureEmissions','Range','K2:K2'); 
 
-% Current Year Data
-EDB.RenewableEnergies_CurrentYear = RenewableEnergies_CurrentYear;
-EDB.NaturalGas_CurrentYear = NaturalGas_CurrentYear;
-EDB.PVLifeCycle = PVLifeCycle;
-EDB.NewPV_PercentageBaseYear = NewPV_PercentageBaseYear;
-EDB.GroundPVPercentage = GroundPVPercentage;
-EDB.DualPVPercentage = DualPVPercentage;
+% Renewable energy data
+% Data about Percentage of enery resurces in the latest year we have data on-  in order to accurate the model data (that based on the 2019 year)
+EDB.RenewableEnergies_CurrentYear = readmatrix('Data.xlsx', 'Sheet','ElectricityConsumption','Range','L3:L3');
+EDB.NaturalGas_CurrentYear = readmatrix('Data.xlsx', 'Sheet','ElectricityConsumption','Range','L4:L4');
+EDB.CurrentYearReal = readmatrix('Data.xlsx', 'Sheet','ElectricityConsumption','Range','L2:L2');
+% PV - data assumptions
+EDB.PVLifeCycle = readmatrix('Data.xlsx', 'Sheet','Area','Range','F5:F5');
+EDB.NewPV_PercentageBaseYear = readmatrix('Data.xlsx', 'Sheet','Area','Range','F7:F7');
+EDB.GroundPVPercentage = readmatrix('Data.xlsx', 'Sheet','Area','Range','F2:F2');
+EDB.DualPVPercentage = readmatrix('Data.xlsx', 'Sheet','Area','Range','F3:F3');
+
+% Waste Inciniration
+%% Waste incinaration values 
+EDB.WasteToElectricity = readmatrix('Data.xlsx', 'Sheet','ElectricityManufactureEmissions','Range','H6:H6'); % How much waste needed to burn to get 1 kWh of electricity
+%EDB.IncinarationEmissionCoefficient = readmatrix('Data.xlsx', 'Sheet','ElectricityManufactureEmissions','Range','H8:H8'); % Emission coefficient of waste incineration
+
 
 %% ------------------------------------- TRANSPORTATION ------------------------------------------------
 %%%%%% TEMPS
@@ -211,10 +225,15 @@ TDB.NaturalGasForFuelRefining = readmatrix('Data.xlsx', 'Sheet','TransportationC
 TDB.EmissionsCoefficientsUpstream = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','N3:T9','ReadVariableNames',false))'; %% array(6,7)
 
 % Rides per day
-TDB.RidesPerDay = RidesPerDay_global;
-% Car Bus Ratio
-TDB.BusCarRatio = BusCarRatio_global;
+TDB.RidesPerDay = readmatrix('Data.xlsx','Sheet','TransportationConsumption','Range','A13:A13'); % 4
+% Car Bus Ratio - Define the ratio between car to bus use
+BusCarRatio = readtable(Data,'Sheet','TransportationConsumption','Range','F12:F12','ReadVariableNames',false);
+BusCarRatio = BusCarRatio{1,1}; 
+TDB.BusCarRatio = BusCarRatio;
 
+% Distribution of - Transition to buses and trains 
+TDB.TransitionToBus = readmatrix('Data.xlsx','Sheet','TransportationConsumption','Range','H12:H12');
+TDB.TransitionToTrain = readmatrix('Data.xlsx','Sheet','TransportationConsumption','Range','I12:I12');
 
 %% ---------------------------------------- WATER ------------------------------------------------
 
@@ -315,7 +334,7 @@ Food_Consumption_Col_Num = int32(numel(Food_Consumption_ColNames));
 % Meat rows in the excel table
 FDB.meatRows = meatRows;
 % Food Loss
-FDB.current_food_lost = current_food_lost_global;
+FDB.current_food_lost = readmatrix('Data.xlsx','Sheet','Food','Range','S2:S2'); % The assumption was that 33% of the food manufactured is lost 
 % {'Local Water For Humans','Local Water For Animals', 'Global Water For Humans', 'Global Water For Animals'}
 FDB.WaterFromFoodCategories = WaterFromFoodCategories;
 
@@ -353,10 +372,9 @@ FDB.WaterConsumptionCoefficientsGlobal = table2array(readtable(Data,'Sheet','Foo
 % CH4 Organic Waste Emission Coefficient (kg/kg)
 FDB.OrganicWasteCoefficients = table2array(readtable(Data,'Sheet','Food','Range','H80:H80','ReadVariableNames',false));
 
-% Organic Waste Emissions (Ton)
+% Organic Waste Quantity (Ton)
 FDB.OrganicWasteAmountsCell = cell(1,Years);
 FDB.OrganicWasteAmountsCell{1} = readtable(Data,'Sheet','Food','Range','H73:I76','ReadVariableNames',true);
-% Organic Waste
 OrganicWasteAmounts_RowNames = {'Local Authorities', 'Food Industry', 'Agriculture'};
 FDB.OrganicWasteAmountsCell{1}.Properties.RowNames = OrganicWasteAmounts_RowNames;
 
@@ -382,7 +400,7 @@ CDB.ConstructionEmissionTypes = {'Mining Waste', 'NOX', 'PM10', 'SO2'};
 CDB.ConstructionTable = array2table(zeros(Construction_Row_Num,Years), 'RowNames', Construction_RowNames);
 CDB.ConstructionFootprintTable = array2table(zeros(Construction_Row_Num,Years), 'RowNames', Construction_RowNames);
 s1 = "Area for Construction ";
-s2 = "Floor Area for Constructure";
+s2 = "Floor Area for Constructure ";
 ColumnNames = cell(1,Years);
 for i=1:Years
     s3 = num2str(i+BaseYear-1);
@@ -524,10 +542,8 @@ clear Construction_Row_Num Construction_RowNames
 clear WateAndRecycling_RowNames WateAndRecycling_ColNames WateAndRecycling_Row_Num WateAndRecycling_Col_Num WateAndRecyclingCell
 clear TDB FDB EDB WDB CDB MDB ADB MONDB
 clear M FuelConsumptionCoefficients Days_In_Year
-clear s1 s2 OrganicWasteAmounts_RowNames PVType RidesPerDay_global current_food_lost_global BusCarRatio_global LowerBoundForArea
-clear i ColumnNames IncinarationEmissionCoefficient WaterFromFoodCategories
-clear RenewableEnergies_CurrentYear NaturalGas_CurrentYear
-clear TransitionToBus TransitionToTrain WasteToElectricity meatRows RenewablePercents ScenarioRowNames EvSenarioLines
-clear Conversion_Liter_To_Kg PVLifeCycle NewPV_PercentageBaseYear
-clear GroundPVPercentage DualPVPercentage
-clear ColumnNames2
+clear s1 s2 OrganicWasteAmounts_RowNames PVType BusCarRatio LowerBoundForArea
+clear i ColumnNames WaterFromFoodCategories
+clear meatRows RenewablePercents ScenarioRowNames EvSenarioLines
+clear Conversion_Liter_To_Kg 
+clear ColumnNames2 s3 

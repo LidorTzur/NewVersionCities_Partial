@@ -308,7 +308,7 @@ for i = 2:Years
 end    
 
 
-%% Amounts of Fuels (for industry)
+%% Amounts of Fuels (for industry) - Tons
 RowNames = {'Crude Oil Products - Not for Energy', 'Crude Oil For Export', 'Crude Oil Import', 'Crude Oil Products - For Energy', 'LPG - Home', 'LPG - Commertiel' };
 ColNames = {'Naptha', 'Mazut','Diesel','Kerosene','Gasoline','Liquified Petroleum Gas', 'Other'};
 AmountsOfFuelsCells = Data.Materials_DataBase.AmountsOfFuelsCells;
@@ -328,7 +328,7 @@ end
 %% ADJUSTING FOR 2035:
 %  REMOVING UNECESSARY COLUMNS FROM THE TABLES:
 
-if (orderIndex >= 7 && width(ScenariosTable) < Years) 
+if (orderIndex >= 7 && width(ScenariosTable) <= Years) 
    ElectricityConsumptionTable = ElectricityConsumptionTable(:, 1:Years);
    TransportationConsumptionTable = TransportationConsumptionTable(:, 1:Years);
    VehicleAmountsCell = VehicleAmountsCell(:, 1:Years);

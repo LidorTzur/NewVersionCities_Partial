@@ -37,7 +37,7 @@ function [CurrentYearEmissionsFromFood] = CalcCo2eFromFoodConsumption(Data, Food
         TotalGlobalEmissionsFromAnimalsFood = TotalGlobalEmissionsFromAnimalsFood+GlobalEmissionsFromAnimalsFood(i);
     end
 
-%% EmissionsFromFood 
+%% EmissionsFromOrganicWaste 
 BurriedOrganicWaste = sum(WasteAmounts{:,1})*Data.Food_DataBase.OrganicWasteCoefficients;
     
 %% Create Final Table

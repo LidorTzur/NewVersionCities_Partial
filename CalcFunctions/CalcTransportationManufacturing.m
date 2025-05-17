@@ -21,7 +21,7 @@ function [TotalTransportationManufacturingEmissions, TotalFuelAmounts] = CalcTra
     %% Inputs 
     
     NumOfDailyTrips = Data.Trans_DataBase.RidesPerDay;
-    FuelConsumptionCoefficients = Data.Trans_DataBase.FuelConsumptionCoefficients;
+    FuelConsumptionCoefficients = Data.Trans_DataBase.FuelConsumptionCoefficients; % g/Km
     VehicleType = FuelConsumptionCoefficients.Properties.VariableNames;
     TrainFuelConsumptionCoefficints =Data.Trans_DataBase.TrainFuelConsumptionCoefficints;
     InflationCoefficient = Data.Trans_DataBase.InflationCoefficient;
@@ -30,8 +30,8 @@ function [TotalTransportationManufacturingEmissions, TotalFuelAmounts] = CalcTra
     CrudeOilToFuelRatio = Data.Electricity_DataBase.CrudeOilToFuelRatio;
     NaturalGasForFuelRefining = Data.Trans_DataBase.NaturalGasForFuelRefining;
     TransEmission_Manu_type = Data.Trans_DataBase.TransEmission_Manu_type;
-    EmissionsCoefficientsUpstream = Data.Trans_DataBase.EmissionsCoefficientsUpstream; %% array(6,7)
-    EmissionsCoefficientsFromBatteryManufacturing = Data.Electricity_DataBase.EmissionsCoefficientsFromBatteryManufacturing;
+    EmissionsCoefficientsUpstream = Data.Trans_DataBase.EmissionsCoefficientsUpstream; %% array(6,7) Kg/Ton
+    EmissionsCoefficientsFromBatteryManufacturing = Data.Electricity_DataBase.EmissionsCoefficientsFromBatteryManufacturing; % gCo2/km
 
     %% Motor Vehicle Fuel Consumption - tons
 
@@ -52,7 +52,7 @@ function [TotalTransportationManufacturingEmissions, TotalFuelAmounts] = CalcTra
     TotalFuelConsumptionForMV{1,7} = ((sum(temp))/1000)*InflationCoefficient; %%+EngineeringToolsFuelConsumption)*InflationCoefficient; %% fuel consumption is in litters - 0.85 is conversion coefficint from litter to KG
     
 
-    %% All vehicles fuel consumption
+    %% All vehicles fuel consumption - Tons
 
     %FuelForOtherUses = table2array(readtable(Data,'Sheet','FuelProductionEmissionsForTrans','Range','B33:F33','ReadVariableNames',false));
     TotalFuelConsumption = array2table(zeros(1,numel(TransEnergy_type)));

@@ -9,9 +9,8 @@ function [population] = populationCal(PrecentegeByTheYears)
 % The function populates the table for all years from the BaseYear to the TargetYear.
 
 population_RowNames = {'Num','Years', 'Israel population', 'Palestinian Authority population'};
-global TargetYear_global;
 global BaseYear;
-Years = TargetYear_global-BaseYear+1; 
+Years = width(PrecentegeByTheYears); 
 global PopulationStartYear_global;
 global palestinians_base_pop_global; % No palestinian in beer sheva.
 

@@ -14,6 +14,7 @@ function [TotalElectricityConsumptionEmissions, CurrentYearTotal] = CalcElectric
 %   CurrentYearTotal                    - Vector of total KWh per energy source.
     
     %% Inputs
+    % Emissions From Mining, Manufacturing Etc Fuels (g/KWh)
     Emissions = Data.Electricity_DataBase.EmissionsFromElectricityConsumption; 
     % 'Co2', 'CH4', 'Nitrous Oxide (N2O)', 'NOX', 'PM', 'SO2', 'Other Air Pollutants', 'Sewage', 'Co2e'
     ElectricityEmissionTypes = Data.Electricity_DataBase.ElectricityEmissionTypes;
@@ -38,7 +39,7 @@ function [TotalElectricityConsumptionEmissions, CurrentYearTotal] = CalcElectric
         Total=0;
     end
 
-    KwhFromInciniration = Data.WasteToElectricity*WasteIncinaration;
+    KwhFromInciniration = Data.Electricity_DataBase.WasteToElectricity*WasteIncinaration;
     
     if(CurrentYear{8,1} > KwhFromInciniration)
         CurrentYear{8,1} = CurrentYear{8,1}-KwhFromInciniration;
