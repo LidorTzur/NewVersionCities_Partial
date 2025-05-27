@@ -109,7 +109,7 @@ DataBase.EmissionsCoefficientsForPv = readtable(Data,'Sheet','PVEmissions','Rang
 % Coefficients from mining and fuel manufacturing 
 EDB.EmissionsCoefficientsUpstreamElectricity = table2array(readtable(Data,'Sheet','ElectricityManufactureEmissions','Range','B15:G21','ReadVariableNames',false))';
 % How many tons of fuel is needed for 1 kwh of electricity
-EDB.ElectrictyManufacturingCoefficients = table2array(readtable(Data,'Sheet','ElectricityManufactureEmissions','Range','B7:E7','ReadVariableNames',false));
+EDB.ElectrictyManufacturingCoefficients = table2array(readtable(Data,'Sheet','ElectricityManufactureEmissions','Range','B3:E3','ReadVariableNames',false));
 % The Ratio between crude oil to Manufactured Fuel
 EDB.CrudeOilToFuelRatio = readmatrix('Data.xlsx', 'Sheet','ElectricityManufactureEmissions','Range','K2:K2'); 
 
@@ -349,7 +349,7 @@ FDB.FoodConsumptionCell{1}.Properties.VariableNames = Food_Consumption_ColNames;
 % compare it to "RowNames" that we already defined...)
 FDB.FoodRowName = table2cell(readtable(Data,'Sheet','Food','Range','A5:A68','ReadVariableNames',false))';
 % the maximal value possible in order to keep the area for food in Israel under 4500000 m^2.
-FDB.TotalGrowthForLocalFood = readmatrix('Data.xlsx', 'Sheet','Food','Range','AJ3:AJ3');  % Save it in the DataBase
+FDB.TotalGrowthForLocalFood = readmatrix('Data.xlsx', 'Sheet','Food','Range','Y2:Y2');  % Save it in the DataBase
 
 %%%%% Water for food percentages (distribution of Nature Water, Diselinated Water, Brackish Water, Reclaimed Water, Flood Water)
 FDB.WaterForFoodPercentages = table2array(readtable(Data,'Sheet','Food','Range','T6:T10','ReadVariableNames',false))';

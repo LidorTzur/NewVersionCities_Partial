@@ -14,14 +14,16 @@
     for i = 1:width(UpDownStreamEmissions)
 
         % Electricity - Local: sum emissions from sub-sector rows 1 to 4, column 9
-        UpDownStreamEmissions{1,i} = sum(EmissionsByYears{2,i}{1,1}{1:4,9})/1000000;
+        %UpDownStreamEmissions{1,i} = sum(EmissionsByYears{2,i}{1,1}{1:4,9})/1000000;
+        UpDownStreamEmissions{1,i} = sum(EmissionsByYears{2,i}{1,1}{1:5,9})/1000000;
         % Electricity - Global: sum all rows, column 7
         UpDownStreamEmissions{2,i} = sum(EmissionsByYears{3,i}{1,1}{:,7})/1000000;
         
         % Transportation - Local: sum two local transport columns
         UpDownStreamEmissions{3,i} = (sum(EmissionsByYears{4,i}{1,1}{:,16}) + sum(EmissionsByYears{5,i}{1,1}{:,12}))/1000000;
         % Transportation - Global: sum all global rows and one local fallback row
-        UpDownStreamEmissions{4,i} = (sum(EmissionsByYears{6,i}{1,1}{:,7}) + EmissionsByYears{2,i}{1,1}{5,9})/1000000;
+        %UpDownStreamEmissions{4,i} = (sum(EmissionsByYears{6,i}{1,1}{:,7}) + EmissionsByYears{2,i}{1,1}{5,9})/1000000;
+        UpDownStreamEmissions{4,i} = (sum(EmissionsByYears{6,i}{1,1}{:,7}))/1000000;
       
         % % Construction - Local: sum rows 11–12, column 2
         % UpDownStreamEmissions{7,i} = sum(EmissionsByYears{7,i}{1,1}{11:12,2})/1000000;
@@ -29,8 +31,8 @@
         % UpDownStreamEmissions{8,i} = sum(EmissionsByYears{7,i}{1,1}{13,2})/1000000;
 
         %Lidor's addition (for the construction that we changed
-        % Construction - Local: sum rows 1-11, column 2
-        UpDownStreamEmissions{7,i} = sum(EmissionsByYears{7,i}{1,1}{1:11,2})/1000000;
+        % Construction - Global: sum rows 1-11, column 2
+        UpDownStreamEmissions{8,i} = sum(EmissionsByYears{7,i}{1,1}{1:11,2})/1000000;
 
         % Water - Local: sum two water-related sources
         UpDownStreamEmissions{9,i} = (EmissionsByYears{10,i}{1,1}{1,2} + EmissionsByYears{2,i}{1,1}{6,9})/1000000;

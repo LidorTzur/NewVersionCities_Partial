@@ -257,7 +257,7 @@ end
 
 %%change in vehicle amounts
 VehicleAmountsCell = CalulateChangeInVehicleAmountsTransitionToPublicTransport(TransportationConsumptionTable, VehicleAmountsCell);
-ElectricityConsumptionEmissionsInTransportation = num2cell(Data.Electricity_DataBase.ElectricityConsumptionEmissionsInTransportation);
+ElectricityConsumptionEmissionsInTransportation = Data.Electricity_DataBase.ElectricityConsumptionEmissionsInTransportation;
 
 KWHForElectricCar = zeros(1,Years);
 KWHForElectricVan = zeros(1,Years);
@@ -288,15 +288,15 @@ for i = 1:Years
     % printWithCommas('KMTraveledByElectricCar', i + 2018, KMTraveledByElectricCar(i), 'km');
 
     % electricity consumption from ev = total KM the vehicle drived X the coefficint of KWh for km. consumption = (0.215, 0.9, 1.2, 1.2). )
-    KWHForElectricCar(i) = (KMTraveledByElectricCar(i))*ElectricityConsumptionEmissionsInTransportation{1}; % Kwh
-    KWHForElectricVan(i) = (KMTraveledByElectricVan)*ElectricityConsumptionEmissionsInTransportation{2};
-    KWHForElectricTruck(i) = (KMTraveledByElectricTruck)*ElectricityConsumptionEmissionsInTransportation{3};
-    KWHForElectricBus(i) = (KMTraveledByElectricBus)*ElectricityConsumptionEmissionsInTransportation{4};
+    KWHForElectricCar(i) = (KMTraveledByElectricCar(i))*ElectricityConsumptionEmissionsInTransportation{1, i}; % Kwh
+    KWHForElectricVan(i) = (KMTraveledByElectricVan)*ElectricityConsumptionEmissionsInTransportation{2, i};
+    KWHForElectricTruck(i) = (KMTraveledByElectricTruck)*ElectricityConsumptionEmissionsInTransportation{3, i};
+    KWHForElectricBus(i) = (KMTraveledByElectricBus)*ElectricityConsumptionEmissionsInTransportation{4, i};
     % indirect emissions from ev
 
 end
 
-%changes in vehicle amounts - needed?
+% changes in vehicle amounts and emissions
 VehicleAmountsCell = ChangesInVehicelAmountsAfterElectricVehicels(TransportationConsumptionTable, VehicleAmountsCell);
 for i = 1:Years
     CurrentTransportatiionConsumtpion = TransportationConsumptionTable{:,i};
@@ -331,17 +331,19 @@ for i = 1:Years
     ElectricityConsumptionTable{:,i} = CurrentYearElectricity;
 end
 
-% percentage of renewable energies - scenario 6
+% increase percentage of renewable energies - scenario 6
+
 InitialPercentage = Data.Electricity_DataBase.InitialPercentage;
 PercentageOfElectricitySourcesByYears = CalculatePercentageOfElectricitySourcesByYears(IncreaseInEnergyConsumptionFromRenewableEnergiesPercentage, IncreaseInEnergyConsumptionFromNaturalGasPercentage, InitialPercentage);
 ElectricityFromWaterCell = CalculateElectricityFromWaterAllYears(Data, WaterConsumptionCell,Years);
-for i = 1:Years
 
-    ElectricityConsumptionTable{5,i} = KWHForElectricCar(i)+KWHForElectricVan(i)+KWHForElectricTruck(i)+KWHForElectricTruck(i);
+% Add the electricity from electric vehicles to the total consumption
+for i = 1:Years
+    ElectricityConsumptionTable{5,i} = KWHForElectricCar(i)+KWHForElectricVan(i)+KWHForElectricTruck(i)+KWHForElectricBus(i);
 end
 
 %% construction waste
-% For the base year the consumption and emission is 0
+% For the base year the consumption and emission is the 2020 delta
 for i = 1:Years
     CurrentConstruction = ConstructionTable{:,i};
     %prevConstruction = ConstructionTable{:,i-1};
@@ -354,16 +356,16 @@ for i = 1:Years
     EmissionsByYears{7,1} = EmissionsByYears{7,2};
 end
 
-%% waste minimization - scenario 9
-for i=1:Years
-    CurrentWaste = WasteAndRecyclingCell{i};
-    for j = 1:height(WasteAndRecyclingCell{i})
-        for k =1:width(CurrentWaste)
-           % CurrentWaste{j,k} = WasteMinimazation(i)*CurrentWaste{j,k};
-        end
-    end
-    WasteAndRecyclingCell{i} = CurrentWaste;
-end
+% %% waste minimization - scenario 9
+% for i=1:Years
+%     CurrentWaste = WasteAndRecyclingCell{i};
+%     for j = 1:height(WasteAndRecyclingCell{i})
+%         for k =1:width(CurrentWaste)
+%            CurrentWaste{j,k} = WasteMinimazation(i)*CurrentWaste{j,k};
+%         end
+%     end
+%     WasteAndRecyclingCell{i} = CurrentWaste;
+% end
 
 
 %% recycled waste - scenario 10
@@ -422,6 +424,7 @@ for i=1:Years
     TotalElectricityFromWater = CurrentElectricityFromWater{6,1};
     CurrentYearElectricity(6) = TotalElectricityFromWater;
     CurrentYearElectricity(7,1) = sum(WaterFromFoodCell{1,i}{1,3:4})*(Data.Water_DataBase.Electricity_Drillind_Water_Coeff); % The electricity coefficient discount is for producing and transporting fresh water
+    
     % The amount of water for global food per cubic meter is twice the electricity coefficients for global water in KWH per cubic meter.
     ElectricityConsumptionTable{6,i} = CurrentYearElectricity(6);
 
@@ -493,7 +496,7 @@ for i = 1:Years
     % Insert the results to the final Resource table
     temp_row_num = find(strcmpi(Resources_RowNames, 'Area For Electricity'));
     Resources{temp_row_num,i} = AreaForElectricity; 
-    temp_row_num = find(strcmpi(Resources_RowNames, 'Cumulative Area'));
+    temp_row_num = find(strcmpi(Resources_RowNames, 'Cumulative Area For Electricity'));
     Resources{temp_row_num,i} = TotalArea;
 end
 
@@ -589,7 +592,7 @@ Resources.Properties.VariableNames = YearsStringsForColNames;
 function ElectricityFromWater = CalculateElectricityFromWaterAllYears(Data, WaterConsumptionCell, Years) %% in data file - needs to multiply the electricity by 1.18336
     ElectricityFromWater = cell(1,Years);
     for i=1:Years
-        ElectricityFromWater{i} = CalcElectricityForWater(Data, WaterConsumptionCell{i}, Data.ElectricityConsumptionCoefficients{:,i});
+        ElectricityFromWater{i} = CalcElectricityForWater(Data, WaterConsumptionCell{i}, Data.Water_DataBase.ElectricityConsumptionCoefficients{:,i});
     end
 end
 
@@ -627,7 +630,7 @@ for i = 2:Years
     CurrentRenewableChange = RenewableEnergiesPercentage(i)-RenewableEnergiesPercentage(i-1);
     CurrentGasChange = NaturalGasPercentage(i)-NaturalGasPercentage(i-1);
     if (Percentage(1) > 0) %% if coal manufacturing still not zero
-        if(Percentage(1)>CurrentGasChange) %% if the change in natural gas is laeger than what is left
+        if(Percentage(1)>CurrentGasChange) %% if the change in natural gas is larger than what is left
             Percentage(1)=Percentage(1)-CurrentGasChange; %% substract from coal
             Percentage(2)=Percentage(2)+CurrentGasChange; %% add to natural gas
         else

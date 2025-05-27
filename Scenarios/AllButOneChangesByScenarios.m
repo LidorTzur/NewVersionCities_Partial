@@ -111,10 +111,10 @@ end
 AllButOneScenariosTable{1,:} = CalcChangeVector(MilesTonesTable{1,:}, Years, S(1)); % Population Growth
 AllButOneScenariosTable{2,:} = CalcChangeVector(MilesTonesTable{2,:}, Years, S(2)); % Increased Electricity Per Capita
 AllButOneScenariosTable{3,:} = CalcChangeVector(MilesTonesTable{3,:}, Years, S(3), 'Type', 'Linear', 'Growth', false); % Desalinated Water
-AllButOneScenariosTable{8,:} = CalcChangeVector(MilesTonesTable{8,:}, Years, S(8), 'Growth', false); % Reducing Beef Consumption
-AllButOneScenariosTable{9,:} = CalcChangeVector(MilesTonesTable{9,:}, Years, S(9), 'Growth', false); % Preventing Food Loss
-AllButOneScenariosTable{12,:} = CalcChangeVector(MilesTonesTable{12,:}, Years, S(12), 'Growth', false); % Renewable Energy Consumption
-AllButOneScenariosTable{13,:} = CalcChangeVector(MilesTonesTable{13,:}, Years, S(13), 'Growth', false); % Electricity Production by Natural Gas
+AllButOneScenariosTable{8,:} = CalcChangeVector(MilesTonesTable{8,:}, Years, S(8), 'Growth', false); % Electricity saving
+AllButOneScenariosTable{9,:} = CalcChangeVector(MilesTonesTable{9,:}, Years, S(9), 'Growth', false); % Fuel for Energy
+AllButOneScenariosTable{12,:} = CalcChangeVector(MilesTonesTable{12,:}, Years, S(12), 'Growth', false); % reducing mileage in the city
+AllButOneScenariosTable{13,:} = CalcChangeVector(MilesTonesTable{13,:}, Years, S(13), 'Growth', false); % Transition To Public Transportation
 AllButOneScenariosTable{19,:} = CalcChangeVector(MilesTonesTable{19,:}, Years, S(19), 'Growth', false); % Water Saving
 AllButOneScenariosTable{20,:} = CalcChangeVector(MilesTonesTable{20,:}, Years, S(20), 'Growth', false); % Vegetarians
 
@@ -141,9 +141,6 @@ AllButOneScenariosTable{14,:} = CalcChangeVector(MilesTonesTable{14,:}, Years, S
 AllButOneScenariosTable{15,:} = CalcChangeVector(MilesTonesTable{15,:}, Years, S(15)); % Electric Van transition
 AllButOneScenariosTable{16,:} = CalcChangeVector(MilesTonesTable{16,:}, Years, S(16)); % Electric Truck transition
 AllButOneScenariosTable{17,:} = CalcChangeVector(MilesTonesTable{17,:}, Years, S(17)); % Electric Bus transition
-
-% Water saving: assuming no change in water consumption through the years
-%AllButOneScenariosTable{18,:} = 1;
 AllButOneScenariosTable{18,:} = CalcChangeVector(MilesTonesTable{18,:}, Years, S(18)); 
 
 
@@ -219,6 +216,11 @@ end
 % over a period of years based on the selected calculation type (Exponential, Linear, or Step).
 % The function checks the 'Type' argument to decide which method to use for calculating the changes.
 % It calls the corresponding calculation function based on the user's choice or defaults to zeros if an invalid type is provided.
+% הערך שמתקבל מ־ CalcChangeVector לא מייצג את אחוז האובדן, אלא את פקטור ההכפלה של האובדן לאורך זמן, לדוגמה:
+% שנה 1: 100% מהאובדן המקורי (33%)
+% שנה אחרונה: ~40% ממנו (13%)
+% כל שנה הערך הוא האחוז שנשאר מהאובד המקורי (נגיד 0.8 אומר שנשאר שהאובדן
+% לאותה שנה הוא 80% מהאובדן בשנה הראשונה שהיא 33%).
 function PercentVector = CalcChangeVector(MileStoneVector, Years, S, varargin)
     p = inputParser;
     addOptional(p, 'Type', 'Exponential'); % Default type is 'Exponential'

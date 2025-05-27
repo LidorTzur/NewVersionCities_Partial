@@ -90,7 +90,7 @@ function [TotalTransportationConsumptionEmissions, TotalTrainEmissions] = CalcTr
     TotalTransportationConsumptionEmissions.Properties.VariableNames = TransEmissionTypes;
 
     for i=1:height(TotalTransportationConsumptionEmissions) %% 1-6
-        for j=1:width(TotalTransportationConsumptionEmissions)-1 %% 1-15
+        for j=1:width(TotalTransportationConsumptionEmissions)-1 %% 1-16
             TotalTransportationConsumptionEmissions{i,j}=HotEmissionsTon(j,i)+ColdEmissionsTon(j,i)+EvaporationEmissionsWhileDrivingTon(j,i)+EvaporationEmissionsAfterDrivingTon(j,i)+EvaporationEmissionsEveryDayTon(j,i)+GridingEmissionsTon(j,i);
         end
     end

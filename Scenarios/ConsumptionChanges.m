@@ -42,6 +42,8 @@ parse(p,varargin{:});
 
 % NEW: Electicity that the industry consumes isn't affected by the population growth.
 ElectricityConsumptionTable = Data.Electricity_DataBase.ElectricityConsumptionTable;
+% Lidor- Add the loss ratio to the electricity consumption
+ElectricityConsumptionTable{:,1} = ElectricityConsumptionTable{:,1}*Data.Electricity_DataBase.ElectricityLossRatio;
 IndustryElectricityConsumptionChange = Data.Electricity_DataBase.IndustryElectricityConsumptionChange; % assuming industrial grow by 1.1
 ChangeInElectricityConsumptionPercentageIndustry = CalculatePercentageLinear(1, IndustryElectricityConsumptionChange, Years);
 
@@ -78,11 +80,14 @@ end
 % adding upper-bound to the growth of local consumption due to area limitation.
 UpperBound =  Data.Food_DataBase.TotalGrowthForLocalFood;
 if (width(ScenariosTable) == Years) % making sure the table has enough columns
-    if (ScenariosTable{5,Years} < 0.8267 && ScenariosTable{5,Years} > 0.826) 
-    % moderate scenario: due to the prevention of food loss we can use more land.
-    UpperBound = UpperBound * 1.24;
-    elseif (ScenariosTable{5,Years} < 0.7467 && ScenariosTable{5,Years} > 0.746) %advanced
-    UpperBound = UpperBound * 1.41;
+
+    if (ScenariosTable{5,Years} <= 0.8267 && ScenariosTable{5,Years} > 0.826) 
+        % moderate scenario: due to the prevention of food loss we can use more land.
+        UpperBound = UpperBound * 1.24;
+
+    elseif (ScenariosTable{5,Years} < 0.7467 && ScenariosTable{5,Years} > 0.746) 
+        % advanced scenario: due to the prevention of food loss we can use more land.
+        UpperBound = UpperBound * 1.41;
     end
 end
 
@@ -93,7 +98,7 @@ FoodPercentageByTheYearsOriginal = ScenariosTable{1,:};
 
 for i = 1:Years
     % each column is multiplied by the relevant percentages, in order to
-    % limit the area for food in Israel to 4500
+    % limit the area for food in Israel to 4500 Km^2
     CurrentConsumption = array2table(zeros(food_numRows,food_numCols), 'RowNames', RowNames);
     CurrentConsumption{:,1} = Initialization(:,1)*(FoodPercentegeByTheYearsLocal(i));
     CurrentConsumption{:,2} = Initialization(:,2)*(FoodPercentegeByTheYearsLocal(i));

@@ -29,6 +29,7 @@ ElectricityConsumptionEmissionsInTransportationTable = array2table(zeros(height(
 ElectricVehicleImprovements = ReductionVectorCalc(BaseYear, TargetYear_global, Electric_Vehicles_Improvements);
 ElectricityConsumptionEmissionsInTransportationTable{:,1} = DataBase.Electricity_DataBase.ElectricityConsumptionEmissionsInTransportation;
 for i = 1:Years
+    % The electricity coeff will improve by twice till 2050
     ElectricityConsumptionEmissionsInTransportationTable{1,i} = ElectricityConsumptionEmissionsInTransportationTable{1,1}*ElectricVehicleImprovements(i);
     ElectricityConsumptionEmissionsInTransportationTable{2,i} = ElectricityConsumptionEmissionsInTransportationTable{2,1}*ElectricVehicleImprovements(i);
     ElectricityConsumptionEmissionsInTransportationTable{3,i} = ElectricityConsumptionEmissionsInTransportationTable{3,1}*ElectricVehicleImprovements(i);
@@ -36,7 +37,7 @@ for i = 1:Years
 end
 ElectricityConsumptionEmissionsInTransportationTable.Properties.VariableNames = Electricity_Transportation_ColumnNames;
 ElectricityConsumptionEmissionsInTransportationTable.Properties.RowNames = Electricity_Transportation_RowNames;
-DataBase.ElectricityConsumptionEmissionsInTransportation = ElectricityConsumptionEmissionsInTransportationTable;
+DataBase.Electricity_DataBase.ElectricityConsumptionEmissionsInTransportation = ElectricityConsumptionEmissionsInTransportationTable;
 
 %% 2. Water Desalination Improvements
 WaterDesalinationImprovements = ReductionVectorCalc(BaseYear,TargetYear_global, Water_Desalination_Improvements);
@@ -52,7 +53,7 @@ for i = 1:Years
 end
 ElectricityFromWaterCoefficientsTable.Properties.VariableNames = Electricity_Transportation_ColumnNames;
 ElectricityFromWaterCoefficientsTable.Properties.RowNames = ElectricityFromWaterCoefficientsTable_RowNames;
-DataBase.ElectricityConsumptionCoefficients = ElectricityFromWaterCoefficientsTable;
+DataBase.Water_DataBase.ElectricityConsumptionCoefficients = ElectricityFromWaterCoefficientsTable;
 
 
 %% 3. Natural Gas Improvements
