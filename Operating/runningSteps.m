@@ -101,7 +101,17 @@ switch orderIndex
         
         % Define the Final Tables to Output
         AllTogetherCell = cell(3, 1);
-        TotalResults = array2table(zeros(3, 3), 'VariableNames', {'TotalEmission (Ton Eco2)', 'TotalArea (Km^2)', 'TotalWater (m^3)'}, 'RowNames', {'BAU', 'Moderate', 'Advanced'});
+        YearsStringsForColNames = cell(1,Years);
+
+        for i=1:Years
+            s1 = num2str(i+BaseYear-1); % changed
+            YearsStringsForColNames{i} = s1;
+        end
+
+        %TotalResults = array2table(zeros(9, Years), 'VariableNames', {YearsStringsForColNames}, 'RowNames', {'BAU - TotalEmission (Ton Eco2)', 'Moderate - TotalEmission (Ton Eco2)', 'Advanced - TotalEmission (Ton Eco2)', 'BAU - TotalArea (Km^2)', 'Moderate - TotalArea (Km^2)', 'Advanced - TotalArea (Km^2)', 'BAU - TotalWater (m^3)', 'Moderate - TotalWater (m^3)', 'Advanced - TotalWater (m^3)'});
+        TotalResults = array2table(zeros(9, Years));
+        TotalResults.Properties.RowNames = {'BAU - TotalEmission (Ton Eco2)', 'Moderate - TotalEmission (Ton Eco2)', 'Advanced - TotalEmission (Ton Eco2)', 'BAU - TotalArea (Km^2)', 'Moderate - TotalArea (Km^2)', 'Advanced - TotalArea (Km^2)', 'BAU - TotalWater (m^3)', 'Moderate - TotalWater (m^3)', 'Advanced - TotalWater (m^3)'};
+        TotalResults.Properties.VariableNames = YearsStringsForColNames;
 
         % BAU
         [RDB.BAU_RDB.FullScenariosTable1] = AllButOneChangesByScenarios(DataBase, 0, Years, ScenariosAndValues{:,4}, 'MileStones', false); %% AllButOneChangesByScenarios(Data, ScenarioNumber, Years, S, varargin)
@@ -109,11 +119,11 @@ switch orderIndex
         [RDB.BAU_RDB.EmissionsByYearsTest1, RDB.BAU_RDB.ConsumptionAmounts1, RDB.BAU_RDB.Resources1, RDB.BAU_RDB.WaterFromFood1] = FullScenario(DataBase, RDB.BAU_RDB.FullScenariosTable1,Years,RDB.BAU_RDB.population,orderIndex,0);
         
         RDB.BAU_RDB.TotalEmission1 = CalcUpDownStream(RDB.BAU_RDB.EmissionsByYearsTest1);
-        RDB.BAU_RDB.Emission1_Sum = sum(RDB.BAU_RDB.TotalEmission1{1:11, Years}); 
+        RDB.BAU_RDB.Emission1_Sum = sum(RDB.BAU_RDB.TotalEmission1{1:11, :}); 
         % Calculate the Resurces Tables
         [RDB.BAU_RDB.AreaSum1, RDB.BAU_RDB.CostsSum1, RDB.BAU_RDB.WaterSum1] = CalcTotalResources(RDB.BAU_RDB.Resources1, RDB.BAU_RDB.ConsumptionAmounts1, RDB.BAU_RDB.WaterFromFood1);
-        RDB.BAU_RDB.Area1_Sum = sum(RDB.BAU_RDB.AreaSum1{1:4, Years});
-        RDB.BAU_RDB.Water1_Sum = sum(RDB.BAU_RDB.WaterSum1{1:5, Years}); 
+        RDB.BAU_RDB.Area1_Sum = sum(RDB.BAU_RDB.AreaSum1{1:4, :});
+        RDB.BAU_RDB.Water1_Sum = sum(RDB.BAU_RDB.WaterSum1{1:5, :}); 
 
         % Moderate
         [RDB.Moderate_RDB.FullScenariosTable2] = AllButOneChangesByScenarios(DataBase, 0, Years, ScenariosAndValues{:,7}, 'MileStones', false);
@@ -123,11 +133,11 @@ switch orderIndex
         
         % For the final results
         RDB.Moderate_RDB.TotalEmission2 = CalcUpDownStream(RDB.Moderate_RDB.EmissionsByYearsTest2);
-        RDB.Moderate_RDB.Emission2_Sum = sum(RDB.Moderate_RDB.TotalEmission2{1:11, Years}); 
+        RDB.Moderate_RDB.Emission2_Sum = sum(RDB.Moderate_RDB.TotalEmission2{1:11, :}); 
         % Calculate the Resurces Tables
         [RDB.Moderate_RDB.AreaSum2, RDB.Moderate_RDB.CostsSum2, RDB.Moderate_RDB.WaterSum2] = CalcTotalResources(RDB.Moderate_RDB.Resources2, RDB.Moderate_RDB.ConsumptionAmounts2, RDB.Moderate_RDB.WaterFromFood2);
-        RDB.Moderate_RDB.Area2_Sum = sum(RDB.Moderate_RDB.AreaSum2{1:4, Years});
-        RDB.Moderate_RDB.Water2_Sum = sum(RDB.Moderate_RDB.WaterSum2{1:5, Years}); 
+        RDB.Moderate_RDB.Area2_Sum = sum(RDB.Moderate_RDB.AreaSum2{1:4, :});
+        RDB.Moderate_RDB.Water2_Sum = sum(RDB.Moderate_RDB.WaterSum2{1:5, :}); 
 
         % Advanced
         [RDB.Advanced_RDB.FullScenariosTable3] = AllButOneChangesByScenarios(DataBase, 0, Years, ScenariosAndValues{:,8}, 'MileStones', false);
@@ -137,11 +147,11 @@ switch orderIndex
         
         % For the final results
         RDB.Advanced_RDB.TotalEmission3 = CalcUpDownStream(RDB.Advanced_RDB.EmissionsByYearsTest3);
-        RDB.Advanced_RDB.Emission3_Sum = sum(RDB.Advanced_RDB.TotalEmission3{1:11, Years}); 
+        RDB.Advanced_RDB.Emission3_Sum = sum(RDB.Advanced_RDB.TotalEmission3{1:11, :}); 
         % Calculate the Resurces Tables
         [RDB.Advanced_RDB.AreaSum3, RDB.Advanced_RDB.CostsSum3, RDB.Advanced_RDB.WaterSum3] = CalcTotalResources(RDB.Advanced_RDB.Resources3, RDB.Advanced_RDB.ConsumptionAmounts3, RDB.Advanced_RDB.WaterFromFood3);
-        RDB.Advanced_RDB.Area3_Sum = sum(RDB.Advanced_RDB.AreaSum3{1:4, Years});
-        RDB.Advanced_RDB.Water3_Sum = sum(RDB.Advanced_RDB.WaterSum3{1:5, Years});
+        RDB.Advanced_RDB.Area3_Sum = sum(RDB.Advanced_RDB.AreaSum3{1:4, :});
+        RDB.Advanced_RDB.Water3_Sum = sum(RDB.Advanced_RDB.WaterSum3{1:5, :});
 
 
         % Compare the Results for the "All the steps together"
@@ -156,19 +166,19 @@ switch orderIndex
         AllTogetherCell{3, 1} = Moderate_Advanced;
 
         % summarized emission table:
-        TotalResults{1, 1} = RDB.BAU_RDB.Emission1_Sum;
-        TotalResults{2, 1} = RDB.Moderate_RDB.Emission2_Sum;
-        TotalResults{3, 1} = RDB.Advanced_RDB.Emission3_Sum;
+        TotalResults{1, :} = RDB.BAU_RDB.Emission1_Sum;
+        TotalResults{2, :} = RDB.Moderate_RDB.Emission2_Sum;
+        TotalResults{3, :} = RDB.Advanced_RDB.Emission3_Sum;
 
         % summarized area table:
-        TotalResults{1, 2} = RDB.BAU_RDB.Area1_Sum;
-        TotalResults{2, 2} = RDB.Moderate_RDB.Area2_Sum;
-        TotalResults{3, 2} = RDB.Advanced_RDB.Area3_Sum;
+        TotalResults{4, :} = RDB.BAU_RDB.Area1_Sum;
+        TotalResults{5, :} = RDB.Moderate_RDB.Area2_Sum;
+        TotalResults{6, :} = RDB.Advanced_RDB.Area3_Sum;
 
         % summarized water table:
-        TotalResults{1, 3} = RDB.BAU_RDB.Water1_Sum;
-        TotalResults{2, 3} = RDB.Moderate_RDB.Water2_Sum;
-        TotalResults{3, 3} = RDB.Advanced_RDB.Water3_Sum;
+        TotalResults{7, :} = RDB.BAU_RDB.Water1_Sum;
+        TotalResults{8, :} = RDB.Moderate_RDB.Water2_Sum;
+        TotalResults{9, :} = RDB.Advanced_RDB.Water3_Sum;
 
         AllTogetherTable = cell2table(AllTogetherCell);
         AllTogetherTable.Properties.VariableNames = {'delta eCo2 Emission (Ton)'};

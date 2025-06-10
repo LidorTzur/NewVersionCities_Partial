@@ -208,6 +208,7 @@ TDB.FreightTrainEmissionCoefficients(11,:) = []; % Deletes the 11th line (Total 
 %%%%%%%%%%%%%%%%%%%%%% Calc transportation manufacturing
 % Fuel Consumption coefficients (g/Km) for every kind of emission in transportation
 TDB.FuelConsumptionCoefficients = array2table(zeros(FuelConsumptionCoefficients_Row_Num, FuelConsumptionCoefficients_Col_Num), 'RowNames', FuelConsumptionCoefficients_RowNames);
+TDB.FuelConsumptionCoefficients.Properties.VariableNames = {'Bus', 'Car', 'Minibus', 'Motorcycle', 'Truck', 'LCV', 'Train'};
 TDB.FuelConsumptionCoefficients{1,1:6} = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','B33:G33','ReadVariableNames',false));
 TDB.FuelConsumptionCoefficients{2,1:6} = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','K33:P33','ReadVariableNames',false));
 TDB.FuelConsumptionCoefficients{3,1:6} = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','T33:Y33','ReadVariableNames',false));
@@ -227,9 +228,9 @@ TDB.EmissionsCoefficientsUpstream = table2array(readtable(Data,'Sheet','Transpor
 % Rides per day
 TDB.RidesPerDay = readmatrix('Data.xlsx','Sheet','TransportationConsumption','Range','A13:A13'); % 4
 % Car Bus Ratio - Define the ratio between car to bus use
-BusCarRatio = readtable(Data,'Sheet','TransportationConsumption','Range','F12:F12','ReadVariableNames',false);
-BusCarRatio = BusCarRatio{1,1}; 
-TDB.BusCarRatio = BusCarRatio;
+TDB.BusCarRatio = readmatrix('Data.xlsx','Sheet','TransportationConsumption','Range','F12:F12');
+% Car Train Ratio - Define the ratio between car to Train use
+TDB.TrainCarRatio = readmatrix('Data.xlsx','Sheet','TransportationConsumption','Range','E12:E12');
 
 % Distribution of - Transition to buses and trains 
 TDB.TransitionToBus = readmatrix('Data.xlsx','Sheet','TransportationConsumption','Range','H12:H12');
@@ -427,19 +428,25 @@ CDB.TotalBuiltArea = readmatrix('Data.xlsx', 'Sheet','Construction','Range','H2:
 
 %%%%%% Calc Construction Area Emission Coefficient, Material Waste Coefficients, Material consumption
 % Waste Coefficients (KG/KG) - Materials that are leftover during the peocess of extracting minerals.
-CDB.CostructionEmissionCoefficients = table2array(readtable(Data,'Sheet','Construction','Range','A26:D26','ReadVariableNames',false));
+CDB.CostructionEmissionCoefficients = table2array(readtable(Data,'Sheet','Construction','Range','A29:D29','ReadVariableNames',false));
 
 % The required amount needed per Square Meter of contruction (ton/km^2)
 %CDB.ConstructionMaterialCoefficients = table2array(readtable(Data,'Sheet','Construction','Range','B19:H19','ReadVariableNames',false));
 % Lidor
 CDB.ConstructionMaterialCoefficients_HighDensity = table2array(readtable(Data,'Sheet','Construction','Range','B19:H19','ReadVariableNames',false));
 CDB.ConstructionMaterialCoefficients_LowDensity = table2array(readtable(Data,'Sheet','Construction','Range','B20:H20','ReadVariableNames',false));
+% The ratio between imported and local production of materials in israel
+CDB.ConstructionMaterialImprotedRate = table2array(readtable(Data,'Sheet','Construction','Range','B24:H24','ReadVariableNames',false));
+CDB.ConstructionMaterialLocalProductionRate = table2array(readtable(Data,'Sheet','Construction','Range','B25:H25','ReadVariableNames',false));
 % The emission coefficient per material type (lidor)
 CDB.ConstructionECO2Coefficients_ByMaterial = table2array(readtable(Data,'Sheet','Construction','Range','B22:H22','ReadVariableNames',false));
 
 %%%%% Material consumption table (How much Cement for construction)
 % Probably will change, due to consideration of apartments construction!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 %CDB.MaterialConsumption = table2array(readtable(Data,'Sheet','Construction','Range','B41:G42','ReadVariableNames',false));
+
+
+
 
 
 %% ---------------------------------------- MATERIALS ------------------------------------------------

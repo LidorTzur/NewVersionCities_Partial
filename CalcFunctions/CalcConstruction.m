@@ -14,6 +14,9 @@ function [MaterialConsumption, TotalConstructionEmissionsAndWaste] = CalcConstru
 %% Inputs
 
 EmissionCoefficients = Data.Const_DataBase.CostructionEmissionCoefficients;
+GlobalDistribution = Data.Const_DataBase.ConstructionMaterialImprotedRate;
+LocalDistribution = Data.Const_DataBase.ConstructionMaterialLocalProductionRate;
+
 %MaterialCoefficients = Data.Const_DataBase.ConstructionMaterialCoefficients;
 %MortarProductionCO2ECoefficient = Data.Const_DataBase.MortarProductionCO2ECoefficient;
 
@@ -80,10 +83,19 @@ TotalConstructionEmissionsAndWaste.Properties.VariableNames = ColNames;
 
 % Extract the table to matrix
 materialAmounts = MaterialConsumption{:,:}; % גודל: N×M
-% Calculate the Total emission
+
+% Calculate the Total emission, and the local, global distribution
+localFactors = ConstructionECO2Coefficients_ByMaterial .* LocalDistribution;
+globalFactors = ConstructionECO2Coefficients_ByMaterial .* GlobalDistribution;
+
 totalEmissions = materialAmounts * ConstructionECO2Coefficients_ByMaterial'; % N×1
+LocalEmission = materialAmounts * localFactors';
+GlobalEmission = materialAmounts * globalFactors';
+
 % Add the emission of eCO2 to the final emission table
 TotalConstructionEmissionsAndWaste = addvars(TotalConstructionEmissionsAndWaste, totalEmissions, 'Before', 2, 'NewVariableNames', 'CO2Emission_tons');
+TotalConstructionEmissionsAndWaste = addvars(TotalConstructionEmissionsAndWaste, LocalEmission, 'Before', 6, 'NewVariableNames', 'CO2Emission_tons_Local');
+TotalConstructionEmissionsAndWaste = addvars(TotalConstructionEmissionsAndWaste, GlobalEmission, 'Before', 7, 'NewVariableNames', 'CO2Emission_tons_Global');
 
 
 %%% Emission from mortar

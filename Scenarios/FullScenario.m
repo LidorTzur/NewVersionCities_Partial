@@ -14,6 +14,7 @@ function [EmissionsByYears,ConsumptionAmounts, Resources, WaterFromFoodCell] = F
 % - ConsumptionAmounts: Fuel, water, and material consumption.
 % - Resources: Land use, electricity, and costs.
 % - WaterFromFoodCell: Water use from food scenarios.
+ 
 
 % ------------------------------------------ COMPARE -------------------
 %% Handle optional comparison input
@@ -26,6 +27,8 @@ end
 
 %% Preperations
 
+RidesPerDay = Data.Trans_DataBase.RidesPerDay;
+Days_In_Year = Data.Days_In_Year;
 global BaseYear
 addpath("CalcFunctions");
 
@@ -46,6 +49,7 @@ Resources = cell(numel(Resources_RowNames), Years);  % Initialize the resources 
 FuelConsumption_RowNames = Data.Materials_DataBase.FuelConsumption_RowNames;
 FuelConsumption_ColNames = Data.Materials_DataBase.FuelConsumption_ColNames;
 BusCarRatio_global = Data.Trans_DataBase.BusCarRatio;
+TrainCarRatio = Data.Trans_DataBase.TrainCarRatio;
 
 % Electricity_Emissions 
 ElectricityBySources_row_names = Data.Electricity_DataBase.ElectricityBySources_row_names;
@@ -248,26 +252,32 @@ PercentageToTrains = Data.Trans_DataBase.TransitionToTrain;
 
 TransitionToBus = (1-TransitionToPublicTransportationPercentage)*PercentageToBuses;
 TransitionToTrain = (1-TransitionToPublicTransportationPercentage)*PercentageToTrains;
+% 1.+ vector to increase the km for buses
 PercentageOfBusTransportation = CalculateBusPercentages(TransitionToBus);
+%Lidor's add - 1.+ vector to increase the km for Trains
+PercentageOfTrainTransportation = CalculateTrainPercentages(TransitionToTrain);
 
 for i = 1:Years
-    TransportationConsumptionTable{2,i} = TransportationConsumptionTable{2,i}*TransitionToPublicTransportationPercentage(i);
-    TransportationConsumptionTable{1,i} = TransportationConsumptionTable{1,i}*PercentageOfBusTransportation(i);
+    % decrease in km for cars from transition to bus and train
+    TransportationConsumptionTable{2,i} = TransportationConsumptionTable{2,i}*TransitionToPublicTransportationPercentage(i); 
+    % increase the km for buses
+    TransportationConsumptionTable{1,i} = TransportationConsumptionTable{1,i}*PercentageOfBusTransportation(i); 
+    %Lidor's add
+    % increase the km for Passenger Train
+    TransportationConsumptionTable{7,i} = TransportationConsumptionTable{7,i}*PercentageOfTrainTransportation(i);
 end
 
-%%change in vehicle amounts
+%%change in vehicle amounts due to transition to train and buses
 VehicleAmountsCell = CalulateChangeInVehicleAmountsTransitionToPublicTransport(TransportationConsumptionTable, VehicleAmountsCell);
-ElectricityConsumptionEmissionsInTransportation = Data.Electricity_DataBase.ElectricityConsumptionEmissionsInTransportation;
 
+%% Transition to EV - consider the electricity and emission from it (Lidor)
+ElectricityConsumptionEmissionsInTransportation = Data.Electricity_DataBase.ElectricityConsumptionEmissionsInTransportation;
 KWHForElectricCar = zeros(1,Years);
 KWHForElectricVan = zeros(1,Years);
 KWHForElectricTruck = zeros(1,Years);
 KWHForElectricBus = zeros(1,Years);
 KMTraveledByElectricCar = zeros(1,Years);
 
-
-
-%% Transition to EV - consider the electricity and emission from it (Lidor)
 for i = 1:Years
 
     % chnging the annual travel of each regular vehicle base on the
@@ -305,14 +315,16 @@ for i = 1:Years
     [EmissionsByYears{6,i}, ConsumptionAmounts{3,i}]  = CalcTransportationManufacturing(Data, CurrentTransportatiionConsumtpion,CurrentVehicleAmount, KMTraveledByElectricCar(i));
 end
 
-for i = 1:Years
-    for j =1:width(EmissionsByYears{4,i})
-        EmissionsByYears{4,i}{2,j} = EmissionsByYears{4,i}{2,j}*(1-TransitionToTrain(i)); %% reduction in fuel amount not changed
-    end
-    for j =1:width(EmissionsByYears{5,i})
-        EmissionsByYears{5,i}{1,j} = EmissionsByYears{5,i}{1,j}*(1+(TransitionToTrain(i)*(0.0027806/2.01))); %% what is this number?
-    end
-end
+%for i = 1:Years
+    % Lidor's delete it for now
+
+    %for j =1:width(EmissionsByYears{4,i})
+        %EmissionsByYears{4,i}{2,j} = EmissionsByYears{4,i}{2,j}*(1-TransitionToTrain(i)); %% reduction in fuel amount not changed
+    %end
+    %for j =1:width(EmissionsByYears{5,i})
+        %EmissionsByYears{5,i}{1,j} = EmissionsByYears{5,i}{1,j}*(1+(TransitionToTrain(i)*(0.0027806/2.01))); %% what is this number?
+    %end
+%end
 
 %% Electricity - Consumption
 
@@ -664,6 +676,16 @@ for i = 2:Years
 end
 end
 
+function PercentageByYears = CalculateTrainPercentages(ChangeByYears)
+TrainCarRatio = Data.Trans_DataBase.TrainCarRatio;
+PercentageByYears = zeros(1,Years);
+PercentageByYears(1) = 1;
+for i = 2:Years
+    CurrentChange = (ChangeByYears(i)-ChangeByYears(i-1))*(TrainCarRatio);
+    PercentageByYears(i) = PercentageByYears(i-1) + CurrentChange;
+end
+end
+
 
 % function PercentageByYears = CalculateTrainPercentages(ChangeByYears)
 % PercentageByYears = zeros(1,Years);
@@ -671,6 +693,8 @@ end
 
 function NewVehicleAmountCell = CalulateChangeInVehicleAmountsTransitionToPublicTransport(TrasnportationConsumptionTable, VehicleAmountCell)
 % Inputs
+% Include decrease due to train and bus transitions
+
 TransRowNames = Data.Trans_DataBase.Vehicle_Amounts_RowNames;
 TransColNames = Data.Trans_DataBase.Vehicle_Amounts_ColNames;
 TransRow_Num = numel(TransRowNames);
@@ -691,14 +715,14 @@ for i=2:Years
 
     NewVehicleAmountCell{i}{:,:} = VehicleAmountCell{i}{:,:};
     NewVehicleAmountCell{i}{1,1} = ceil((TrasnportationConsumptionTable{1,i}-TrasnportationConsumptionTable{1,i-1})/KMPerBus) + NewVehicleAmountCell{i-1}{1,1};
-    NewVehicleAmountCell{i}{4,1} = NewVehicleAmountCell{i}{1,1}*RidesPerDay_global;
-    NewVehicleAmountCell{i}{5,1} = NewVehicleAmountCell{i}{4,1}*Data.Days_In_Year;
-    NewVehicleAmountCell{i}{6,1} = NewVehicleAmountCell{i}{1,1}*Data.Days_In_Year;
+    NewVehicleAmountCell{i}{4,1} = NewVehicleAmountCell{i}{1,1}*RidesPerDay;
+    NewVehicleAmountCell{i}{5,1} = NewVehicleAmountCell{i}{4,1}*Days_In_Year;
+    NewVehicleAmountCell{i}{6,1} = NewVehicleAmountCell{i}{1,1}*Days_In_Year;
 
     NewVehicleAmountCell{i}{1,2} = NewVehicleAmountCell{i-1}{1,2} - floor((TrasnportationConsumptionTable{2,i-1}-TrasnportationConsumptionTable{2,i})/KMPerCar);
-    NewVehicleAmountCell{i}{4,2} = NewVehicleAmountCell{i}{1,2}*RidesPerDay_global;
-    NewVehicleAmountCell{i}{5,2} = NewVehicleAmountCell{i}{4,2}*Data.Days_In_Year;
-    NewVehicleAmountCell{i}{6,2} = NewVehicleAmountCell{i}{1,2}*Data.Days_In_Year;
+    NewVehicleAmountCell{i}{4,2} = NewVehicleAmountCell{i}{1,2}*RidesPerDay;
+    NewVehicleAmountCell{i}{5,2} = NewVehicleAmountCell{i}{4,2}*Days_In_Year;
+    NewVehicleAmountCell{i}{6,2} = NewVehicleAmountCell{i}{1,2}*Days_In_Year;
 
     NewVehicleAmountCell{i}.Properties.VariableNames = TransColNames;
 end
@@ -713,6 +737,7 @@ TransColNum = numel(TransColNames);
 
 NewVehicleAmountCell = cell(1,Years);
 NewVehicleAmountCell{1} = VehicleAmountCell{1};
+
 KMPerCar = TrasnportationConsumptionTable{2,1}/VehicleAmountCell{1}{1,2};
 KMPerBus = TrasnportationConsumptionTable{1,1}/VehicleAmountCell{1}{1,1};
 KMPerTruck = TrasnportationConsumptionTable{5,1}/VehicleAmountCell{1}{1,5};
@@ -722,33 +747,35 @@ NewVehicleAmountCell{1} = array2table(zeros(TransRow_Num,TransColNum), 'RowNames
 NewVehicleAmountCell{1}.Properties.VariableNames = TransColNames;
 NewVehicleAmountCell{1}{:,:} = VehicleAmountCell{1}{:,:};
 
-
 for i=2:Years
     NewVehicleAmountCell{i} = array2table(zeros(TransRow_Num,TransColNum), 'RowNames', TransRowNames);
     NewVehicleAmountCell{i}{:,:} = VehicleAmountCell{i}{:,:};
     %buses
     NewVehicleAmountCell{i}{1,1} = NewVehicleAmountCell{i-1}{1,1} - floor((TrasnportationConsumptionTable{1,i-1}-TrasnportationConsumptionTable{1,i})/KMPerBus); %x
-    NewVehicleAmountCell{i}{4,1} = NewVehicleAmountCell{i}{1,1}*RidesPerDay_global; %4x
-    NewVehicleAmountCell{i}{5,1} = NewVehicleAmountCell{i}{4,1}*Data.Days_In_Year; % 4x*365
-    NewVehicleAmountCell{i}{6,1} = NewVehicleAmountCell{i}{1,1}*Data.Days_In_Year; % 365x
+    NewVehicleAmountCell{i}{4,1} = NewVehicleAmountCell{i}{1,1}*RidesPerDay; %4x
+    NewVehicleAmountCell{i}{5,1} = NewVehicleAmountCell{i}{4,1}*Days_In_Year; % 4x*365
+    NewVehicleAmountCell{i}{6,1} = NewVehicleAmountCell{i}{1,1}*Days_In_Year; % 365x
     %cars
     NewVehicleAmountCell{i}{1,2} = NewVehicleAmountCell{i-1}{1,2} - floor((TrasnportationConsumptionTable{2,i-1}-TrasnportationConsumptionTable{2,i})/KMPerCar);
-    NewVehicleAmountCell{i}{4,2} = NewVehicleAmountCell{i}{1,2}*RidesPerDay_global;
-    NewVehicleAmountCell{i}{5,2} = NewVehicleAmountCell{i}{4,2}*Data.Days_In_Year;
-    NewVehicleAmountCell{i}{6,2} = NewVehicleAmountCell{i}{1,2}*Data.Days_In_Year;
+    NewVehicleAmountCell{i}{4,2} = NewVehicleAmountCell{i}{1,2}*RidesPerDay;
+    NewVehicleAmountCell{i}{5,2} = NewVehicleAmountCell{i}{4,2}*Days_In_Year;
+    NewVehicleAmountCell{i}{6,2} = NewVehicleAmountCell{i}{1,2}*Days_In_Year;
     %trucks
     NewVehicleAmountCell{i}{1,5} = NewVehicleAmountCell{i-1}{1,5} - floor((TrasnportationConsumptionTable{5,i-1}-TrasnportationConsumptionTable{5,i})/KMPerTruck);
-    NewVehicleAmountCell{i}{4,5} = NewVehicleAmountCell{i}{1,5}*RidesPerDay_global;
-    NewVehicleAmountCell{i}{5,5} = NewVehicleAmountCell{i}{4,5}*Data.Days_In_Year;
-    NewVehicleAmountCell{i}{6,5} = NewVehicleAmountCell{i}{1,5}*Data.Days_In_Year;
+    NewVehicleAmountCell{i}{4,5} = NewVehicleAmountCell{i}{1,5}*RidesPerDay;
+    NewVehicleAmountCell{i}{5,5} = NewVehicleAmountCell{i}{4,5}*Days_In_Year;
+    NewVehicleAmountCell{i}{6,5} = NewVehicleAmountCell{i}{1,5}*Days_In_Year;
     %vans
-    NewVehicleAmountCell{i}{1,6} = ceil(NewVehicleAmountCell{i-1}{1,6} - ((TrasnportationConsumptionTable{6,i-1}-TrasnportationConsumptionTable{6,i})/KMPerVan));
-    NewVehicleAmountCell{i}{4,6} = NewVehicleAmountCell{i}{1,6}*RidesPerDay_global;
-    NewVehicleAmountCell{i}{5,6} = NewVehicleAmountCell{i}{4,6}*Data.Days_In_Year;
-    NewVehicleAmountCell{i}{6,6} = NewVehicleAmountCell{i}{1,6}*Data.Days_In_Year;
+    NewVehicleAmountCell{i}{1,6} = (NewVehicleAmountCell{i-1}{1,6} - floor((TrasnportationConsumptionTable{6,i-1}-TrasnportationConsumptionTable{6,i})/KMPerVan));
+    NewVehicleAmountCell{i}{4,6} = NewVehicleAmountCell{i}{1,6}*RidesPerDay;
+    NewVehicleAmountCell{i}{5,6} = NewVehicleAmountCell{i}{4,6}*Days_In_Year;
+    NewVehicleAmountCell{i}{6,6} = NewVehicleAmountCell{i}{1,6}*Days_In_Year;
 
     NewVehicleAmountCell{i}.Properties.VariableNames = TransColNames;
+    %disp(i);
+    %disp(NewVehicleAmountCell{i});
 end
+%disp(NewVehicleAmountCell{1});
 end
 
 clear fuel_LPG_coeff  fuel_MTOE_coeff Crude_Oil_To_Electricity ElectricityBySources_row_names
