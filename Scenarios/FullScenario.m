@@ -564,8 +564,8 @@ temp_row_num2 = find(strcmpi(Resources_RowNames, 'Cumulative Area For Constructi
 
 InitBuiltArea = Data.Const_DataBase.TotalBuiltArea; % The initial built Area in the Base year
 
-Resources{temp_row_num,1} = 0; % For the first year
-Resources{temp_row_num2,1} = InitBuiltArea; % For the first year
+Resources{temp_row_num,1} = ConstructionFootprintTable{height(ConstructionFootprintTable),2}; % For the first year- we took the delta of the 2020 year
+Resources{temp_row_num2,1} = Resources{temp_row_num,1}; % For the first year
 
 for i = 2:Years
     if (orderIndex == 2 && ConstructionFootprintTable{height(ConstructionFootprintTable),1} ~= ConstructionFootprintTable{height(ConstructionFootprintTable),width(ConstructionFootprintTable)}) || orderIndex ~= 2

@@ -33,7 +33,7 @@
         %Lidor's addition (for the construction that we changed
         UpDownStreamEmissions{7,i} = sum(EmissionsByYears{7,i}{1,1}{1:11,6})/1000000;
         % Construction - Global: sum rows 1-11, column 2
-        UpDownStreamEmissions{8,i} = sum(EmissionsByYears{7,i}{1,1}{1:11,2})/1000000;
+        UpDownStreamEmissions{8,i} = sum(EmissionsByYears{7,i}{1,1}{1:11,7})/1000000;
 
         % Water - Local: sum two water-related sources
         UpDownStreamEmissions{9,i} = (EmissionsByYears{10,i}{1,1}{1,2} + EmissionsByYears{2,i}{1,1}{6,9})/1000000;

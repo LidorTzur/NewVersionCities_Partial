@@ -267,27 +267,33 @@ Data.Water_DataBase = WDB;
 ConstructionTable = Data.Const_DataBase.ConstructionTable;
 ConstructionTable_numRows = height(ConstructionTable) - 1;
 ConstructionInitialization = ConstructionTable{1:ConstructionTable_numRows,1};
+
 % Lidor's addition
 ConstructionFootprintTable = Data.Const_DataBase.ConstructionFootprintTable;
 ConstructionFootprint_numRows = height(ConstructionFootprintTable) - 1;
 ConstructionFootprintInitialization = ConstructionFootprintTable{1:ConstructionFootprint_numRows,1};
 
-for i=2:Years
-    % subtraction the last year from the third year
-    if i>2
-        Does_Reduce_Last_Year = 1;
-    else
-        Does_Reduce_Last_Year = 0;
-    end
+ for i=2:Years
+%     % subtraction the last year from the third year
+%     if i>2
+%         Does_Reduce_Last_Year = 1;
+%     else
+%         Does_Reduce_Last_Year = 0;
+%     end
 
-    ConstructionTable{1:ConstructionTable_numRows, i} = (ScenariosTable{1,i}*ConstructionInitialization) - ConstructionInitialization - (Does_Reduce_Last_Year*ConstructionTable{1:ConstructionTable_numRows, i-1});
+    %ConstructionTable{1:ConstructionTable_numRows, i} = (ScenariosTable{1,i}*ConstructionInitialization) - ConstructionInitialization - (Does_Reduce_Last_Year*ConstructionTable{1:ConstructionTable_numRows, i-1});
+    ConstructionTable{1:ConstructionTable_numRows, i} = (ScenariosTable{1,i}*ConstructionInitialization) - (sum(ConstructionTable{1:ConstructionTable_numRows, 1:i-1}, 2));
     ConstructionTable{ConstructionTable_numRows+1, i} = sum(ConstructionTable{1:ConstructionTable_numRows, i});
 
     % Lidor's addition
-    ConstructionFootprintTable{1:ConstructionFootprint_numRows, i} = (ScenariosTable{1,i}*ConstructionFootprintInitialization) - ConstructionFootprintInitialization - (Does_Reduce_Last_Year*ConstructionFootprintTable{1:ConstructionFootprint_numRows, i-1});
+    %ConstructionFootprintTable{1:ConstructionFootprint_numRows, i} = (ScenariosTable{1,i}*ConstructionFootprintInitialization) - ConstructionFootprintInitialization - (Does_Reduce_Last_Year*ConstructionFootprintTable{1:ConstructionFootprint_numRows, i-1});
+    ConstructionFootprintTable{1:ConstructionFootprint_numRows, i} = (ScenariosTable{1,i}*ConstructionFootprintInitialization) - sum(ConstructionFootprintTable{1:ConstructionFootprint_numRows, 1:i-1}, 2);
     ConstructionFootprintTable{ConstructionFootprint_numRows+1, i} = sum(ConstructionFootprintTable{1:ConstructionFootprint_numRows, i});
 
-end
+ end
+ % Take for the base year 2019 the 2020 delta
+ ConstructionTable{1:ConstructionTable_numRows, 1} = ConstructionTable{1:ConstructionTable_numRows, 2};
+ ConstructionFootprintTable{1:ConstructionFootprint_numRows, 1} = ConstructionFootprintTable{1:ConstructionFootprint_numRows, 2};
 
 %% Materials - generated waste and recycling
 RowNames = {'Organic Products','Plastic', 'Paper', 'Cardboard', 'Diapers', 'Garden Waste', 'Textile', 'Metal', 'Glass', 'Pruned Trees','Wood', 'Oils', 'Others'};
