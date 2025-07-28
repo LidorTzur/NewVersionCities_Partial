@@ -34,10 +34,10 @@ addpath("CalcFunctions");
 
 %% Initialize the Results calculated data-base
 % Initialize the row names
-Emission_RowNames = {'Food', 'Electricity - Direct', 'Electricity - Indirect', 'Transportation - Direct', 'Train Emissions','Transportation - Indirect', 'Construction', 'Consumption Emissions' ,'Fuel for Industry', 'Sewege Treatment'}; %, 'Water from food'
-consumption_RowNames = {'Water', 'Fuels For Electriciy Manufacturing', 'Fuels For Transportation Amounts', 'Materials For Construction', 'Fuels For Energy Industry'};
+Emission_RowNames = {'Food (Ton ECo2)', 'Electricity - Direct (Ton ECo2)', 'Electricity - Indirect (Ton ECo2)', 'Transportation - Direct (Ton ECo2)', 'Train Emissions (Ton ECo2)','Transportation - Indirect (Ton ECo2)', 'Construction (Ton ECo2)', 'Consumption Emissions' ,'Fuel for Industry (Ton ECo2)', 'Sewege Treatment'}; %, 'Water from food'
+consumption_RowNames = {'Water (10^6*m^3)', 'Fuels For Electriciy Manufacturing (Ton)', 'Fuels For Transportation Amounts (Ton)', 'Materials For Construction (Ton)', 'Fuels For Energy Industry (Ton)'};
 %Resources_RowNames = {'Area For Electricity', 'Cumulative Area','Area For Food', 'Operating Costs', 'Setting Costs', 'Fuels Costs', 'Cost Of Area For PV','Area For Construction'};
-Resources_RowNames = {'Area For Electricity', 'Cumulative Area For Electricity','Area For Food', 'Operating Costs', 'Setting Costs', 'Fuels Costs', 'Cost Of Area For PV', 'Area For Construction', 'Cumulative Area For Construction'};
+Resources_RowNames = {'Area For Electricity (Km^2)', 'Cumulative Area For Electricity (Km^2)','Area For Food (Km^2)', 'Operating Costs', 'Setting Costs', 'Fuels Costs', 'Cost Of Area For PV', 'Area For Construction (Km^2)', 'Cumulative Area For Construction (Km^2)'};
 
 % Initialize the final tables
 EmissionsByYears = cell(numel(Emission_RowNames),Years);  % Initialize the emissions table for each year
@@ -110,8 +110,8 @@ end
 % Loop over each year and calculate the fuel consumption and emissions
 % For industry Fuels (Materials)
 
-temp_row_num = find(strcmpi(consumption_RowNames, 'Fuels For Energy Industry'));
-temp_row_num_2 = find(strcmpi(Emission_RowNames, 'Fuel for Industry'));
+temp_row_num = find(strcmpi(consumption_RowNames, 'Fuels For Energy Industry (Ton)'));
+temp_row_num_2 = find(strcmpi(Emission_RowNames, 'Fuel for Industry (Ton ECo2)'));
 for i=1:Years 
    ConsumptionAmounts{temp_row_num,i} = array2table(AmountsOfFuelsCells{1,i}{4:6,:},'RowNames', FuelConsumption_RowNames,'VariableNames',FuelConsumption_ColNames); % data transfer
    EmissionsByYears{temp_row_num_2,i} = array2table(ConsumptionAmounts{5,i}{:,:}); % Creating a table within the emissions table
@@ -180,7 +180,7 @@ for i = 1:Years
     % Compute emissions from food consumption based on the updated values
     EmissionsFromFood = CalcCo2eFromFoodConsumption(Data, CurrentFoodConsumption, OrganicWasteCell{i});    
     % Store the emissions in the corresponding year
-    temp_row_num = find(strcmpi(Emission_RowNames, 'Food'));
+    temp_row_num = find(strcmpi(Emission_RowNames, 'Food (Ton ECo2)'));
     EmissionsByYears{temp_row_num,i} = EmissionsFromFood;   
     % Update the food consumption table after applying the modifications
     FoodConsumptionCell{i} = CurrentFoodConsumption;
@@ -202,8 +202,7 @@ for i = 1:Years
     EmissionsByYears{temp_row_num,i} = EmmisionsFromSewegeTreatment;
 end
 
-%% { change in diselinated water consumption - scenario 3  - not useful, need to be change
-
+%%  change in diselinated water consumption - scenario 3  - old- now we calculate it by the needs
 %{
 for i =1:Years
     DiselinatedWaterConsumption = WaterConsumptionCell{i}{:,2};
@@ -214,7 +213,7 @@ end ConsumptionAmounts{1
 
 
 % water saving - scenario 19
-temp_row_num = find(strcmpi(consumption_RowNames, 'Water'));
+temp_row_num = find(strcmpi(consumption_RowNames, 'Water (10^6*m^3)'));
 for i=1:Years
     % WaterConsumptionCell is calculated by ConsumptionChanges(),based on population growth only.
     % updates the tables of water consumption based on savings precentage per year.
@@ -506,15 +505,15 @@ for i = 1:Years
     TotalArea = sum(AreaForElectricity{1,:}) + TotalArea;
 
     % Insert the results to the final Resource table
-    temp_row_num = find(strcmpi(Resources_RowNames, 'Area For Electricity'));
+    temp_row_num = find(strcmpi(Resources_RowNames, 'Area For Electricity (Km^2)'));
     Resources{temp_row_num,i} = AreaForElectricity; 
-    temp_row_num = find(strcmpi(Resources_RowNames, 'Cumulative Area For Electricity'));
+    temp_row_num = find(strcmpi(Resources_RowNames, 'Cumulative Area For Electricity (Km^2)'));
     Resources{temp_row_num,i} = TotalArea;
 end
 
 
 % Area for food
-temp_row_num = find(strcmpi(Resources_RowNames, 'Area For Food'));
+temp_row_num = find(strcmpi(Resources_RowNames, 'Area For Food (Km^2)'));
 for i = 1:Years
     CurrentAreaForFood = CalcAreaForFoodConsumption(FoodConsumptionCell{i},  Data.Food_DataBase.AreaForFoodCoefficients);
     CurrentAreaForFood{:,:} = CurrentAreaForFood{:,:}/1000;%% 1000m^2 ----- 1000m^2/1000000 = 0.001 m^2 = km^2
@@ -559,8 +558,8 @@ end
 
 
 % Construction area 
-temp_row_num = find(strcmpi(Resources_RowNames, 'Area For Construction')); % Find the match row for contruction
-temp_row_num2 = find(strcmpi(Resources_RowNames, 'Cumulative Area For Construction')); 
+temp_row_num = find(strcmpi(Resources_RowNames, 'Area For Construction (Km^2)')); % Find the match row for contruction
+temp_row_num2 = find(strcmpi(Resources_RowNames, 'Cumulative Area For Construction (Km^2)')); 
 
 InitBuiltArea = Data.Const_DataBase.TotalBuiltArea; % The initial built Area in the Base year
 

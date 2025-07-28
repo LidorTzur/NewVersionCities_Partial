@@ -277,7 +277,7 @@ WDB.WaterConsumptionCell{1} = array2table(zeros(1,numel(WDB.water_Names)), 'Vari
 % Load all the constant values
 % Agriculture_water
 WDB.AgriculturePerCapitaFactor_water = readmatrix('Data.xlsx', 'Sheet','WaterNew','Range','D20:D20');
-WDB.AgriculturePerCapitaFactor_water_Not_Base_Year = readmatrix('Data.xlsx', 'Sheet','WaterNew','Range','D21:D21');
+%WDB.AgriculturePerCapitaFactor_water_Not_Base_Year = readmatrix('Data.xlsx', 'Sheet','WaterNew','Range','D21:D21');
 WDB.AgriculturePerCapitaOffset_water = readmatrix('Data.xlsx', 'Sheet','WaterNew','Range','D22:D22');
 WDB.AgricultureBaseYear_water = readmatrix('Data.xlsx', 'Sheet','WaterNew','Range','D19:D19');
 
@@ -287,6 +287,8 @@ WDB.FreshWaterForAgriculture   = readmatrix('Data.xlsx', 'Sheet','WaterNew','Ran
 WDB.FreshWaterForDomestic      = readmatrix('Data.xlsx', 'Sheet','WaterNew','Range','C31:C31');
 WDB.LossRatio                  = 1 + readmatrix('Data.xlsx', 'Sheet','WaterNew','Range','B22:B22');
 WDB.ChangeDrillingWater        = readmatrix('Data.xlsx', 'Sheet','WaterNew','Range','B23:B23');
+% Calculate the yeasrly Change in drilling water (25% less until 2050)
+WDB.Yearly_ChangeDrillingWater = WDB.ChangeDrillingWater^(1/Years);
 WDB.ReclaimedRatio             = readmatrix('Data.xlsx', 'Sheet','WaterNew','Range','B24:B24'); 
 WDB.BrackishAmount             = readmatrix('Data.xlsx', 'Sheet','WaterNew','Range','B25:B25');
 WDB.DesalinatedFormula         = readcell('Data.xlsx', 'Sheet','WaterNew','Range','B26:B26'); 

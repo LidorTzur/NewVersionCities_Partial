@@ -29,7 +29,7 @@ palestinians_base_pop_global = double(0);
 %% Food
 % meat rows in the excel
 meatRows = [53, 54, 55, 56, 57, 59, 60, 61];
-WaterFromFoodCategories = {'Local Water For Humans','Local Water For Animals', 'Global Water For Humans', 'Global Water For Animals'};
+WaterFromFoodCategories = {'Local Water For Humans (m^3)','Local Water For Animals (m^3)', 'Global Water For Humans (m^3)', 'Global Water For Animals (m^3)'};
 
 % PV Data
 % The maximum theoretical efficiency of a solar cell using a single p-n junction to collect power from the cell where the only loss mechanism is radiative recombination in the solar cell.

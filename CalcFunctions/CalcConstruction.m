@@ -11,6 +11,12 @@ function [MaterialConsumption, TotalConstructionEmissionsAndWaste] = CalcConstru
 %   MaterialConsumption              - Table with total material use (tons) by construction sector and material type.
 %   TotalConstructionEmissionsAndWaste - Table with emissions and waste (e.g., CO2, NOX, mining waste) by sector.
 
+
+disp('--- CurrentYearConstruction ---')
+disp(class(CurrentYearConstruction))
+disp(size(CurrentYearConstruction))
+disp(CurrentYearConstruction)
+
 %% Inputs
 
 EmissionCoefficients = Data.Const_DataBase.CostructionEmissionCoefficients;
@@ -40,17 +46,20 @@ MaterialConsumption = array2table(zeros(numel(RowNames),numel(ColNames)), 'RowNa
 % Lidor's addition
 % Calculate the Ratio between the all area to the floor area to get thr avg number of floors - to match the materials coefficient properly
 Ratio = CurrentYearConstruction ./ CurrentConstructionFootprint;
-isHighDensity = Ratio > 3;
+Ratio(CurrentConstructionFootprint == 0) = Inf;
+isHighDensity = Ratio > 2;
 Categories_to_run = height(MaterialConsumption)-3;
 
 for i=1:width(MaterialConsumption) %%1-7 Materials
     for j = 1:Categories_to_run %%1-9 - construction categories
         if isHighDensity(j)
+            %disp(size(ConstructionMaterialCoefficients_HighDensity) );
             coeff = ConstructionMaterialCoefficients_HighDensity(i);
         else
             coeff = ConstructionMaterialCoefficients_LowDensity(i);
         end
         MaterialConsumption{j,i} = CurrentYearConstruction(j) * coeff; % tons of materials
+
         %MaterialConsumption{j,i} = CurrentYearConstruction(j)*MaterialCoefficients(i); % tons of materials
     end
     % Lidor: Enter the residential Data (separate from the rest)
@@ -73,7 +82,7 @@ TotalConstructionEmissionsAndWaste = array2table(zeros(numel(RowNames),numel(Col
 % Fill the table
 for i = 1:width(TotalConstructionEmissionsAndWaste) %% 1-4
     for j = 1:height(TotalConstructionEmissionsAndWaste) %% 1-12
-        TotalConstructionEmissionsAndWaste{j,i} = EmissionCoefficients(i)*sum(MaterialConsumption{j, :}); % million tons  
+        TotalConstructionEmissionsAndWaste{j,i} = EmissionCoefficients(i)*sum(MaterialConsumption{j, :}); %  tons  eco2
     end
 end
 

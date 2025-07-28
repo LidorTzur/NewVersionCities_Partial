@@ -178,7 +178,7 @@ for i =1:Years
    
    % Drilling Water to all the other years
    if i>1   % means that is not in the Base year
-       waterData{'Drilling Water',i} = waterData{'Drilling Water',i-1}*WDB.AgriculturePerCapitaFactor_water_Not_Base_Year;
+       waterData{'Drilling Water',i} = waterData{'Drilling Water',i-1}*WDB.Yearly_ChangeDrillingWater;
        
        if i==2022-BaseYear+1 % Adjustment to the water model data for 2022, until all the data in the software is updated
             waterData{'Drilling Water',i} = WDB.WaterConsumptionTableNew{'Drilling Water', '2022'};
@@ -321,7 +321,7 @@ end
 
 %% Amounts of Fuels (for industry) - Tons
 RowNames = {'Crude Oil Products - Not for Energy', 'Crude Oil For Export', 'Crude Oil Import', 'Crude Oil Products - For Energy', 'LPG - Home', 'LPG - Commertiel' };
-ColNames = {'Naptha', 'Mazut','Diesel','Kerosene','Gasoline','Liquified Petroleum Gas', 'Other'};
+ColNames = {'Naptha', 'Diesel','Mazut','Kerosene','Gasoline','Liquified Petroleum Gas', 'Other'};
 AmountsOfFuelsCells = Data.Materials_DataBase.AmountsOfFuelsCells;
 
 % Crude Oil Products - For Energy

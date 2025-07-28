@@ -7,7 +7,7 @@ function [Area, Costs, Water] = CalcTotalResources(Resources, ConsumptionAmounts
    % Set row labels for each table
     Area_RowNames = {'Electricity- Local', 'Food - Local', 'Food - Gloabl', 'Construction - Local', 'Total'};
     Costs_RowNames = {'Operating Costs', 'Setting Costs', 'Fuels Costs', 'Cost of Area for PV', 'Total'};
-    Water_RowNames = {'Ground Water', 'Desalinated Water', 'Brackish & Reservoirs Water', 'Treated Wastewater', 'Global Water'};
+    Water_RowNames = {'Ground Water', 'Desalinated Water', 'Brackish & Reservoirs Water', 'Treated Wastewater', 'Global Water', 'Total Local Water'};
 
     % Initialize output tables for Area (m²), Costs (billion currency units), and Water (million m³)
     Area = array2table(zeros(numel(Area_RowNames),width(Resources)));
