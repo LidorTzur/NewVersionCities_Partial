@@ -12,10 +12,10 @@ function [MaterialConsumption, TotalConstructionEmissionsAndWaste] = CalcConstru
 %   TotalConstructionEmissionsAndWaste - Table with emissions and waste (e.g., CO2, NOX, mining waste) by sector.
 
 
-disp('--- CurrentYearConstruction ---')
-disp(class(CurrentYearConstruction))
-disp(size(CurrentYearConstruction))
-disp(CurrentYearConstruction)
+% disp('--- CurrentYearConstruction ---')
+% disp(class(CurrentYearConstruction))
+% disp(size(CurrentYearConstruction))
+% disp(CurrentYearConstruction)
 
 %% Inputs
 

@@ -3,7 +3,6 @@
 %% Read Files  - needs to convert to function
 addpath("Scenarios");
 addpath("CalcFunctions");
-%addpath("UI");
 addpath("Data");
 
 %% Create the DataBase

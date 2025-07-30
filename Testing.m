@@ -1,1 +1,6 @@
-[EmissionsByYearsTest1, ConsumptionAmounts1, Resources1, WaterFromFood1] = FullScenario(DataBase, FullScenariosTable1,Years,population,orderIndex,0);
+% ResultsDataBase.TotalResults.Properties
+% head(ResultsDataBase.TotalResults)
+% ResultsDataBase.TotalResults(:,1)
+%writetable(ResultsDataBase.TotalResults, 'TotalResults.xlsx', 'WriteRowNames', true)
+ writetable(ResultsDataBase.TotalResults, 'C:\Users\צור\Documents\תואר שני\תזה\קיימות ערים\באר שבע\השוואה למודל הארצי\TotalResults.xlsx', ...
+     'WriteRowNames', true)
