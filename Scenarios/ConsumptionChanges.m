@@ -274,12 +274,6 @@ ConstructionFootprint_numRows = height(ConstructionFootprintTable) - 1;
 ConstructionFootprintInitialization = ConstructionFootprintTable{1:ConstructionFootprint_numRows,1};
 
  for i=2:Years
-%     % subtraction the last year from the third year
-%     if i>2
-%         Does_Reduce_Last_Year = 1;
-%     else
-%         Does_Reduce_Last_Year = 0;
-%     end
 
     %ConstructionTable{1:ConstructionTable_numRows, i} = (ScenariosTable{1,i}*ConstructionInitialization) - ConstructionInitialization - (Does_Reduce_Last_Year*ConstructionTable{1:ConstructionTable_numRows, i-1});
     ConstructionTable{1:ConstructionTable_numRows, i} = (ScenariosTable{1,i}*ConstructionInitialization) - (sum(ConstructionTable{1:ConstructionTable_numRows, 1:i-1}, 2));

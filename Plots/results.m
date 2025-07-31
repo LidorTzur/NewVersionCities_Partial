@@ -71,12 +71,12 @@ colors4Cost = [
 
 
 %% 1. Main graph - For the first base year
-Order = {'2019 - Base Year'};
+Order = {'BAU'};
 x = categorical(Order);
 x = reordercats(x, Order);
 
 figure;
-t = tiledlayout(1,4);
+t = tiledlayout(1,3);
 
 nexttile
 plotStackedBar('Emissions', NoPolicy{1:11,1}, colors1Em, NoPolicy.Properties.RowNames(1:11), 'MtCO2Eq', {'Base Year'});
@@ -84,20 +84,21 @@ nexttile
 plotStackedBar('Area', AreaSum1{1:4,1}, colors2Area, AreaSum1.Properties.RowNames(1:4), 'km^2', {'Base Year'});
 nexttile
 plotStackedBar('Water', WaterSum1{1:5,1}, colors3Water, WaterSum1.Properties.RowNames(1:5), 'Million m^3', {'Base Year'});
-nexttile
-plotStackedBar('Cost', CostsSum1{1:4,1}, colors4Cost, CostsSum1.Properties.RowNames(1:4), 'Billion ILS', {'Base Year'});
+% nexttile
+% plotStackedBar('Cost- 2019', CostsSum1{1:4,1}, colors4Cost, CostsSum1.Properties.RowNames(1:4), 'Billion ILS', {'Base Year'});
+title(t, 'Emissions, Area, and Water for Base Year - 2019', 'FontSize', 20, 'FontWeight', 'bold');
 
 
 
 %% 2. emissions-area-water-base year to Target year *****
 % To be used after selecting "all steps together" 
 
-Order = {'Base Year','No Policy - 2050', 'Moderate - 2050', 'Advanced - 2050'};
-x = categorical({'Base Year','No Policy - 2050', 'Moderate - 2050', 'Advanced - 2050'});
+Order = {'2019','No Policy (2050)', 'Moderate (2050)', 'Advanced (2050)'};
+x = categorical({'2019','No Policy (2050)', 'Moderate (2050)', 'Advanced (2050)'});
 x = reordercats(x, Order);
 
 figure;
-t = tiledlayout(1,4);
+t = tiledlayout(1,3);
 
 % Emissions
 nexttile
@@ -114,67 +115,69 @@ nexttile
 dataWater = [WaterSum1{1:5,1}, WaterSum1{1:5,Years}, WaterSum2{1:5,Years}, WaterSum3{1:5,Years}];
 plotStackedBar('Water', dataWater, colors3Water, WaterSum3.Properties.RowNames(1:5), 'Million m^3', Order);
 
-% Costs
-nexttile
-dataCost = [CostsSum1{1:4,1}, CostsSum1{1:4,Years}, CostsSum2{1:4,Years}, CostsSum3{1:4,Years}];
-plotStackedBar('Costs', dataCost, colors4Cost, CostsSum3.Properties.RowNames(1:4), 'Billion ILS', Order);
+% % Costs
+% nexttile
+% dataCost = [CostsSum1{1:4,1}, CostsSum1{1:4,Years}, CostsSum2{1:4,Years}, CostsSum3{1:4,Years}];
+% plotStackedBar('Costs', dataCost, colors4Cost, CostsSum3.Properties.RowNames(1:4), 'Billion ILS', Order);
+title(t, 'Compare Emissions, Area, and Water for 2019 VS 2050', 'FontSize', 20, 'FontWeight', 'bold');
 
 
 
-%% 3. emissions-area-water: base year to 2035 with specific scenario
-% To be used after selecting "all steps together" (FOR 2035!) - index 7
-
-% % Arranging the data and building the graph
-% colors1Em = [
-%     0.902, 0.373, 0.145; % electricity - L
-%     0.6353, 0.0824, 0.1843
-%     0.949, 0.737, 0.239;  % transportaion - L
-%     0.7098, 0.5333, 0.1765
-%     0.784, 0.910, 0.690; % food - L 
-%     0.4314, 0.6196, 0.4627
-%     0.871, 0.761, 0.941; % construction - L 
-%     0.4941, 0.3490, 0.6039
-%     0.302, 0.749, 0.929; % water - L
-%     0.0039, 0.4471, 0.7451
-%     0.361, 0.325, 0.325; % fuels - L
-% ];
+% %% 3. emissions-area-water: base year to 2035 with specific scenario
+% % To be used after selecting "all steps together" (FOR 2035!) - index 7
 % 
-% colors2Area = [
-%     0.4314, 0.6196, 0.4627;
-%     0.7961, 0.8863, 0.6667; 
-%     0.7843, 0.5961, 0.6824; 
-%     0.8510, 0.3216, 0.0941;
-% ];
+% % % Arranging the data and building the graph
+% % colors1Em = [
+% %     0.902, 0.373, 0.145; % electricity - L
+% %     0.6353, 0.0824, 0.1843
+% %     0.949, 0.737, 0.239;  % transportaion - L
+% %     0.7098, 0.5333, 0.1765
+% %     0.784, 0.910, 0.690; % food - L 
+% %     0.4314, 0.6196, 0.4627
+% %     0.871, 0.761, 0.941; % construction - L 
+% %     0.4941, 0.3490, 0.6039
+% %     0.302, 0.749, 0.929; % water - L
+% %     0.0039, 0.4471, 0.7451
+% %     0.361, 0.325, 0.325; % fuels - L
+% % ];
+% % 
+% % colors2Area = [
+% %     0.4314, 0.6196, 0.4627;
+% %     0.7961, 0.8863, 0.6667; 
+% %     0.7843, 0.5961, 0.6824; 
+% %     0.8510, 0.3216, 0.0941;
+% % ];
+% % 
+% % colors3Water = [
+% %     24/255, 80/255, 129/255; 
+% %     0.0039, 0.4471, 0.7451;
+% %     0.4627, 0.7216, 0.8902;    
+% %     0.9176, 0.9255, 0.9216;        
+% %     0.3608, 0.4667, 0.5098;   
+% %     ];
 % 
-% colors3Water = [
-%     24/255, 80/255, 129/255; 
-%     0.0039, 0.4471, 0.7451;
-%     0.4627, 0.7216, 0.8902;    
-%     0.9176, 0.9255, 0.9216;        
-%     0.3608, 0.4667, 0.5098;   
-%     ];
-
-Order = {'Base Year','No Policy - 2035', 'Chosen Scenario - 2035'};
-x = categorical({'Base Year','No Policy - 2035', 'Chosen Scenario - 2035'});
-x = reordercats(x, Order);
-
-figure;
-t = tiledlayout(1,3);
-
-% Tile 1 – Emission
-nexttile
-dataEm = [NoPolicy{1:11,1}, NoPolicy{1:11,Middle_Year}, Scenario2{1:11,Middle_Year}];
-plotStackedBar('Emissions', dataEm, colors1Em, NoPolicy.Properties.RowNames(1:11), 'MtCO2Eq', Order);
-
-% Tile 2 – Area
-nexttile
-dataArea = [AreaSum1{1:4,1}, AreaSum1{1:4,Middle_Year}, AreaSum3{1:4,Middle_Year}];
-plotStackedBar('Area', dataArea, colors2Area, AreaSum3.Properties.RowNames(1:4), 'km^2', Order);
-
-% Tile 3 – Water
-nexttile
-dataWater = [WaterSum1{1:5,1}, WaterSum1{1:5,Middle_Year}, WaterSum3{1:5, Middle_Year}];
-plotStackedBar('Water', dataWater, colors3Water, WaterSum3.Properties.RowNames(1:5), 'Million m^3', Order);
+% Order = {'Base Year','No Policy (2035)', 'Chosen Scenario (2035)'};
+% x = categorical({'Base Year','No Policy (2035)', 'Chosen Scenario (2035)'});
+% x = reordercats(x, Order);
+% 
+% figure;
+% t = tiledlayout(1,3);
+% 
+% % Tile 1 – Emission
+% nexttile
+% dataEm = [NoPolicy{1:11,1}, NoPolicy{1:11,Middle_Year}, Scenario2{1:11,Middle_Year}];
+% plotStackedBar('Emissions', dataEm, colors1Em, NoPolicy.Properties.RowNames(1:11), 'MtCO2Eq', Order);
+% 
+% % Tile 2 – Area
+% nexttile
+% dataArea = [AreaSum1{1:4,1}, AreaSum1{1:4,Middle_Year}, AreaSum3{1:4,Middle_Year}];
+% plotStackedBar('Area', dataArea, colors2Area, AreaSum3.Properties.RowNames(1:4), 'km^2', Order);
+% 
+% % Tile 3 – Water
+% nexttile
+% dataWater = [WaterSum1{1:5,1}, WaterSum1{1:5,Middle_Year}, WaterSum3{1:5, Middle_Year}];
+% plotStackedBar('Water', dataWater, colors3Water, WaterSum3.Properties.RowNames(1:5), 'Million m^3', Order);
+% title(t, 'Compare Emissions, Area, and Water for 2019 VS 2035', 'FontSize', 20, 'FontWeight', 'bold');
 
 
 
@@ -327,6 +330,15 @@ ResultsDataBase = RDB;
 
 
 function plotStackedBar(tileTitle, dataMat, colors, rowLabels, ylabelText, Order)
+    % % סדר לפי סכום כל שורה
+    % rowSums = sum(dataMat, 2);                     % סכום לכל שורה (קטגוריה)
+    % [~, sortIdx] = sort(rowSums, 'descend');       % כדי שגדול יהיה בתחתית
+    % 
+    % % מיין את הנתונים לפי הסדר
+    % dataMat = dataMat(sortIdx, :);
+    % rowLabels = rowLabels(sortIdx);
+    % colors = colors(sortIdx, :);    
+
     y = dataMat';
     x = categorical(Order);
     x = reordercats(x, Order);
@@ -337,11 +349,11 @@ function plotStackedBar(tileTitle, dataMat, colors, rowLabels, ylabelText, Order
     end
     
     title(tileTitle, 'FontSize', 14);
-    xlabel('Scenarios', 'FontSize', 14);
+    xlabel('Scenarios', 'FontSize', 12);
     ylabel(ylabelText, 'FontSize', 12);
     xticklabels(Order);
-    xtickangle(14);
-    legend(flip(b), flip(rowLabels), 'FontSize', 7, 'Location', 'northwest');
+    xtickangle(16);
+    legend(flip(b), flip(rowLabels), 'FontSize', 7, 'FontWeight', 'bold', 'Location', 'southoutside', 'NumColumns', 2);
 end
 
 clear ans AreaSum1 AreaSum2 AreaSum3 b colors3Water colors2Area colors1Em colors4Cost

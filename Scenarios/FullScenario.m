@@ -478,20 +478,17 @@ else
     RenewableDistribution = Data.Area_DataBase.AreaDistribution.DualPV;
 end  
 
-% Electricity Installed Power
-DeltaKW = array2table(zeros(7,Years)); %% the difference in installed KW for the setting costs
+% Electricity Installed Power - the difference in installed KW 
+DeltaKW = array2table(zeros(7,Years)); 
 DeltaKW{:,1} = KWForElectricity{:,1};
 for i = 2:Years
-    DeltaKW{:,i} =  KWForElectricity{:,i} - KWForElectricity{:,i-1};
-    %{
-    for j = 1:height(DeltaKW)
-        if (DeltaKW{j,i}) < 0
-            DeltaKW{j,i} = 0;
-        end
-    end  
-    %}
+    %DeltaKW{:,i} =  KWForElectricity{:,i} - KWForElectricity{:,i-1};
+    % for j = 1:height(DeltaKW)
+    %     if (DeltaKW{j,i}) < 0
+    %         DeltaKW{j,i} = 0;
+    %     end
+    % end  
 end
-
 
 DeltaKW.Properties.RowNames = Renewable_Electricity_row_names;
 DeltaKW.Properties.VariableNames = YearsStringsForColNames;
@@ -500,10 +497,9 @@ TotalArea = 0;
 for i = 1:Years
     CurrentAreaCoefficient = Data.Area_DataBase.AreaForSolarEnergyCoefficients{i,:}; % AreaForSolarEnergyCoefficients need a re-name
     AreaForElectricity = CalcAreaForElectricity(Data, DeltaKW{:,i}, CurrentAreaCoefficient, RenewableDistribution, Data.Area_DataBase.AreaDistribution{:,3});
-    %AreaForElectricity = CalcAreaForElectricity(Data, KWForElectricity{:,i}, CurrentAreaCoefficient, RenewableDistribution, Data.Area_DataBase.AreaDistribution{:,3});
     AreaForElectricity{:,:} = AreaForElectricity{:,:}/1000;%% km^2
     TotalArea = sum(AreaForElectricity{1,:}) + TotalArea;
-
+    
     % Insert the results to the final Resource table
     temp_row_num = find(strcmpi(Resources_RowNames, 'Area For Electricity (Km^2)'));
     Resources{temp_row_num,i} = AreaForElectricity; 
@@ -518,6 +514,41 @@ for i = 1:Years
     CurrentAreaForFood = CalcAreaForFoodConsumption(FoodConsumptionCell{i},  Data.Food_DataBase.AreaForFoodCoefficients);
     CurrentAreaForFood{:,:} = CurrentAreaForFood{:,:}/1000;%% 1000m^2 ----- 1000m^2/1000000 = 0.001 m^2 = km^2
     Resources{temp_row_num,i} = CurrentAreaForFood; 
+end
+
+% Construction area 
+temp_row_num = find(strcmpi(Resources_RowNames, 'Area For Construction (Km^2)')); % Find the match row for contruction
+temp_row_num2 = find(strcmpi(Resources_RowNames, 'Cumulative Area For Construction (Km^2)')); 
+
+InitBuiltArea = Data.Const_DataBase.TotalBuiltArea; % The initial built Area in the Base year
+
+Resources{temp_row_num,1} = ConstructionFootprintTable{height(ConstructionFootprintTable),2}; % For the first year- we took the delta of the 2020 year
+Resources{temp_row_num2,1} = Resources{temp_row_num,1}; % For the first year
+
+for i = 2:Years
+    if (orderIndex == 2 && ConstructionFootprintTable{height(ConstructionFootprintTable),1} ~= ConstructionFootprintTable{height(ConstructionFootprintTable),width(ConstructionFootprintTable)}) || orderIndex ~= 2
+        Resources{temp_row_num,i} = ConstructionFootprintTable{height(ConstructionFootprintTable),i};
+        Resources{temp_row_num2,i} = ConstructionFootprintTable{height(ConstructionFootprintTable),i} + Resources{temp_row_num2,i-1};
+    else
+        Resources{temp_row_num,i} = InitBuiltArea;
+    end
+end
+
+count=0;
+for i = 1:Years
+    if count<1
+        % Check if we exeeded the allowed area (construction and pv)
+        ProjectedTotal = Resources{2,i} +  Resources{9,i};
+        if ProjectedTotal > Data.Const_DataBase.TotalAreaAllowed 
+            count = count + 1 ;
+            yearStr = YearsStringsForColNames{i};
+            msg = sprintf(['Exceeded max allowed Area in year %s.\n' ...
+                           'Cumulative area would be %.2f km²\n' ...
+                           'Maximum allowed is %.2f km²'], ...
+                           i+BaseYear-1, ProjectedTotal, Data.Const_DataBase.TotalAreaAllowed );
+            warndlg(msg, '⚠️ Area Limit Reached');
+        end
+    end
 end
 
 %% Money
@@ -556,24 +587,6 @@ for i = 1:Years
      Resources{7,i} = 0;
 end
 
-
-% Construction area 
-temp_row_num = find(strcmpi(Resources_RowNames, 'Area For Construction (Km^2)')); % Find the match row for contruction
-temp_row_num2 = find(strcmpi(Resources_RowNames, 'Cumulative Area For Construction (Km^2)')); 
-
-InitBuiltArea = Data.Const_DataBase.TotalBuiltArea; % The initial built Area in the Base year
-
-Resources{temp_row_num,1} = ConstructionFootprintTable{height(ConstructionFootprintTable),2}; % For the first year- we took the delta of the 2020 year
-Resources{temp_row_num2,1} = Resources{temp_row_num,1}; % For the first year
-
-for i = 2:Years
-    if (orderIndex == 2 && ConstructionFootprintTable{height(ConstructionFootprintTable),1} ~= ConstructionFootprintTable{height(ConstructionFootprintTable),width(ConstructionFootprintTable)}) || orderIndex ~= 2
-        Resources{temp_row_num,i} = ConstructionFootprintTable{height(ConstructionFootprintTable),i};
-        Resources{temp_row_num2,i} = ConstructionFootprintTable{height(ConstructionFootprintTable),i} + Resources{temp_row_num2,i-1};
-    else
-        Resources{temp_row_num,i} = InitBuiltArea;
-    end
-end
 
 % Lidor add it - just so we can see the output
 Data.Water_DataBase.WaterConsumptionCell = WaterConsumptionCell;

@@ -119,8 +119,18 @@ switch orderIndex
         [RDB.Advanced_RDB.AreaSum3, RDB.Advanced_RDB.CostsSum3, RDB.Advanced_RDB.WaterSum3] = CalcTotalResources(RDB.Advanced_RDB.Resources3, RDB.Advanced_RDB.ConsumptionAmounts3, RDB.Advanced_RDB.WaterFromFood3);
         
         ResultsDataBase = RDB;
+        % Create the results tables and graphs to this scenario in the ResultsDataBase
         AllTheStepsTogether_RESULTS;
+        % Export the results tables to excel to this project
+        export_results_to_excel;
         disp("All The Steps Together")
+
+
+
+
+
+
+
 
 
 

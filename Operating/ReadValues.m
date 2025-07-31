@@ -423,7 +423,8 @@ CDB.ConstructionFootprintTable{Construction_Row_Num, 1} = sum(CDB.ConstructionFo
 %%%% Variables
 % Lidor's addition
 %CDB.Mining_Waste = readmatrix('Data.xlsx', 'Sheet','Construction','Range','A26:A26');	
-CDB.TotalBuiltArea = readmatrix('Data.xlsx', 'Sheet','Construction','Range','H2:H2');   % square kilometer
+CDB.TotalBuiltArea = readmatrix('Data.xlsx', 'Sheet','Construction','Range','I2:I2');   % square kilometer
+CDB.TotalAreaAllowed = readmatrix('Data.xlsx', 'Sheet','Construction','Range','K2:K2');
 %Mortar Production Emissions Coefficients - CO2E (KG/KG)
 %CDB.MortarProductionCO2ECoefficient = readmatrix('Data.xlsx', 'Sheet','Construction','Range','L36:L36');
 
