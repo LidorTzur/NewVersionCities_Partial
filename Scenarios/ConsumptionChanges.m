@@ -61,7 +61,8 @@ end
 
 %% Transportation Consumption
 for i=1:Years
-    Growth = ScenariosTable{1,i}*1.011;
+    %Growth = ScenariosTable{1,i}*1.011; %% didnt understant why?!?!?!
+    Growth = ScenariosTable{1,i};
     TransportationConsumptionTable{1:8, i} = Growth*TransportationConsumptionTable{1:8,1};
     TransportationConsumptionTable{9,i} = sum(TransportationConsumptionTable{1:8,i});
 end

@@ -187,13 +187,8 @@ for i = 1:Years
 end
 
 
-
-
-
-%% ------------------------------------------ STOPPED HERE ----------------------------------
-% ---------------------------- MATCHED TO DOR'S MODEL: 
-% I think I did it well, make sure with Dor---------------------
 %% Water
+% ---------------------------- Lidor: MATCHED TO DOR'S MODEL: 
 
 % Water Emissions (from sewege)
 temp_row_num = find(strcmpi(Emission_RowNames, 'Sewege Treatment'));
@@ -311,7 +306,7 @@ for i = 1:Years
     CurrentTransportatiionConsumtpion = TransportationConsumptionTable{:,i};
     CurrentVehicleAmount = table2array(VehicleAmountsCell{i});
     [EmissionsByYears{4,i},EmissionsByYears{5,i}]  = CalcTransportationConsumption(Data, CurrentTransportatiionConsumtpion,CurrentVehicleAmount);
-    [EmissionsByYears{6,i}, ConsumptionAmounts{3,i}]  = CalcTransportationManufacturing(Data, CurrentTransportatiionConsumtpion,CurrentVehicleAmount, KMTraveledByElectricCar(i));
+    [EmissionsByYears{6,i}, ConsumptionAmounts{3,i}]  = CalcTransportationManufacturing(Data, CurrentTransportatiionConsumtpion,CurrentVehicleAmount, KMTraveledByElectricCar(i), Data.Trans_DataBase.VehicleAmountsCell(1:i));
 end
 
 %for i = 1:Years

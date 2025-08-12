@@ -121,6 +121,7 @@ switch orderIndex
         ResultsDataBase = RDB;
         % Create the results tables and graphs to this scenario in the ResultsDataBase
         AllTheStepsTogether_RESULTS;
+        results;
         % Export the results tables to excel to this project
         export_results_to_excel;
         disp("All The Steps Together")

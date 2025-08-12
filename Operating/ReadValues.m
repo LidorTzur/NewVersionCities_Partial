@@ -110,7 +110,7 @@ EDB.EmissionsCoefficientsUpstreamElectricity = table2array(readtable(Data,'Sheet
 % How many tons of fuel is needed for 1 kwh of electricity
 EDB.ElectrictyManufacturingCoefficients = table2array(readtable(Data,'Sheet','ElectricityManufactureEmissions','Range','B3:E3','ReadVariableNames',false));
 % The Ratio between crude oil to Manufactured Fuel
-EDB.CrudeOilToFuelRatio = readmatrix('Data.xlsx', 'Sheet','ElectricityManufactureEmissions','Range','K2:K2'); 
+EDB.CrudeOilToFuelRatio = readmatrix('Data.xlsx', 'Sheet','Materials','Range','J48:J48'); 
 
 % Renewable energy data
 % Data about Percentage of enery resurces in the latest year we have data on-  in order to accurate the model data (that based on the 2019 year)
