@@ -1,6 +1,5 @@
 function [SewegeTreatmentEmmissionsTable] = CalcSewegeEmissions(Data,WaterConsumption)
 
-% ------------------------ Lidor: STOPPED HERE - 
 % עשיתי מה שנראה לי לנכון למודל של דור שזה פשוט לבטל את המודל הישן ולהשאיר
 % את החישוב של החדש וזהו
 

@@ -23,7 +23,7 @@ EmissionsCoefficientsForPv = Data.EmissionsCoefficientsForPv; % g co2/Kwh
 ElectricityConsumers = Data.Electricity_DataBase.Electricity_Consumption_RowNames;
 CrudeOilToFuelRatio = Data.Electricity_DataBase.CrudeOilToFuelRatio;
 PVLifeCycle = Data.Electricity_DataBase.PVLifeCycle; % 25
-NewPV_PercentageBaseYear = Data.Electricity_DataBase.NewPV_PercentageBaseYear;
+NewPV_PercentageBaseYear = Data.Electricity_DataBase.NewPV_PercentageBaseYear; % 22.8%
 
 RowNames = ElectricityConsumers;
 temp = strrep(Data.Electricity_DataBase.Electricity_Sources, 'Renewable', 'Renewable Energies');
@@ -94,7 +94,7 @@ function emission = CalcPVEmissions(CurrentYearTable, PrevYearTable, Year, j, Em
         if Year == 1
             Delta = Delta * NewPV_PercentageBaseYear;
         end
-        emission = Delta * EmissionsCoefficientsForPv{Year, 2} / 1e6 * PVLifeCycle;
+        emission = Delta * EmissionsCoefficientsForPv{Year, 2} / 1000000 * PVLifeCycle;
     else
         emission = 0;
     end

@@ -218,7 +218,7 @@ TDB.FuelConsumptionCoefficients{6,1:6} = table2array(readtable(Data,'Sheet','Tra
 TDB.TrainFuelConsumptionCoefficints = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','F77:F78','ReadVariableNames',false))';
 
 % Soler/amount ratio - CBS Coeeficients 2011
-TDB.InflationCoefficient = readmatrix('Data.xlsx', 'Sheet','TransportationConsumption','Range','G93:G93');
+%TDB.InflationCoefficient = readmatrix('Data.xlsx', 'Sheet','TransportationConsumption','Range','G93:G93');
 % Fuel Amounts For Transportation - Natural Gas to Fuel Refining for transportation (Ton)
 TDB.NaturalGasForFuelRefining = readmatrix('Data.xlsx', 'Sheet','TransportationConsumption','Range','I63:I63');
 % Coefficients from mining and fuel manufacturing for Mazut only

@@ -23,7 +23,7 @@ function [TotalTransportationManufacturingEmissions, TotalFuelAmounts] = CalcTra
     FuelConsumptionCoefficients = Data.Trans_DataBase.FuelConsumptionCoefficients; % g/Km
     VehicleType = FuelConsumptionCoefficients.Properties.VariableNames;
     TrainFuelConsumptionCoefficints =Data.Trans_DataBase.TrainFuelConsumptionCoefficints;
-    InflationCoefficient = Data.Trans_DataBase.InflationCoefficient;
+    %InflationCoefficient = Data.Trans_DataBase.InflationCoefficient;
     Conversion_Liter_To_Kg = Data.Conversion_Liter_To_Kg;
     TransEnergy_type = Data.Trans_DataBase.TransEnergy_type;
     CrudeOilToFuelRatio = Data.Electricity_DataBase.CrudeOilToFuelRatio;
@@ -49,8 +49,9 @@ function [TotalTransportationManufacturingEmissions, TotalFuelAmounts] = CalcTra
     %%EngineeringToolsFuelConsumption = readtable(Data,'Sheet','FuelProductionEmissionsForTrans','Range','O68:O68','ReadVariableNames',false);
     %%EngineeringToolsFuelConsumption = EngineeringToolsFuelConsumption{1,1};
     temp = TrainFuelConsumptionCoefficints.*TotalKMBYTrain*Conversion_Liter_To_Kg;
-    TotalFuelConsumptionForMV{1,7} = ((sum(temp))/1000)*InflationCoefficient; %%+EngineeringToolsFuelConsumption)*InflationCoefficient; %% Tons
-    
+    %TotalFuelConsumptionForMV{1,7} = ((sum(temp))/1000)*InflationCoefficient; %%+EngineeringToolsFuelConsumption)*InflationCoefficient; %% Tons
+    TotalFuelConsumptionForMV{1,7} = ((sum(temp))/1000); %%+EngineeringToolsFuelConsumption)*InflationCoefficient; %% Tons
+
 
     %% All vehicles fuel consumption - Tons
 

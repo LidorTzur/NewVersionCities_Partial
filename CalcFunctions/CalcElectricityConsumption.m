@@ -71,8 +71,6 @@ function [TotalElectricityConsumptionEmissions, CurrentYearTotal] = CalcElectric
             CurrentYearIndex = find(EmissionsCoefficientsForPv{:,1} == year, 1); 
             if ~isempty(CurrentYearIndex)
                 Emissions(3,1) = EmissionsCoefficientsForPv{CurrentYearIndex,2};
-                %disp('Emissions From Electricity Consumption');
-                %disp(Emissions(:,:));
             end
         end
 

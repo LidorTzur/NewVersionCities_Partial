@@ -608,7 +608,7 @@ Resources.Properties.VariableNames = YearsStringsForColNames;
 
 %% Other Functions
 
-function ElectricityFromWater = CalculateElectricityFromWaterAllYears(Data, WaterConsumptionCell, Years) %% in data file - needs to multiply the electricity by 1.18336
+    function ElectricityFromWater = CalculateElectricityFromWaterAllYears(Data, WaterConsumptionCell, Years)
     ElectricityFromWater = cell(1,Years);
     for i=1:Years
         ElectricityFromWater{i} = CalcElectricityForWater(Data, WaterConsumptionCell{i}, Data.Water_DataBase.ElectricityConsumptionCoefficients{:,i});
@@ -639,12 +639,13 @@ PercentageByYears = array2table(zeros(ElectricityRowNum,Years)); %% cell array t
 %RowNames = {'Coal', 'Natural Gas', 'Renewable', 'Soler', 'Mazut'};
 ColumnNames = cell(1,Years);
 for i=1:Years
-    s1 = num2str(i+BaseYear-1); % changed
+    s1 = num2str(i+BaseYear-1); 
     ColumnNames{i} = s1;
 end
 PercentageByYears.Properties.VariableNames = ColumnNames;
 PercentageByYears.Properties.RowNames = ElectricityRowName;
 PercentageByYears{:,1} = Percentage'; %% initialization
+
 for i = 2:Years
     CurrentRenewableChange = RenewableEnergiesPercentage(i)-RenewableEnergiesPercentage(i-1);
     CurrentGasChange = NaturalGasPercentage(i)-NaturalGasPercentage(i-1);
