@@ -1,5 +1,11 @@
 
-RDB = ResultsDataBase;
+switch DataBase.City_Case
+    case "R"
+        RDB = ResultsDataBase_Rashlaz;
+    case "BS"
+        RDB = ResultsDataBase_BeerSheva;
+end
+
 
 %% Define the Final Tables to Output
 AllTogetherCell = cell(3, 1);
@@ -147,8 +153,17 @@ plotGroupedStackedEmissions( ...
         );
 
 % Return to the original DataBases
-ResultsDataBase = RDB;
-writetable(ResultsDataBase.TotalResults, 'TotalResults.xlsx', 'WriteRowNames', true)
+
+switch DataBase.City_Case
+    case "R"
+        ResultsDataBase_Rashlaz = RDB;
+        writetable(ResultsDataBase_Rashlaz.TotalResults, 'TotalResults.xlsx', 'WriteRowNames', true)
+    case "BS"
+        ResultsDataBase_BeerSheva = RDB;
+        writetable(ResultsDataBase_BeerSheva.TotalResults, 'TotalResults.xlsx', 'WriteRowNames', true)
+end
+
+
 
 clear Emission1_Sum_Local Emission1_Sum_Global Emission1_Sum_Total Area1_Sum_Local Area1_Sum_Global Area1_Sum_Total Water1_Sum_Local Water1_Sum_Global Water1_Sum_Total
 clear Emission2_Sum_Local Emission2_Sum_Global Emission2_Sum_Total Area2_Sum_Local Area2_Sum_Global Area2_Sum_Total Water2_Sum_Local Water2_Sum_Global Water2_Sum_Total

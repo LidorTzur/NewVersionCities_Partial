@@ -55,11 +55,9 @@ function [TotalTransportationManufacturingEmissions, TotalFuelAmounts] = CalcTra
 
     %% All vehicles fuel consumption - Tons
 
-    %FuelForOtherUses = table2array(readtable(Data,'Sheet','FuelProductionEmissionsForTrans','Range','B33:F33','ReadVariableNames',false));
     TotalFuelConsumption = array2table(zeros(1,numel(TransEnergy_type)));
     % {'Mazut', 'Diesel', 'Kerosene', 'Gasoline','Liquefied Petroleum Gas', 'Crude Oil', 'Natural Gas', 'Battery Manufacturing'}
     TotalFuelConsumption.Properties.VariableNames = TransEnergy_type;
-    %MazutConsumption = readtable(Data,'Sheet','FuelProductionEmissionsForTrans','Range','B30:B30','ReadVariableNames',false);
     %TotalFuelConsumption{1,1} = MazutConsumption{1,1} + FuelForOtherUses(1);
     %ShipInternationalConsumption = readtable(Data,'Sheet','FuelProductionEmissionsForTrans','Range','C30:C30','ReadVariableNames',false);
     %ShipInternationalConsumption = ShipInternationalConsumption{1,1};

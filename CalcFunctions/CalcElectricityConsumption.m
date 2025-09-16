@@ -60,11 +60,6 @@ function [TotalElectricityConsumptionEmissions, CurrentYearTotal] = CalcElectric
         Temp = zeros(numel(RowNames),numel(ElectricityEmissionTypes)); 
         Temp = array2table(Temp, 'RowNames', RowNames);
         Temp.Properties.VariableNames = ElectricityEmissionTypes;
-
-        %%% Lidor's adding
-        %%%%%%% We need To change the electricity consumption by PV- its not like they did in the project!!!!!!
-        % maybe we need to add the consumption to the electricity
-        % consumption in the excel, or change it here somehow
         
         % Fill the right emission values of renewable energies by the year
         if Table == 3 % Renewable energies
@@ -73,7 +68,6 @@ function [TotalElectricityConsumptionEmissions, CurrentYearTotal] = CalcElectric
                 Emissions(3,1) = EmissionsCoefficientsForPv{CurrentYearIndex,2};
             end
         end
-
 
         for j=1:width(Temp)-1
             for i=1:height(Temp)                

@@ -96,12 +96,13 @@ EDB.InitialPercentage = table2array(readtable(Data,'Sheet','ElectricityConsumpti
 % Calc Electricity Consumption
 % Emissions g/KWh of differnt types of fuels for electricity
 EDB.EmissionsFromElectricityConsumption = table2array(readtable(Data,'Sheet','ElectricityConsumption','Range','B15:I21','ReadVariableNames',true));
+
 % Emissions from Natural Gas g/KWh from two power-plant
 EDB.ElctricityFromNatualGasCoeff = array2table(zeros(2,1));
 EDB.ElctricityFromNatualGasCoeff.Properties.RowNames = ElctricityFromNatualGasCoeff_RowNames;
-
 EDB.ElctricityFromNatualGasCoeff{1,1}  = readmatrix('Data.xlsx', 'Sheet','ElectricityConsumption','Range','I11:I11'); 
 EDB.ElctricityFromNatualGasCoeff{2,1}  = readmatrix('Data.xlsx', 'Sheet','ElectricityConsumption','Range','I12:I12'); 
+
 
 % Calc Electricity manufacturing
 DataBase.EmissionsCoefficientsForPv = readtable(Data,'Sheet','PVEmissions','Range','I8:J40','ReadVariableNames',true);
@@ -235,6 +236,9 @@ TDB.TrainCarRatio = readmatrix('Data.xlsx','Sheet','TransportationConsumption','
 TDB.TransitionToBus = readmatrix('Data.xlsx','Sheet','TransportationConsumption','Range','H12:H12');
 TDB.TransitionToTrain = readmatrix('Data.xlsx','Sheet','TransportationConsumption','Range','I12:I12');
 
+
+
+
 %% ---------------------------------------- WATER ------------------------------------------------
 
 % Load water base consumption table
@@ -322,6 +326,9 @@ WDB.ElectricityConsumptionCoefficients = readmatrix(Data, 'Sheet', 'WaterNew', '
 % WDB.RatioForBrackishWater = table2array(readtable(Data,'Sheet','Water','Range','P23:Q23','ReadVariableNames',false));
 
 WDB.Electricity_Drillind_Water_Coeff = WDB.ElectricityConsumptionCoefficients(2,1) + WDB.ElectricityConsumptionCoefficients(6,1); % Electricity water coeff
+
+
+
 
 
 %% ---------------------------------------- FOOD ------------------------------------------------

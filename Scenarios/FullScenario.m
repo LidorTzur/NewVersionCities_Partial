@@ -445,15 +445,6 @@ for i=1:Years
     PreviousYearElectricity = CurrentYearElectricity; % updating for the next iteration
 end
 
-% ---------------Emission from RECICLING WASTE, as for now we dont imply that---------------------------------
-%% Waste and Recicling - emissions from consumption - on hold until further analysis
-% WasteAndRecyclingSummaryCell = cell(1,Years);
-% for i=1:Years
-%     WasteAndRecyclingSummaryCell{i} = CalcWasteAndRecycling(WasteAndRecyclingCell{i}, Data);
-%     [EmissionsByYears{8,i}, EmissionsByYears{9,i}] = CalcConsumptionEmissions(WasteAndRecyclingCell{i} ,Data);
-% end
-
-
 %% Area
 
 % Electricity Area

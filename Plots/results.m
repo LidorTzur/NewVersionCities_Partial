@@ -1,6 +1,11 @@
 
+switch DataBase.City_Case
+    case "R"
+        RDB = ResultsDataBase_Rashlaz;
+    case "BS"
+        RDB = ResultsDataBase_BeerSheva;
+end
 
-RDB = ResultsDataBase;
 Year_Stone = 2035;
 Middle_Year  = (Year_Stone - BaseYear + 1);
 
@@ -325,7 +330,12 @@ title(t, 'Compare Emissions, Area, and Water for 2019 VS 2050', 'FontSize', 20, 
 % disp(UpdatedDeltaTable);
 
 % Return to the original DataBases
-ResultsDataBase = RDB;
+switch DataBase.City_Case
+    case "R"
+        ResultsDataBase_Rashlaz = RDB;
+    case "BS"
+        ResultsDataBase_BeerSheva = RDB;
+end
 
 
 
