@@ -1,8 +1,20 @@
 
 %% השוואת ערים לפי TotalResults ופליטות מפורקות
 % הגדרות קלט – שים כאן את ה־ResultsDataBase של כל עיר
-cities    = {ResultsDataBase_BeerSheva, ResultsDataBase_Rashlaz}; 
-cityNames = {'Beer-Sheva','Rishon LeZion'};
+% cities    = {ResultsDataBase_BeerSheva, ResultsDataBase_Rashlaz, ResultsDataBase_BeitShemesh}; 
+% cityNames = {'Beer-Sheva','Rishon LeZion', 'Beit Shemesh'};
+
+
+% שליפה מתוך ה־struct
+cityCode  = fieldnames(AllCities);          % {'BeerSheva','Rashlaz','BeitShemesh'}
+cities    = cellfun(@(f) AllCities.(f), cityCode, 'UniformOutput', false);
+cityNames = cityCode;
+
+% שמות ידידותיים לגרפים/טבלאות
+% cityNames = strrep(cityTags,'BeerSheva','Beer-Sheva');
+% cityNames = strrep(cityNames,'Rashlaz','Rishon LeZion');
+% cityNames = strrep(cityNames,'BeitShemesh','Beit Shemesh');
+
 
 baseCol   = 1;   % אינדקס שנת בסיס (למשל 1 עבור 2019)
 targetCol = 32;  % אינדקס שנת יעד (למשל 2050)

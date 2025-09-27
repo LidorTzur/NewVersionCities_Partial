@@ -1,4 +1,4 @@
-function plotGroupedStackedEmissions(RDBs, year, scenarioNames)
+function plotGroupedStackedEmissions(RDBs, year, scenarioNames, cityCode)
     % הגדרת שורות לפי סקטור
     localRows  = [1, 3, 5, 7, 9, 11];
     globalRows = [2, 4, 6, 8, 10];
@@ -60,7 +60,7 @@ function plotGroupedStackedEmissions(RDBs, year, scenarioNames)
     xticklabels(xtickMinor);
     xtickangle(0);
     ylabel('Emissions (Ton CO₂)');
-    title(['Emission Breakdown by Sector – Year ' year], 'FontSize', 14);
+    title(sprintf('Emission Breakdown by Sector – Year %s (%s)', year, cityCode), 'FontSize', 14);
     legend(sectorLabelsValid, 'Location', 'northeastoutside');
     grid on;
 

@@ -1,4 +1,7 @@
 
+Data = excelFile;
+scenarios = scenariosFile;
+
 %% General Inputs
 Days_In_Year = 365;
 global TargetYear_global;
@@ -65,7 +68,12 @@ ScenarioRowNames = {'Population Growth', 'Increased Electricity Per Capita', 'In
 % Analysis_Row_Names = {'Population Growth', 'Increase In Electricity Per Capita', 'Increase in Desalinated Water', 'Reducing Beef Consumption', 'Preventing Food Loss', 'Change In Energy Consumption From Renewable Energies', 'Electricity Production by Natural Gas','Electricity Saving', 'Waste Minimization','Recycle Waste', '11', 'Reducing Mileage', 'Transition To Public Transportation', 'Transition to Electric Car', 'Transition to Electric Van', 'Transition to Electric Truck', 'Transition to Electric Bus','18', 'Water Saving', 'Vegetarians'};
 
 % Upload the Scenarios table
-ScenariosAndValues = readtable("The Three Scenarios.xlsx",'Sheet','Scenarios','Range','A1:J21','ReadRowNames',true,'ReadVariableNames',true);
+%ScenariosAndValues = readtable("The Three Scenarios.xlsx",'Sheet','Scenarios','Range','A1:J21','ReadRowNames',true,'ReadVariableNames',true);
+global ScenariosAndValues
+ScenariosAndValues = readtable(scenarios, ...
+    'Sheet','Scenarios','Range','A1:J21', ...
+    'ReadRowNames',true,'ReadVariableNames',true);
+
 
 % Run this two scripts
 ReadValues;

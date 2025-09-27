@@ -23,7 +23,6 @@ CDB = DataBase.Const_DataBase;
 MDB = DataBase.Materials_DataBase;
 ADB = DataBase.Area_DataBase;
 MONDB = DataBase.Money_DataBase;
-Data = "Data.xlsx";
 
 % Generel Input for the model DataBase
 GeneralInputsDataBase = struct();
@@ -76,11 +75,11 @@ EDB.ElectricityConsumptionTable.Properties.VariableNames = cellstr(ColumnNames);
 EDB.ElectricityConsumptionTable{1:(Electricity_Consumption_Row_Num-1), 1} = table2array(readtable(Data,'Sheet','ElectricityConsumption','Range','B2:B7','ReadVariableNames',false));
 
 % Import more variables
-EDB.IndustryElectricityConsumptionChange = readmatrix('Data.xlsx', 'Sheet','ElectricityConsumption','Range','E4:E4'); % Save the single Datumn in the DataBase as single value
-EDB.ElectricityLossRatio = readmatrix('Data.xlsx', 'Sheet','ElectricityConsumption','Range','E2:E2'); % Save the single Datumn in the DataBase as single value
+EDB.IndustryElectricityConsumptionChange = readmatrix(Data, 'Sheet','ElectricityConsumption','Range','E4:E4'); % Save the single Datumn in the DataBase as single value
+EDB.ElectricityLossRatio = readmatrix(Data, 'Sheet','ElectricityConsumption','Range','E2:E2'); % Save the single Datumn in the DataBase as single value
 
 % Electricity Fuels coeff
-EDB.Crude_Oil_To_Electricity = readmatrix('Data.xlsx', 'Sheet','Materials','Range','L37:L37');  %11.63; % Crude oil to electricity
+EDB.Crude_Oil_To_Electricity = readmatrix(Data, 'Sheet','Materials','Range','L37:L37');  %11.63; % Crude oil to electricity
 % Emission coefficient per ton fuel burning
 EDB.fuel_MTOE_coeff = 2.5; % CO₂ Emission Factor per Ton of Burning Fuel (Ton/Ton)
 EDB.fuel_LPG_coeff = 2.9; % CO₂ Emission Factor per Ton of Burning LPG Fuel (Ton/Ton)
@@ -100,8 +99,8 @@ EDB.EmissionsFromElectricityConsumption = table2array(readtable(Data,'Sheet','El
 % Emissions from Natural Gas g/KWh from two power-plant
 EDB.ElctricityFromNatualGasCoeff = array2table(zeros(2,1));
 EDB.ElctricityFromNatualGasCoeff.Properties.RowNames = ElctricityFromNatualGasCoeff_RowNames;
-EDB.ElctricityFromNatualGasCoeff{1,1}  = readmatrix('Data.xlsx', 'Sheet','ElectricityConsumption','Range','I11:I11'); 
-EDB.ElctricityFromNatualGasCoeff{2,1}  = readmatrix('Data.xlsx', 'Sheet','ElectricityConsumption','Range','I12:I12'); 
+EDB.ElctricityFromNatualGasCoeff{1,1}  = readmatrix(Data, 'Sheet','ElectricityConsumption','Range','I11:I11'); 
+EDB.ElctricityFromNatualGasCoeff{2,1}  = readmatrix(Data, 'Sheet','ElectricityConsumption','Range','I12:I12'); 
 
 
 % Calc Electricity manufacturing
@@ -111,23 +110,23 @@ EDB.EmissionsCoefficientsUpstreamElectricity = table2array(readtable(Data,'Sheet
 % How many tons of fuel is needed for 1 kwh of electricity
 EDB.ElectrictyManufacturingCoefficients = table2array(readtable(Data,'Sheet','ElectricityManufactureEmissions','Range','B3:E3','ReadVariableNames',false));
 % The Ratio between crude oil to Manufactured Fuel
-EDB.CrudeOilToFuelRatio = readmatrix('Data.xlsx', 'Sheet','Materials','Range','J48:J48'); 
+EDB.CrudeOilToFuelRatio = readmatrix(Data, 'Sheet','Materials','Range','J48:J48'); 
 
 % Renewable energy data
 % Data about Percentage of enery resurces in the latest year we have data on-  in order to accurate the model data (that based on the 2019 year)
-EDB.RenewableEnergies_CurrentYear = readmatrix('Data.xlsx', 'Sheet','ElectricityConsumption','Range','L3:L3');
-EDB.NaturalGas_CurrentYear = readmatrix('Data.xlsx', 'Sheet','ElectricityConsumption','Range','L4:L4');
-EDB.CurrentYearReal = readmatrix('Data.xlsx', 'Sheet','ElectricityConsumption','Range','L2:L2');
+EDB.RenewableEnergies_CurrentYear = readmatrix(Data, 'Sheet','ElectricityConsumption','Range','L3:L3');
+EDB.NaturalGas_CurrentYear = readmatrix(Data, 'Sheet','ElectricityConsumption','Range','L4:L4');
+EDB.CurrentYearReal = readmatrix(Data, 'Sheet','ElectricityConsumption','Range','L2:L2');
 % PV - data assumptions
-EDB.PVLifeCycle = readmatrix('Data.xlsx', 'Sheet','Area','Range','F5:F5');
-EDB.NewPV_PercentageBaseYear = readmatrix('Data.xlsx', 'Sheet','Area','Range','F7:F7');
-EDB.GroundPVPercentage = readmatrix('Data.xlsx', 'Sheet','Area','Range','F2:F2');
-EDB.DualPVPercentage = readmatrix('Data.xlsx', 'Sheet','Area','Range','F3:F3');
+EDB.PVLifeCycle = readmatrix(Data, 'Sheet','Area','Range','F5:F5');
+EDB.NewPV_PercentageBaseYear = readmatrix(Data, 'Sheet','Area','Range','F7:F7');
+EDB.GroundPVPercentage = readmatrix(Data, 'Sheet','Area','Range','F2:F2');
+EDB.DualPVPercentage = readmatrix(Data, 'Sheet','Area','Range','F3:F3');
 
 % Waste Inciniration
 %% Waste incinaration values 
-EDB.WasteToElectricity = readmatrix('Data.xlsx', 'Sheet','ElectricityManufactureEmissions','Range','H6:H6'); % How much waste needed to burn to get 1 kWh of electricity
-%EDB.IncinarationEmissionCoefficient = readmatrix('Data.xlsx', 'Sheet','ElectricityManufactureEmissions','Range','H8:H8'); % Emission coefficient of waste incineration
+EDB.WasteToElectricity = readmatrix(Data, 'Sheet','ElectricityManufactureEmissions','Range','H6:H6'); % How much waste needed to burn to get 1 kWh of electricity
+%EDB.IncinarationEmissionCoefficient = readmatrix(Data, 'Sheet','ElectricityManufactureEmissions','Range','H8:H8'); % Emission coefficient of waste incineration
 
 
 %% ------------------------------------- TRANSPORTATION ------------------------------------------------
@@ -221,20 +220,20 @@ TDB.TrainFuelConsumptionCoefficints = table2array(readtable(Data,'Sheet','Transp
 % Soler/amount ratio - CBS Coeeficients 2011
 %TDB.InflationCoefficient = readmatrix('Data.xlsx', 'Sheet','TransportationConsumption','Range','G93:G93');
 % Fuel Amounts For Transportation - Natural Gas to Fuel Refining for transportation (Ton)
-TDB.NaturalGasForFuelRefining = readmatrix('Data.xlsx', 'Sheet','TransportationConsumption','Range','I63:I63');
+TDB.NaturalGasForFuelRefining = readmatrix(Data, 'Sheet','TransportationConsumption','Range','I63:I63');
 % Coefficients from mining and fuel manufacturing for Mazut only
 TDB.EmissionsCoefficientsUpstream = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','N3:T9','ReadVariableNames',false))'; %% array(6,7)
 
 % Rides per day
-TDB.RidesPerDay = readmatrix('Data.xlsx','Sheet','TransportationConsumption','Range','A13:A13'); % 4
+TDB.RidesPerDay = readmatrix(Data,'Sheet','TransportationConsumption','Range','A13:A13'); % 4
 % Car Bus Ratio - Define the ratio between car to bus use
-TDB.BusCarRatio = readmatrix('Data.xlsx','Sheet','TransportationConsumption','Range','F12:F12');
+TDB.BusCarRatio = readmatrix(Data,'Sheet','TransportationConsumption','Range','F12:F12');
 % Car Train Ratio - Define the ratio between car to Train use
-TDB.TrainCarRatio = readmatrix('Data.xlsx','Sheet','TransportationConsumption','Range','E12:E12');
+TDB.TrainCarRatio = readmatrix(Data,'Sheet','TransportationConsumption','Range','E12:E12');
 
 % Distribution of - Transition to buses and trains 
-TDB.TransitionToBus = readmatrix('Data.xlsx','Sheet','TransportationConsumption','Range','H12:H12');
-TDB.TransitionToTrain = readmatrix('Data.xlsx','Sheet','TransportationConsumption','Range','I12:I12');
+TDB.TransitionToBus = readmatrix(Data,'Sheet','TransportationConsumption','Range','H12:H12');
+TDB.TransitionToTrain = readmatrix(Data,'Sheet','TransportationConsumption','Range','I12:I12');
 
 
 
@@ -243,7 +242,7 @@ TDB.TransitionToTrain = readmatrix('Data.xlsx','Sheet','TransportationConsumptio
 
 % Load water base consumption table
 WDB.water_Names = {'Water for Domestic & Industrial', 'Water for Agriculture', 'Water for Neighbors', 'Water for  Nature', 'Drilling Water', 'Reclaimed Wastewater', 'Brackish water, fresh and non-fresh reservoir water', 'Desalinated Water'};
-WDB.WaterConsumptionTableNew = readtable('Data.xlsx','Sheet', 'WaterNew','ReadVariableNames', false, 'ReadRowNames', true,'Range', 'A2:D9');  
+WDB.WaterConsumptionTableNew = readtable(Data,'Sheet', 'WaterNew','ReadVariableNames', false, 'ReadRowNames', true,'Range', 'A2:D9');  
 WDB.WaterConsumptionTableNew.Properties.VariableNames = {'2017','2019','2022'};
 WDB.WaterConsumptionTableNew.Properties.RowNames = WDB.water_Names;
 
@@ -279,28 +278,28 @@ WDB.WaterConsumptionCell{1} = array2table(zeros(1,numel(WDB.water_Names)), 'Vari
 %% Water-New load (Dor's model) - Lidor's Update
 % Load all the constant values
 % Agriculture_water
-WDB.AgriculturePerCapitaFactor_water = readmatrix('Data.xlsx', 'Sheet','WaterNew','Range','D20:D20');
+WDB.AgriculturePerCapitaFactor_water = readmatrix(Data, 'Sheet','WaterNew','Range','D20:D20');
 %WDB.AgriculturePerCapitaFactor_water_Not_Base_Year = readmatrix('Data.xlsx', 'Sheet','WaterNew','Range','D21:D21');
-WDB.AgriculturePerCapitaOffset_water = readmatrix('Data.xlsx', 'Sheet','WaterNew','Range','D22:D22');
-WDB.AgricultureBaseYear_water = readmatrix('Data.xlsx', 'Sheet','WaterNew','Range','D19:D19');
+WDB.AgriculturePerCapitaOffset_water = readmatrix(Data, 'Sheet','WaterNew','Range','D22:D22');
+WDB.AgricultureBaseYear_water = readmatrix(Data, 'Sheet','WaterNew','Range','D19:D19');
 
-WDB.PopulationGrowth           = readmatrix('Data.xlsx', 'Sheet','WaterNew','Range','B19:B19');
-WDB.ChangeFreshWater           = readmatrix('Data.xlsx', 'Sheet','WaterNew','Range','B20:B20');
-WDB.FreshWaterForAgriculture   = readmatrix('Data.xlsx', 'Sheet','WaterNew','Range','B21:B21');
-WDB.FreshWaterForDomestic      = readmatrix('Data.xlsx', 'Sheet','WaterNew','Range','C31:C31');
-WDB.LossRatio                  = 1 + readmatrix('Data.xlsx', 'Sheet','WaterNew','Range','B22:B22');
-WDB.ChangeDrillingWater        = readmatrix('Data.xlsx', 'Sheet','WaterNew','Range','B23:B23');
+WDB.PopulationGrowth           = readmatrix(Data, 'Sheet','WaterNew','Range','B19:B19');
+WDB.ChangeFreshWater           = readmatrix(Data, 'Sheet','WaterNew','Range','B20:B20');
+WDB.FreshWaterForAgriculture   = readmatrix(Data, 'Sheet','WaterNew','Range','B21:B21');
+WDB.FreshWaterForDomestic      = readmatrix(Data, 'Sheet','WaterNew','Range','C31:C31');
+WDB.LossRatio                  = 1 + readmatrix(Data, 'Sheet','WaterNew','Range','B22:B22');
+WDB.ChangeDrillingWater        = readmatrix(Data, 'Sheet','WaterNew','Range','B23:B23');
 % Calculate the yeasrly Change in drilling water (25% less until 2050)
 WDB.Yearly_ChangeDrillingWater = WDB.ChangeDrillingWater^(1/Years);
-WDB.ReclaimedRatio             = readmatrix('Data.xlsx', 'Sheet','WaterNew','Range','B24:B24'); 
-WDB.BrackishAmount             = readmatrix('Data.xlsx', 'Sheet','WaterNew','Range','B25:B25');
-WDB.DesalinatedFormula         = readcell('Data.xlsx', 'Sheet','WaterNew','Range','B26:B26'); 
-WDB.Avg_per_capita_domestic    = readmatrix('Data.xlsx', 'Sheet','WaterNew','Range','B31:B31'); 
-WDB.Avg_per_capita_Palestinians= readmatrix('Data.xlsx', 'Sheet','WaterNew','Range','B32:B32'); 
+WDB.ReclaimedRatio             = readmatrix(Data, 'Sheet','WaterNew','Range','B24:B24'); 
+WDB.BrackishAmount             = readmatrix(Data, 'Sheet','WaterNew','Range','B25:B25');
+WDB.DesalinatedFormula         = readcell(Data, 'Sheet','WaterNew','Range','B26:B26'); 
+WDB.Avg_per_capita_domestic    = readmatrix(Data, 'Sheet','WaterNew','Range','B31:B31'); 
+WDB.Avg_per_capita_Palestinians= readmatrix(Data, 'Sheet','WaterNew','Range','B32:B32'); 
 WDB.Fixed_Brackish = WDB.WaterConsumptionTableNew{'Brackish water, fresh and non-fresh reservoir water', '2019'};
 
 % Nature_water
-M = readmatrix('Data.xlsx', 'Sheet', 'WaterNew', 'Range', 'G7:H10');  
+M = readmatrix(Data, 'Sheet', 'WaterNew', 'Range', 'G7:H10');  
 WDB.Nature_water_yearThresholds = M(:,2);
 WDB.Nature_water_yearThresholds_values = M(:,1);
 % WDB.Nature_water_yearThresholds = [7, 12, 22, 32];
@@ -343,7 +342,7 @@ Food_Consumption_Col_Num = int32(numel(Food_Consumption_ColNames));
 % Meat rows in the excel table
 FDB.meatRows = meatRows;
 % Food Loss
-FDB.current_food_lost = readmatrix('Data.xlsx','Sheet','Food','Range','S2:S2'); % The assumption was that 33% of the food manufactured is lost 
+FDB.current_food_lost = readmatrix(Data,'Sheet','Food','Range','S2:S2'); % The assumption was that 33% of the food manufactured is lost 
 % {'Local Water For Humans','Local Water For Animals', 'Global Water For Humans', 'Global Water For Animals'}
 FDB.WaterFromFoodCategories = WaterFromFoodCategories;
 
@@ -358,7 +357,7 @@ FDB.FoodConsumptionCell{1}.Properties.VariableNames = Food_Consumption_ColNames;
 % compare it to "RowNames" that we already defined...)
 FDB.FoodRowName = table2cell(readtable(Data,'Sheet','Food','Range','A5:A68','ReadVariableNames',false))';
 % the maximal value possible in order to keep the area for food in Israel under 4500000 m^2.
-FDB.TotalGrowthForLocalFood = readmatrix('Data.xlsx', 'Sheet','Food','Range','Y2:Y2');  % Save it in the DataBase
+FDB.TotalGrowthForLocalFood = readmatrix(Data, 'Sheet','Food','Range','Y2:Y2');  % Save it in the DataBase
 
 %%%%% Water for food percentages (distribution of Nature Water, Diselinated Water, Brackish Water, Reclaimed Water, Flood Water)
 FDB.WaterForFoodPercentages = table2array(readtable(Data,'Sheet','Food','Range','T6:T10','ReadVariableNames',false))';
@@ -430,8 +429,8 @@ CDB.ConstructionFootprintTable{Construction_Row_Num, 1} = sum(CDB.ConstructionFo
 %%%% Variables
 % Lidor's addition
 %CDB.Mining_Waste = readmatrix('Data.xlsx', 'Sheet','Construction','Range','A26:A26');	
-CDB.TotalBuiltArea = readmatrix('Data.xlsx', 'Sheet','Construction','Range','I2:I2');   % square kilometer
-CDB.TotalAreaAllowed = readmatrix('Data.xlsx', 'Sheet','Construction','Range','K2:K2');
+CDB.TotalBuiltArea = readmatrix(Data, 'Sheet','Construction','Range','I2:I2');   % square kilometer
+CDB.TotalAreaAllowed = readmatrix(Data, 'Sheet','Construction','Range','K2:K2');
 %Mortar Production Emissions Coefficients - CO2E (KG/KG)
 %CDB.MortarProductionCO2ECoefficient = readmatrix('Data.xlsx', 'Sheet','Construction','Range','L36:L36');
 
@@ -545,10 +544,10 @@ DataBase.Money_DataBase = MONDB;
 
 %% read the trends in consumption for the target year (empty)- Needs to change!!!!!!!!!!!!!!!!!!
 DataBase.ChnageStruct = struct;
-DataBase.ChnageStruct.Electricity = readtable("The Three Scenarios.xlsx",'Sheet','ChangesInConsumptionType','Range','A2:B5','ReadRowNames',true);
-DataBase.ChnageStruct.Water = readtable("The Three Scenarios.xlsx",'Sheet','ChangesInConsumptionType','Range','A8:B12','ReadRowNames',true);
-DataBase.ChnageStruct.Transportation = readtable("The Three Scenarios.xlsx",'Sheet','ChangesInConsumptionType','Range','A15:B21','ReadRowNames',true);
-DataBase.ChnageStruct.Food = readtable("The Three Scenarios.xlsx",'Sheet','ChangesInConsumptionType','Range','D2:E65','ReadRowNames',true);
+DataBase.ChnageStruct.Electricity = readtable(scenariosFile,'Sheet','ChangesInConsumptionType','Range','A2:B5','ReadRowNames',true);
+DataBase.ChnageStruct.Water = readtable(scenariosFile,'Sheet','ChangesInConsumptionType','Range','A8:B12','ReadRowNames',true);
+DataBase.ChnageStruct.Transportation = readtable(scenariosFile,'Sheet','ChangesInConsumptionType','Range','A15:B21','ReadRowNames',true);
+DataBase.ChnageStruct.Food = readtable(scenariosFile,'Sheet','ChangesInConsumptionType','Range','D2:E65','ReadRowNames',true);
 
 %%%% Delete all the temps
 clear Transportation_Consumption_RowNames Transportation_Consumption_Row_Num Vehicle_Amounts_Row_Num Vehicle_Amounts_Col_Num AmountsOfFuels_RowNames AmountsOfFuels_ColNames AmountsOfFuels_Row_Num AmountsOfFuels_Col_Num FuelConsumptionCoefficients_RowNames FuelConsumptionCoefficients_Row_Num FuelConsumptionCoefficients_Col_Num

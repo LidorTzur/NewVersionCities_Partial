@@ -1,10 +1,4 @@
-
-switch DataBase.City_Case
-    case "R"
-        RDB = ResultsDataBase_Rashlaz;
-    case "BS"
-        RDB = ResultsDataBase_BeerSheva;
-end
+RDB = ResultsDataBase;
 
 Year_Stone = 2035;
 Middle_Year  = (Year_Stone - BaseYear + 1);
@@ -91,7 +85,7 @@ nexttile
 plotStackedBar('Water', WaterSum1{1:5,1}, colors3Water, WaterSum1.Properties.RowNames(1:5), 'Million m^3', {'Base Year'});
 % nexttile
 % plotStackedBar('Cost- 2019', CostsSum1{1:4,1}, colors4Cost, CostsSum1.Properties.RowNames(1:4), 'Billion ILS', {'Base Year'});
-title(t, 'Emissions, Area, and Water for Base Year - 2019', 'FontSize', 20, 'FontWeight', 'bold');
+title(t, sprintf('Emissions, Area, and Water for Base Year - 2019 (%s)', cityCode), 'FontSize', 20, 'FontWeight', 'bold');
 
 
 
@@ -118,13 +112,13 @@ plotStackedBar('Area', dataArea, colors2Area, AreaSum3.Properties.RowNames(1:4),
 % Water
 nexttile
 dataWater = [WaterSum1{1:5,1}, WaterSum1{1:5,Years}, WaterSum2{1:5,Years}, WaterSum3{1:5,Years}];
-plotStackedBar('Water', dataWater, colors3Water, WaterSum3.Properties.RowNames(1:5), 'Million m^3', Order);
+plotStackedBar( 'Water', dataWater, colors3Water, WaterSum3.Properties.RowNames(1:5), 'Million m^3', Order);
 
 % % Costs
 % nexttile
 % dataCost = [CostsSum1{1:4,1}, CostsSum1{1:4,Years}, CostsSum2{1:4,Years}, CostsSum3{1:4,Years}];
 % plotStackedBar('Costs', dataCost, colors4Cost, CostsSum3.Properties.RowNames(1:4), 'Billion ILS', Order);
-title(t, 'Compare Emissions, Area, and Water for 2019 VS 2050', 'FontSize', 20, 'FontWeight', 'bold');
+title(t, sprintf('Compare Emissions, Area, and Water for 2019 VS 2050 (%s)', cityCode), 'FontSize', 20, 'FontWeight', 'bold');
 
 
 
@@ -329,14 +323,7 @@ title(t, 'Compare Emissions, Area, and Water for 2019 VS 2050', 'FontSize', 20, 
 % UpdatedDeltaTable.Properties.VariableNames = DeltaTable.Properties.VariableNames;
 % disp(UpdatedDeltaTable);
 
-% Return to the original DataBases
-switch DataBase.City_Case
-    case "R"
-        ResultsDataBase_Rashlaz = RDB;
-    case "BS"
-        ResultsDataBase_BeerSheva = RDB;
-end
-
+ResultsDataBase = RDB;
 
 
 function plotStackedBar(tileTitle, dataMat, colors, rowLabels, ylabelText, Order)

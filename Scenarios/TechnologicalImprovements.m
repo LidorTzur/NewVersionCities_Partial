@@ -4,7 +4,7 @@ addpath("CalcFunctions");
 addpath("Data");
 
 %% insert the changes from the scenarios excel
-ImprovementValues = readtable("The Three Scenarios.xlsx",'Sheet','Improvements','Range','B2:B5','ReadVariableNames',false);
+ImprovementValues = readtable(scenarios,'Sheet','Improvements','Range','B2:B5','ReadVariableNames',false);
 
 %% Inputs to the sheet
 % Electricity Transportation row name

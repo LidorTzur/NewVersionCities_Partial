@@ -119,27 +119,26 @@ switch orderIndex
         [RDB.Advanced_RDB.AreaSum3, RDB.Advanced_RDB.CostsSum3, RDB.Advanced_RDB.WaterSum3] = CalcTotalResources(RDB.Advanced_RDB.Resources3, RDB.Advanced_RDB.ConsumptionAmounts3, RDB.Advanced_RDB.WaterFromFood3);
         
         ResultsDataBase = RDB;
-        %ResultsDataBase_BeerSheva = RDB;
-
 
         % Create the results tables and graphs to this scenario in the ResultsDataBase
         
-        DataBase.City_Case = 'R';
-
-
-        switch DataBase.City_Case
-            case "R"
-                ResultsDataBase_Rashlaz = RDB;
-            case "BS"
-                ResultsDataBase_BeerSheva = RDB;
-        end
+        % DataBase.City_Case = 'R';
+        % 
+        % switch DataBase.City_Case
+        %     case "R"
+        %         ResultsDataBase_Rashlaz = RDB;
+        %     case "BS"
+        %         ResultsDataBase_BeerSheva = RDB;
+        %     case "BeitS"
+        %         ResultsDataBase_BeitShemesh = RDB;
+        % end
 
         
 
         AllTheStepsTogether_RESULTS;
         results;
         % Export the results tables to excel to this project
-        export_results_to_excel;
+        %export_results_to_excel;
         disp("All The Steps Together")
 
 
