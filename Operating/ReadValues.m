@@ -79,7 +79,7 @@ EDB.IndustryElectricityConsumptionChange = readmatrix(Data, 'Sheet','Electricity
 EDB.ElectricityLossRatio = readmatrix(Data, 'Sheet','ElectricityConsumption','Range','E2:E2'); % Save the single Datumn in the DataBase as single value
 
 % Electricity Fuels coeff
-EDB.Crude_Oil_To_Electricity = readmatrix(Data, 'Sheet','Materials','Range','L37:L37');  %11.63; % Crude oil to electricity
+EDB.Crude_Oil_To_Electricity = readmatrix(Data, 'Sheet','Materials','Range','K2:K2');  %11.63; % Crude oil to electricity
 % Emission coefficient per ton fuel burning
 EDB.fuel_MTOE_coeff = 2.5; % CO₂ Emission Factor per Ton of Burning Fuel (Ton/Ton)
 EDB.fuel_LPG_coeff = 2.9; % CO₂ Emission Factor per Ton of Burning LPG Fuel (Ton/Ton)
@@ -110,7 +110,7 @@ EDB.EmissionsCoefficientsUpstreamElectricity = table2array(readtable(Data,'Sheet
 % How many tons of fuel is needed for 1 kwh of electricity
 EDB.ElectrictyManufacturingCoefficients = table2array(readtable(Data,'Sheet','ElectricityManufactureEmissions','Range','B3:E3','ReadVariableNames',false));
 % The Ratio between crude oil to Manufactured Fuel
-EDB.CrudeOilToFuelRatio = readmatrix(Data, 'Sheet','Materials','Range','J48:J48'); 
+EDB.CrudeOilToFuelRatio = readmatrix(Data, 'Sheet','Materials','Range','K4:K4'); 
 
 % Renewable energy data
 % Data about Percentage of enery resurces in the latest year we have data on-  in order to accurate the model data (that based on the 2019 year)
@@ -472,31 +472,30 @@ MDB.FuelConsumption_ColNames = {'Naptha', 'Mazut','Diesel','Kerosene','GWDB.Elec
 %%%% Materials - generated waste and recycling - on hold, Need to Update!!!!!!!!!!!!!!!!!!!!!!!!!!!
 WateAndRecyclingCell = cell(1,Years);
 WateAndRecyclingCell{1} =  array2table(zeros(WateAndRecycling_Row_Num,WateAndRecycling_Col_Num), 'RowNames', WateAndRecycling_RowNames);
-WateAndRecyclingCell{1}{:,:} = table2array(readtable(Data,'Sheet','Materials','Range','I4:P16','ReadVariableNames',false));
+WateAndRecyclingCell{1}{:,:} = table2array(readtable(Data,'Sheet','Materials','Range','B4:I16','ReadVariableNames',false));
 WateAndRecyclingCell{1}.Properties.VariableNames = WateAndRecycling_ColNames;
 MDB.WateAndRecyclingCell = WateAndRecyclingCell;
 
 %%%%% Amounts of Fuels For Industry in tons of oil equivelent
-% Need to Update the Data in the excel...!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 MDB.AmountsOfFuelsCells = cell(1,Years); %% including mazut, kerosene and LPG for transportation
 MDB.AmountsOfFuelsCells{1} = array2table(zeros(AmountsOfFuels_Row_Num,AmountsOfFuels_Col_Num),'RowNames', AmountsOfFuels_RowNames);
-MDB.AmountsOfFuelsCells{1}{1,:} = table2array(readtable(Data,'Sheet','Materials','Range','P45:V45','ReadVariableNames',false));
-MDB.AmountsOfFuelsCells{1}{2,:} = table2array(readtable(Data,'Sheet','Materials','Range','P49:V49','ReadVariableNames',false));
-MDB.AmountsOfFuelsCells{1}{3,:} = table2array(readtable(Data,'Sheet','Materials','Range','P57:V57','ReadVariableNames',false));
-MDB.AmountsOfFuelsCells{1}{4,:} = table2array(readtable(Data,'Sheet','Materials','Range','P41:V41','ReadVariableNames',false));
-MDB.AmountsOfFuelsCells{1}{5,6} = table2array(readtable(Data,'Sheet','Materials','Range','R30:R30','ReadVariableNames',false));
-MDB.AmountsOfFuelsCells{1}{6,6} = table2array(readtable(Data,'Sheet','Materials','Range','R31:R31','ReadVariableNames',false));
+MDB.AmountsOfFuelsCells{1}{1,:} = table2array(readtable(Data,'Sheet','Materials','Range','M15:S15','ReadVariableNames',false));
+MDB.AmountsOfFuelsCells{1}{2,:} = table2array(readtable(Data,'Sheet','Materials','Range','M16:S16','ReadVariableNames',false));
+MDB.AmountsOfFuelsCells{1}{3,:} = table2array(readtable(Data,'Sheet','Materials','Range','M18:S18','ReadVariableNames',false));
+MDB.AmountsOfFuelsCells{1}{4,:} = table2array(readtable(Data,'Sheet','Materials','Range','M14:S14','ReadVariableNames',false));
+MDB.AmountsOfFuelsCells{1}{5,6} = table2array(readtable(Data,'Sheet','Materials','Range','L9:L9','ReadVariableNames',false));
+MDB.AmountsOfFuelsCells{1}{6,6} = table2array(readtable(Data,'Sheet','Materials','Range','L10:L10','ReadVariableNames',false));
 MDB.AmountsOfFuelsCells{1}.Properties.VariableNames = AmountsOfFuels_ColNames;
 
 %%%%%% Calc Consumption emissions 
 % CH4 Emission Coefficients from Waste (Kg/Kg)
-MDB.ConsumptionEmissionCoefficients = table2array(readtable(Data,'Sheet','Materials','Range','X3:X15','ReadVariableNames',false));
+MDB.ConsumptionEmissionCoefficients = table2array(readtable(Data,'Sheet','Materials','Range','G21:G33','ReadVariableNames',false));
 % CH4 Emissions Coefficients from Crude Oil Refining (Kg/Ton)
-MDB.CrudeOilRefiningEmissionsCoefficients = readtable(Data,'Sheet','Materials','Range','B41:H46','ReadVariableNames',false);
+MDB.CrudeOilRefiningEmissionsCoefficients = readtable(Data,'Sheet','Materials','Range','B38:H43','ReadVariableNames',false);
 
 %%%%%% Calc Waste and recycling  
 % Distributionof different materials for Export Waste For Recycling 
-MDB.ExportWasteForRecyclingPercentage = table2array(readtable(Data,'Sheet','Materials','Range','I20:I32','ReadVariableNames',false));
+MDB.ExportWasteForRecyclingPercentage = table2array(readtable(Data,'Sheet','Materials','Range','B20:B32','ReadVariableNames',false));
     
 
 

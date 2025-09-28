@@ -7,3 +7,4 @@ addpath("Data");
 addpath("results");
 addpath("AllTheStepsTogether_RESULTS");
 addpath("export_results_to_excel");
+addpath("Results_Plots");

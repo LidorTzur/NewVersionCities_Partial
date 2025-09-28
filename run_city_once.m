@@ -1,17 +1,14 @@
 
 % run_city_once - מריץ את המודל עבור עיר אחת ושומר את הפלטים
-%
 % קלטים:
-%   cityCode  - קוד עיר ("R", "BS", "BeitS", ...)
 %   excelFile - קובץ האקסל עם הנתונים של העיר
-%
 % פלט:
 %   RDB       - ResultsDataBase של העיר
-
 % =====================
 % 1. קריאה לנתוני קונפיגורציה
 % =====================
-[OutDir] = get_city_info(cityCode);
+[OutDir] = fullfile('C:\Users','צור','Documents','תואר שני','תזה','קיימות ערים','פלטים מהמודל');
+
 
 % משתנה גלובלי או ב-base workspace כדי שהסקריפטים שלך יזהו
 % assignin('base','Data', excelFile); 
@@ -47,7 +44,7 @@ for k = 1:numel(fnames)
     T        = fnames{k}{2};
 
     % שמירה בתיקייה הנוכחית
-    file1 = sprintf('%s_%s.xlsx', baseName, cityCode);
+    file1 = sprintf('Results_Plots\\%s_%s.xlsx', baseName, cityCode);
     writetable(T, file1, 'WriteRowNames', true);
 
     % שמירה בתיקייה הייעודית

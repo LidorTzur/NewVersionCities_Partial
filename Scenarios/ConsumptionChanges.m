@@ -314,11 +314,10 @@ for i = 2:Years
 end    
 
 
-%% Amounts of Fuels (for industry) - Tons
+%% Amounts of Fuels (for industry) - Tons ------ Removed from the City model (Lidor) - values 0
 RowNames = {'Crude Oil Products - Not for Energy', 'Crude Oil For Export', 'Crude Oil Import', 'Crude Oil Products - For Energy', 'LPG - Home', 'LPG - Commertiel' };
 ColNames = {'Naptha', 'Diesel','Mazut','Kerosene','Gasoline','Liquified Petroleum Gas', 'Other'};
 AmountsOfFuelsCells = Data.Materials_DataBase.AmountsOfFuelsCells;
-
 % Crude Oil Products - For Energy
 % multiple by 2- so it match to the data of raziel (this is what tal did and matched to raziel data)
 AmountsOfFuelsCells{1,1}{4,:} = AmountsOfFuelsCells{1,1}{4,:}*2; % Completion to an estimated size of 1.5 MTOE Because currently the data is 0.75
