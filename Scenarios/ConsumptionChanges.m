@@ -274,15 +274,18 @@ ConstructionFootprintTable = Data.Const_DataBase.ConstructionFootprintTable;
 ConstructionFootprint_numRows = height(ConstructionFootprintTable) - 1;
 ConstructionFootprintInitialization = ConstructionFootprintTable{1:ConstructionFootprint_numRows,1};
 
+CDB = Data.Const_DataBase;
  for i=2:Years
 
-    %ConstructionTable{1:ConstructionTable_numRows, i} = (ScenariosTable{1,i}*ConstructionInitialization) - ConstructionInitialization - (Does_Reduce_Last_Year*ConstructionTable{1:ConstructionTable_numRows, i-1});
-    ConstructionTable{1:ConstructionTable_numRows, i} = (ScenariosTable{1,i}*ConstructionInitialization) - (sum(ConstructionTable{1:ConstructionTable_numRows, 1:i-1}, 2));
+    %ConstructionTable{1:ConstructionTable_numRows, i} = (ScenariosTable{1,i}*ConstructionInitialization) - (sum(ConstructionTable{1:ConstructionTable_numRows, 1:i-1}, 2));
+    %ConstructionTable{1:9, i} = (ScenariosTable{1,i}*ConstructionInitialization) - (sum(ConstructionTable{1:ConstructionTable_numRows, 1:i-1}, 2));
+    %ConstructionTable{10:11, i} = (ScenariosTable{1,i}*PopulationStartYear_global*(CDB.Built_up_area_per_capita+(CDB.Annual_area_per_capita_growth_rate*(i-1)))) - (sum(ConstructionTable{1:ConstructionTable_numRows, 1:i-1}, 2)); % For the Domestic Categury
     ConstructionTable{ConstructionTable_numRows+1, i} = sum(ConstructionTable{1:ConstructionTable_numRows, i});
 
     % Lidor's addition
-    %ConstructionFootprintTable{1:ConstructionFootprint_numRows, i} = (ScenariosTable{1,i}*ConstructionFootprintInitialization) - ConstructionFootprintInitialization - (Does_Reduce_Last_Year*ConstructionFootprintTable{1:ConstructionFootprint_numRows, i-1});
     ConstructionFootprintTable{1:ConstructionFootprint_numRows, i} = (ScenariosTable{1,i}*ConstructionFootprintInitialization) - sum(ConstructionFootprintTable{1:ConstructionFootprint_numRows, 1:i-1}, 2);
+    %ConstructionFootprintTable{1:9, i} = (ScenariosTable{1,i}*ConstructionFootprintInitialization) - sum(ConstructionFootprintTable{1:ConstructionFootprint_numRows, 1:i-1}, 2);
+    %ConstructionFootprintTable{10:11, i} = (ScenariosTable{1,i}*ConstructionFootprintInitialization) - sum(ConstructionFootprintTable{1:ConstructionFootprint_numRows, 1:i-1}, 2);
     ConstructionFootprintTable{ConstructionFootprint_numRows+1, i} = sum(ConstructionFootprintTable{1:ConstructionFootprint_numRows, i});
 
  end

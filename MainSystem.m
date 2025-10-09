@@ -5,17 +5,17 @@
 % % Calculate emissions by specific steps
 % runningSteps;
 
-createPath;
-cities = {
-    "RishonLeZion"     , "Data\RishonLeZion.xlsx" , "Scenarios_Rishon.xlsx"
-    "BeerSheva"    , "Data\BeerSheva.xlsx"    , "Scenarios_BeerSheva.xlsx"
-    "BeitShemesh" , "Data\BeitShemesh.xlsx"  , "Scenarios_BeitShemesh.xlsx"
-    "Tlv" , "Data\Tlv.xlsx"  , "Scenarios_Tlv.xlsx"
-    };
-
+% createPath;
 % cities = {
+%     "RishonLeZion"     , "Data\RishonLeZion.xlsx" , "Scenarios_Rishon.xlsx"
+%     "BeerSheva"    , "Data\BeerSheva.xlsx"    , "Scenarios_BeerSheva.xlsx"
 %     "BeitShemesh" , "Data\BeitShemesh.xlsx"  , "Scenarios_BeitShemesh.xlsx"
+%     "Tlv" , "Data\Tlv.xlsx"  , "Scenarios_Tlv.xlsx"
 %     };
+
+cities = {
+    "BeerSheva" , "Data\BeerSheva.xlsx"  , "Scenarios_BeerSheva.xlsx"
+    };
 
 % מבנה שיאחסן את כל התוצאות
 AllCities = struct();

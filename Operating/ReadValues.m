@@ -449,6 +449,41 @@ CDB.ConstructionMaterialLocalProductionRate = table2array(readtable(Data,'Sheet'
 % The emission coefficient per material type (lidor)
 CDB.ConstructionECO2Coefficients_ByMaterial = table2array(readtable(Data,'Sheet','Construction','Range','B22:H22','ReadVariableNames',false));
 
+
+
+
+%----------------------------------------------------- stopped hereeee-----------------------------------
+%% The ConstructionNew Sheet to calculations
+CDB.Built_up_area_per_capita = readmatrix(Data, 'Sheet','ConstructionNew','Range','C7:C7');
+CDB.Built_up_area_per_capita = CDB.Built_up_area_per_capita(1);
+CDB.Annual_area_per_capita_growth_rate = readmatrix(Data, 'Sheet','ConstructionNew','Range','E4:E4');
+CDB.Annual_area_per_capita_growth_rate = CDB.Annual_area_per_capita_growth_rate(1);
+
+ApartmentsDistribution_ColNames = {'1-2','3-5', '6-10', '11-20', '21-30', '31-40', '41+'};
+ApartmentsDistribution_RowNames = {'Estimated percentage of high-density construction', 'Estimated percentage of low-density housing', 'Average floors number'};
+ApartmentsDistribution_Row_Num = int64(numel(ApartmentsDistribution_RowNames));
+ApartmentsDistribution_Col_Num = int64(numel(ApartmentsDistribution_ColNames));
+ApartmentsDistributionCell = cell(1,Years);
+ApartmentsDistributionCell{1} =  array2table(zeros(ApartmentsDistribution_Row_Num,ApartmentsDistribution_Col_Num), 'RowNames', ApartmentsDistribution_RowNames);
+ApartmentsDistributionCell{1}{:,:} = table2array(readtable(Data,'Sheet','ConstructionNew','Range','B20:H22','ReadVariableNames',false));
+ApartmentsDistributionCell{1}.Properties.VariableNames = ApartmentsDistribution_ColNames;
+CDB.ApartmentsDistributionCell = ApartmentsDistributionCell;
+
+Building_Type_Distribution_ColNames = {'High-Density Construction', 'Low-Density Construction'};
+Building_Type_Distribution_Col_Num = int64(numel(Building_Type_Distribution_ColNames));
+Building_Type_Distribution_Cell = cell(1,Years);
+Building_Type_Distribution_Cell{1} =  array2table(zeros(1,Building_Type_Distribution_Col_Num));
+Building_Type_Distribution_Cell{1}{:,:} = table2array(readtable(Data,'Sheet','ConstructionNew','Range','A16:B16','ReadVariableNames',false));
+Building_Type_Distribution_Cell{1}.Properties.VariableNames = Building_Type_Distribution_ColNames;
+CDB.Building_Type_Distribution_Cell = Building_Type_Distribution_Cell;
+
+
+
+
+
+
+
+
 %%%%% Material consumption table (How much Cement for construction)
 % Probably will change, due to consideration of apartments construction!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 %CDB.MaterialConsumption = table2array(readtable(Data,'Sheet','Construction','Range','B41:G42','ReadVariableNames',false));
