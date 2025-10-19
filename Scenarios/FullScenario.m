@@ -1,4 +1,4 @@
-function [EmissionsByYears,ConsumptionAmounts, Resources, WaterFromFoodCell] = FullScenario(Data,ScenariosTable,Years,pop,orderIndex, index, varargin)
+function [EmissionsByYears,ConsumptionAmounts, Resources, WaterFromFoodCell, Data] = FullScenario(Data,ScenariosTable,Years,pop,orderIndex, index, varargin)
 
 % INPUTS:
 % - Data: Structure with base environmental data.
@@ -94,10 +94,14 @@ TransitionToElectricBus = ScenariosTable{17,:};
 WaterSaving = ScenariosTable{19,:};
 ReducingMeatConsumptionPercentage = ScenariosTable{20,:};
 
+% New - Lidor's adding - construction scenario
+ChangeInBuildingMixRatio = ScenariosTable{21,:}; % Row 21: High-Density Ratio (0 to 1)
+ChangeInFloorPrintHighDensity = ScenariosTable{22,:}; % Row 22: FloorPrint High-Density Multiplier
+ChangeInFloorPrintLowDensity = ScenariosTable{23,:}; % Row 23: FloorPrint Low-Density Multiplier
 
 %% Calculate Base Consumptions (No scenario)
 % Calculate the base consumption data based on population growth
-[ElectricityConsumptionTable, TransportationConsumptionTable, VehicleAmountsCell, FoodConsumptionCell, WaterConsumptionCell, ConstructionTable, ConstructionFootprintTable ,WasteAndRecyclingCell,AmountsOfFuelsCells, OrganicWasteCell] = ConsumptionChanges(Data,ScenariosTable, Years, pop, orderIndex);
+[ElectricityConsumptionTable, TransportationConsumptionTable, VehicleAmountsCell, FoodConsumptionCell, WaterConsumptionCell, ConstructionTable, ConstructionFootprintTable ,WasteAndRecyclingCell,AmountsOfFuelsCells, OrganicWasteCell, Data1] = ConsumptionChanges(Data,ScenariosTable, Years, pop, orderIndex);
 
 %% Create the years column names (based on the years)
 YearsStringsForColNames = cell(1,Years);
@@ -589,6 +593,7 @@ Resources = cell2table(Resources);
 Resources.Properties.RowNames = Resources_RowNames;
 Resources.Properties.VariableNames = YearsStringsForColNames;
 
+Data = Data1;
 
 %% Inputs to the functions
 % TransRowNames = Data.Trans_DataBase.Vehicle_Amounts_RowNames;

@@ -7,6 +7,7 @@ addpath("Data");
 
 %% Create the DataBase
 DataBase = struct();
+ChangeDataBase = struct();
 DataBase.Water_DataBase = struct();
 DataBase.Electricity_DataBase = struct();
 DataBase.Trans_DataBase = struct();
@@ -449,10 +450,7 @@ CDB.ConstructionMaterialLocalProductionRate = table2array(readtable(Data,'Sheet'
 % The emission coefficient per material type (lidor)
 CDB.ConstructionECO2Coefficients_ByMaterial = table2array(readtable(Data,'Sheet','Construction','Range','B22:H22','ReadVariableNames',false));
 
-
-
-
-%----------------------------------------------------- stopped hereeee-----------------------------------
+%----------------------------------------------------- New Application-----------------------------------
 %% The ConstructionNew Sheet to calculations
 CDB.Built_up_area_per_capita = readmatrix(Data, 'Sheet','ConstructionNew','Range','C7:C7');
 CDB.Built_up_area_per_capita = CDB.Built_up_area_per_capita(1);
@@ -478,18 +476,18 @@ Building_Type_Distribution_Cell{1}.Properties.VariableNames = Building_Type_Dist
 CDB.Building_Type_Distribution_Cell = Building_Type_Distribution_Cell;
 
 
-
-
-
-
+Precent_Floor_Footprint_ColNames = {'High-Density Construction', 'Low-Density Construction'};
+Precent_Floor_Footprint_Col_Num = int64(numel(Precent_Floor_Footprint_ColNames));
+Precent_Floor_Footprint_Cell = cell(1,Years);
+Precent_Floor_Footprint_Cell{1} =  array2table(zeros(1,Precent_Floor_Footprint_Col_Num));
+Precent_Floor_Footprint_Cell{1}{:,:} = table2array(readtable(Data,'Sheet','ConstructionNew','Range','B4:C4','ReadVariableNames',false));
+Precent_Floor_Footprint_Cell{1}.Properties.VariableNames = Precent_Floor_Footprint_ColNames;
+CDB.Precent_Floor_Footprint_Cell = Precent_Floor_Footprint_Cell;
 
 
 %%%%% Material consumption table (How much Cement for construction)
 % Probably will change, due to consideration of apartments construction!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 %CDB.MaterialConsumption = table2array(readtable(Data,'Sheet','Construction','Range','B41:G42','ReadVariableNames',false));
-
-
-
 
 
 %% ---------------------------------------- MATERIALS ------------------------------------------------

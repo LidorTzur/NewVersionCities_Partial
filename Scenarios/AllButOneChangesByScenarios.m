@@ -109,6 +109,7 @@ end
 % same structure)
 
 AllButOneScenariosTable{1,:} = CalcChangeVector(MilesTonesTable{1,:}, Years, S(1)); % Population Growth
+
 AllButOneScenariosTable{2,:} = CalcChangeVector(MilesTonesTable{2,:}, Years, S(2)); % Increased Electricity Per Capita
 AllButOneScenariosTable{3,:} = CalcChangeVector(MilesTonesTable{3,:}, Years, S(3), 'Type', 'Linear', 'Growth', false); % Desalinated Water
 AllButOneScenariosTable{8,:} = CalcChangeVector(MilesTonesTable{8,:}, Years, S(8), 'Growth', false); % Electricity saving
@@ -143,6 +144,17 @@ AllButOneScenariosTable{16,:} = CalcChangeVector(MilesTonesTable{16,:}, Years, S
 AllButOneScenariosTable{17,:} = CalcChangeVector(MilesTonesTable{17,:}, Years, S(17)); % Electric Bus transition
 AllButOneScenariosTable{18,:} = CalcChangeVector(MilesTonesTable{18,:}, Years, S(18)); 
 
+
+
+
+
+%% --- Construction - Add New Scenario (Assuming it's now Row 21, 22, 23 in the scenarios table) ---
+% Change in Building Type Distribution (Assuming S(21) holds the final High-Density target ratio, e.g., 0.7 for 70% HD)
+% We calculate the change vector that interpolates the High-Density ratio from the current ratio to the target S(21).
+% Assuming linear interpolation for the ratio itself (not the change *from* 1)
+AllButOneScenariosTable{21,:} = CalcChangeVector(MilesTonesTable{21,:}, Years, S(21), 'Type', 'Linear', 'Growth', true);
+AllButOneScenariosTable{22,:} = CalcChangeVector(MilesTonesTable{22,:}, Years, S(22), 'Type', 'Linear', 'Growth', true);
+AllButOneScenariosTable{23,:} = CalcChangeVector(MilesTonesTable{23,:}, Years, S(23), 'Type', 'Linear', 'Growth', true);
 
 %% Everyone but one- If there is a scenario chosen : Apply specific changes based on scenario selection
 % We will neutralize the effect of the chosen scenario by changing all the factors except this one.

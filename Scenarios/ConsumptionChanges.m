@@ -1,4 +1,4 @@
- function [ElectricityConsumptionTable, TransportationConsumptionTable, VehicleAmountsCell, FoodConsumptionCell, WaterConsumptionCell, ConstructionTable, ConstructionFootprintTable, WateAndRecyclingCell, AmountsOfFuelsCells, OrganicWasteAmount] = ConsumptionChanges(Data, ScenariosTable,Years,pop,orderIndex, varargin)
+ function [ElectricityConsumptionTable, TransportationConsumptionTable, VehicleAmountsCell, FoodConsumptionCell, WaterConsumptionCell, ConstructionTable, ConstructionFootprintTable, WateAndRecyclingCell, AmountsOfFuelsCells, OrganicWasteAmount, Data] = ConsumptionChanges(Data, ScenariosTable,Years,pop,orderIndex, varargin)
 % This function calculates consumption changes based on population growth and predefined coefficients.
 % Input:
 %   - Data: Structure containing base data for various consumption categories.
@@ -261,37 +261,139 @@ end
 
 Data.Water_DataBase = WDB;
 
+%% ----------------------------------Construction Tables
+
+% The Scenario Vector
+% Update Building Type Distribution based on Scenario 21 (ChangeInBuildingMixRatio)
+ChangeInBuildingMixRatio = ScenariosTable{21,:}; % Multiplicative factor (e.g., 1.6 for 60% increase)
+ChangeInFloorPrintHighDensity = ScenariosTable{22,:}; % Row 22: Multiplicative factor for High-Density FloorPrint
+ChangeInFloorPrintLowDensity = ScenariosTable{23,:}; % Row 23: Multiplicative factor for Low-Density FloorPrint
+
+BaseDistTable = Data.Const_DataBase.Building_Type_Distribution_Cell{1}; % Get the Base Table structure for updates
+BaseFootprintTable = Data.Const_DataBase.Precent_Floor_Footprint_Cell{1}; % נתוני בסיס של Footprint Ratio
+
+% Ensure the Cell Array is initialized for all years (Building Type)
+MaxIndex = length(Data.Const_DataBase.Building_Type_Distribution_Cell);
+if MaxIndex < Years
+    BaseTableToCopy = Data.Const_DataBase.Building_Type_Distribution_Cell{1};
+    for k = MaxIndex+1:Years
+        Data.Const_DataBase.Building_Type_Distribution_Cell{k} = BaseTableToCopy;
+    end
+end
+
+% Ensure Cell Arrays are initialized for all years (Floor Print)
+MaxIndex_Foot = length(Data.Const_DataBase.Precent_Floor_Footprint_Cell);
+if MaxIndex_Foot < Years
+    BaseTableToCopy = Data.Const_DataBase.Precent_Floor_Footprint_Cell{1};
+    for k = MaxIndex_Foot+1:Years
+        Data.Const_DataBase.Precent_Floor_Footprint_Cell{k} = BaseTableToCopy;
+    end
+end
+
+% --- Apply Scenarios 21, 22, 23 and update CDB tables for CalculateAnnualResidentialAreas ---
+for i = 1:Years
+    
+    % --- Update Building Type Distribution (Scenario 21) ---
+    CurrentMultiplier = ChangeInBuildingMixRatio(i); 
+    InitialHDRatio = BaseDistTable{1, 1}; % חילוץ מספר טהור (עובד ב-readValues)
+
+    NewHDRatio_Raw = InitialHDRatio * CurrentMultiplier;
+    CurrentHighDensityRatio = min(NewHDRatio_Raw, 1.0);
+    CurrentLowDensityRatio = 1 - CurrentHighDensityRatio;
+
+    NewDistTable = BaseDistTable; % Copy structure
+    NewDistTable{1, 1} = CurrentHighDensityRatio;
+    NewDistTable{1,2} = CurrentLowDensityRatio; 
+    Data.Const_DataBase.Building_Type_Distribution_Cell{i} = NewDistTable;
+
+    % --- Update Floor Print Distribution (Scenarios 22, 23) ---
+    InitialHighFootprintRatio = BaseFootprintTable{1, 1};
+    InitialLowFootprintRatio = BaseFootprintTable{1,2};
+
+    NewHighFootprintRatio = min(InitialHighFootprintRatio * ChangeInFloorPrintHighDensity(i), 1.0);
+    NewLowFootprintRatio = min(InitialLowFootprintRatio * ChangeInFloorPrintLowDensity(i), 1.0);
+
+    NewFootTable = BaseFootprintTable;
+    NewFootTable{1,1} = NewHighFootprintRatio;
+    NewFootTable{1,2} = NewLowFootprintRatio;
+    Data.Const_DataBase.Precent_Floor_Footprint_Cell{i} = NewFootTable;
+end
 
 
-
-%% Construction Tables
+%% The tables (Applying the core logic)
 ConstructionTable = Data.Const_DataBase.ConstructionTable;
 ConstructionTable_numRows = height(ConstructionTable) - 1;
 ConstructionInitialization = ConstructionTable{1:ConstructionTable_numRows,1};
-
 % Lidor's addition
 ConstructionFootprintTable = Data.Const_DataBase.ConstructionFootprintTable;
 ConstructionFootprint_numRows = height(ConstructionFootprintTable) - 1;
 ConstructionFootprintInitialization = ConstructionFootprintTable{1:ConstructionFootprint_numRows,1};
-
 CDB = Data.Const_DataBase;
- for i=2:Years
 
-    %ConstructionTable{1:ConstructionTable_numRows, i} = (ScenariosTable{1,i}*ConstructionInitialization) - (sum(ConstructionTable{1:ConstructionTable_numRows, 1:i-1}, 2));
-    %ConstructionTable{1:9, i} = (ScenariosTable{1,i}*ConstructionInitialization) - (sum(ConstructionTable{1:ConstructionTable_numRows, 1:i-1}, 2));
-    %ConstructionTable{10:11, i} = (ScenariosTable{1,i}*PopulationStartYear_global*(CDB.Built_up_area_per_capita+(CDB.Annual_area_per_capita_growth_rate*(i-1)))) - (sum(ConstructionTable{1:ConstructionTable_numRows, 1:i-1}, 2)); % For the Domestic Categury
+% 1. Calculate the ACCUMULATIVE Residential Areas (Built Area and Floor Footprint) for all years
+% This uses the dynamic 'area per capita', 'building type distribution', and 'floor footprint ratio'
+[BuiltAreaRes_Acc, FloorFootprintRes_Acc, CDB] = CalculateAnnualResidentialAreas(CDB, pop, Years); 
+Data.Const_DataBase = CDB;
+
+% 2. Loop to calculate the ANNUAL DELTA (Years 2 to End)
+for i=2:Years
+    
+    % --- Non-Residential Sectors (Rows 1-9) - Maintain Existing Logic (Population Growth) ---
+    Non_Residential_Growth_Ratio = ScenariosTable{1,i}; 
+    
+    % Built Area Delta (New construction required this year)
+    % Delta = Total Required up to year 'i' - Cumulative built up to year 'i-1'
+    Total_Non_Residential_Area = Non_Residential_Growth_Ratio * ConstructionInitialization(1:9); 
+    ConstructionTable{1:9, i} = Total_Non_Residential_Area - sum(ConstructionTable{1:9, 1:i-1}, 2);
+    
+    % Floor Footprint Delta 
+    Total_Non_Residential_Footprint = Non_Residential_Growth_Ratio * ConstructionFootprintInitialization(1:9);
+    ConstructionFootprintTable{1:9, i} = Total_Non_Residential_Footprint - sum(ConstructionFootprintTable{1:9, 1:i-1}, 2);
+ 
+    % --- Residential Sectors (Rows 10 & 11) - Use New Master Plan Calculation ---
+    % Row 10: Residential - High-Density, Row 11: Residential - Low-Density
+    
+    % Built Area Delta (using the result from the new helper function)
+    %ConstructionTable{10, i} = BuiltAreaRes_Acc(1, i) - sum(ConstructionTable{10, 1:i-1}, 2); % High-Density
+    %ConstructionTable{11, i} = BuiltAreaRes_Acc(2, i) - sum(ConstructionTable{11, 1:i-1}, 2); % Low-Density
+    
+    % Floor Footprint Delta (using the result from the new helper function)
+    %ConstructionFootprintTable{10, i} = FloorFootprintRes_Acc(1, i) - sum(ConstructionFootprintTable{10, 1:i-1}, 2); % High-Density
+    %ConstructionFootprintTable{11, i} = FloorFootprintRes_Acc(2, i) - sum(ConstructionFootprintTable{11, 1:i-1}, 2); % Low-Density
+    
+
+    % דלתא אמיתית = שינוי בין שני ערכים מצטברים סמוכים
+    ConstructionTable{10, i} = BuiltAreaRes_Acc(1, i) - BuiltAreaRes_Acc(1, i-1);
+    ConstructionTable{11, i} = BuiltAreaRes_Acc(2, i) - BuiltAreaRes_Acc(2, i-1);
+    
+    ConstructionFootprintTable{10, i} = FloorFootprintRes_Acc(1, i) - FloorFootprintRes_Acc(1, i-1);
+    ConstructionFootprintTable{11, i} = FloorFootprintRes_Acc(2, i) - FloorFootprintRes_Acc(2, i-1);
+
+
+    % Update Total Rows
     ConstructionTable{ConstructionTable_numRows+1, i} = sum(ConstructionTable{1:ConstructionTable_numRows, i});
-
-    % Lidor's addition
-    ConstructionFootprintTable{1:ConstructionFootprint_numRows, i} = (ScenariosTable{1,i}*ConstructionFootprintInitialization) - sum(ConstructionFootprintTable{1:ConstructionFootprint_numRows, 1:i-1}, 2);
-    %ConstructionFootprintTable{1:9, i} = (ScenariosTable{1,i}*ConstructionFootprintInitialization) - sum(ConstructionFootprintTable{1:ConstructionFootprint_numRows, 1:i-1}, 2);
-    %ConstructionFootprintTable{10:11, i} = (ScenariosTable{1,i}*ConstructionFootprintInitialization) - sum(ConstructionFootprintTable{1:ConstructionFootprint_numRows, 1:i-1}, 2);
     ConstructionFootprintTable{ConstructionFootprint_numRows+1, i} = sum(ConstructionFootprintTable{1:ConstructionFootprint_numRows, i});
+end
 
- end
- % Take for the base year 2019 the 2020 delta
- ConstructionTable{1:ConstructionTable_numRows, 1} = ConstructionTable{1:ConstructionTable_numRows, 2};
- ConstructionFootprintTable{1:ConstructionFootprint_numRows, 1} = ConstructionFootprintTable{1:ConstructionFootprint_numRows, 2};
+% Ensure no negative delta values (prevents negative emissions/material use if cumulative demand decreases)
+ConstructionTable{:, :} = max(ConstructionTable{:, :}, 0);
+ConstructionFootprintTable{:, :} = max(ConstructionFootprintTable{:, :}, 0);
+
+% Set Base Year 2019 Delta to 2020 Delta (as done in the original code)
+ConstructionFootprintTable{1:ConstructionFootprint_numRows, 1} = ConstructionFootprintTable{1:ConstructionFootprint_numRows, 2};
+ConstructionTable{1:ConstructionTable_numRows, 1} = ConstructionTable{1:ConstructionTable_numRows, 2};
+
+
+% Save Results
+Data.ConstructionTable = ConstructionTable;
+Data.ConstructionFootprintTable = ConstructionFootprintTable;
+
+
+
+
+
+
+
 
 %% Materials - generated waste and recycling
 RowNames = {'Organic Products','Plastic', 'Paper', 'Cardboard', 'Diapers', 'Garden Waste', 'Textile', 'Metal', 'Glass', 'Pruned Trees','Wood', 'Oils', 'Others'};
@@ -526,3 +628,77 @@ function FoodPercentegeByTheYearsGlobal = CalcFoodPercentegeByTheYearsGlobal(Sce
     end
 end
 
+
+function [BuiltAreaRes, FloorFootprintRes, CDB] = CalculateAnnualResidentialAreas(CDB, pop, Years)
+% CALCULATEANNUALRESIDENTIALAREAS calculates the cumulative built area and floor footprint
+% for residential sectors (High-Density and Low-Density) based on the city's
+% master plan logic and time-varying coefficients.
+%
+% Inputs:
+% - CDB: Construction DataBase structure (contains base values and coefficients).
+% - pop: Population data table.
+% - Years: Total number of years in the simulation (e.g., 32 for 2019-2050).
+%
+% Outputs:
+% - BuiltAreaRes: 2xYears matrix of ACCUMULATIVE Built Area (Row 1: High-Density; Row 2: Low-Density).
+% - FloorFootprintRes: 2xYears matrix of ACCUMULATIVE Floor Footprint (Row 1: High-Density; Row 2: Low-Density).
+
+    BuiltAreaRes = zeros(2, Years); 
+    FloorFootprintRes = zeros(2, Years); 
+    
+    % 1. Calculate 'Built-up area per capita' vector (Km²/person)
+    CDB.AreaPerCapitaVector = zeros(1, Years);
+    CDB.AreaPerCapitaVector(1) = CDB.Built_up_area_per_capita; % 2019 Base Value
+    
+    % Annual linear growth
+    for i = 2:Years
+        CDB.AreaPerCapitaVector(i) = CDB.AreaPerCapitaVector(i-1) + CDB.Annual_area_per_capita_growth_rate;
+    end
+    
+    % City's Population Vector (assuming 'Israel population' row is used)
+    PopulationVector = pop{'Israel population', 1:Years};
+    
+
+    % 2. Calculate Total Cumulative Residential Built Area and Floor Footprint
+    for i = 1:Years
+        disp(i+2019-1);
+        disp(PopulationVector(i));
+        
+        % Total built area required for residential up to year i (Cumulative)
+        % (Population * Area per Capita)
+        TotalBuiltAreaResidential = PopulationVector(i) * 1000000 * CDB.AreaPerCapitaVector(i);
+
+        % --- Retrieve Time-Varying Coefficients for the current year ---
+        % If data is not provided for all years in the Cell Array, use the data from year 1
+        
+        % Building Type Distribution (High/Low Density split)
+        if i <= length(CDB.Building_Type_Distribution_Cell)
+            Dist_Table = CDB.Building_Type_Distribution_Cell{i};
+        else
+            Dist_Table = CDB.Building_Type_Distribution_Cell{1}; % Use Year 1 data as fallback
+        end
+        Dist_High = table2array(Dist_Table(1,1));
+        Dist_Low = table2array(Dist_Table(1,2));
+
+        % Percent Floor Footprint of Total Built Area
+        if i < length(CDB.Precent_Floor_Footprint_Cell)
+            Footprint_Table = CDB.Precent_Floor_Footprint_Cell{i};
+        else
+            Footprint_Table = CDB.Precent_Floor_Footprint_Cell{1}; % Use Year 1 data as fallback
+        end   
+
+        Footprint_Ratio_High = Footprint_Table{1,1};
+        Footprint_Ratio_Low = Footprint_Table{1,2};
+       
+        
+        % 3. Calculate Cumulative Built Area (Rows 10 & 11)
+        BuiltAreaRes(1, i) = TotalBuiltAreaResidential * Dist_High; % High-Density
+        BuiltAreaRes(2, i) = TotalBuiltAreaResidential * Dist_Low;  % Low-Density
+
+        % 4. Calculate Cumulative Floor Footprint (Rows 10 & 11)
+        % Floor Footprint = Built Area * Floor Footprint Ratio (for each type)
+        FloorFootprintRes(1, i) = BuiltAreaRes(1, i) * Footprint_Ratio_High; % High-Density
+        FloorFootprintRes(2, i) = BuiltAreaRes(2, i) * Footprint_Ratio_Low;  % Low-Density
+        
+    end
+end

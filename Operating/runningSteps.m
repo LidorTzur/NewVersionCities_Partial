@@ -105,7 +105,8 @@ switch orderIndex
         % Moderate
         [RDB.Moderate_RDB.FullScenariosTable2] = AllButOneChangesByScenarios(DataBase, 0, Years, ScenariosAndValues{:,7}, 'MileStones', false);
         [RDB.Moderate_RDB.population] = populationCal(RDB.Moderate_RDB.FullScenariosTable2);
-        [RDB.Moderate_RDB.EmissionsByYearsTest2, RDB.Moderate_RDB.ConsumptionAmounts2, RDB.Moderate_RDB.Resources2, RDB.Moderate_RDB.WaterFromFood2] = FullScenario(DataBase, RDB.Moderate_RDB.FullScenariosTable2,Years,RDB.Moderate_RDB.population,orderIndex, 0, RDB.BAU_RDB.WaterFromFood1);
+        [RDB.Moderate_RDB.EmissionsByYearsTest2, RDB.Moderate_RDB.ConsumptionAmounts2, RDB.Moderate_RDB.Resources2, RDB.Moderate_RDB.WaterFromFood2, Data1] = FullScenario(DataBase, RDB.Moderate_RDB.FullScenariosTable2,Years,RDB.Moderate_RDB.population,orderIndex, 0, RDB.BAU_RDB.WaterFromFood1);
+        
         %[EmissionsByYearsTest2, ConsumptionAmounts2, Resources2, WaterFromFood2] = FullScenarioCompare(DataBase, FullScenariosTable2,Years,population,WaterFromFood1,orderIndex);
         % Calculate the Resurces Tables
         [RDB.Moderate_RDB.AreaSum2, RDB.Moderate_RDB.CostsSum2, RDB.Moderate_RDB.WaterSum2] = CalcTotalResources(RDB.Moderate_RDB.Resources2, RDB.Moderate_RDB.ConsumptionAmounts2, RDB.Moderate_RDB.WaterFromFood2);
@@ -113,11 +114,13 @@ switch orderIndex
         % Advanced
         [RDB.Advanced_RDB.FullScenariosTable3] = AllButOneChangesByScenarios(DataBase, 0, Years, ScenariosAndValues{:,8}, 'MileStones', false);
         [RDB.Advanced_RDB.population] = populationCal(RDB.Advanced_RDB.FullScenariosTable3);
-        [RDB.Advanced_RDB.EmissionsByYearsTest3, RDB.Advanced_RDB.ConsumptionAmounts3, RDB.Advanced_RDB.Resources3, RDB.Advanced_RDB.WaterFromFood3] = FullScenario(DataBase, RDB.Advanced_RDB.FullScenariosTable3,Years,RDB.Advanced_RDB.population,orderIndex, 0, RDB.BAU_RDB.WaterFromFood1);
+        [RDB.Advanced_RDB.EmissionsByYearsTest3, RDB.Advanced_RDB.ConsumptionAmounts3, RDB.Advanced_RDB.Resources3, RDB.Advanced_RDB.WaterFromFood3, Data1] = FullScenario(DataBase, RDB.Advanced_RDB.FullScenariosTable3,Years,RDB.Advanced_RDB.population,orderIndex, 0, RDB.BAU_RDB.WaterFromFood1);
+        
         %[EmissionsByYearsTest3, ConsumptionAmounts3, Resources3, WaterFromFood3] = FullScenarioCompare(DataBase, FullScenariosTable3,Years,population,WaterFromFood1,orderIndex);
         % Calculate the Resurces Tables
         [RDB.Advanced_RDB.AreaSum3, RDB.Advanced_RDB.CostsSum3, RDB.Advanced_RDB.WaterSum3] = CalcTotalResources(RDB.Advanced_RDB.Resources3, RDB.Advanced_RDB.ConsumptionAmounts3, RDB.Advanced_RDB.WaterFromFood3);
         
+        ChangeDataBase = Data1;
         ResultsDataBase = RDB;
         AllTheStepsTogether_RESULTS;
         results;
@@ -185,8 +188,8 @@ switch orderIndex
     %     [EmissionsByYearsTest3, ConsumptionAmounts3, Resources3, WaterFromFood3] = FullScenarioCompare(DataBase, FullScenariosTable3,Years,population,WaterFromFood1,orderIndex);
     % 
 
-    
-    case 8 % Sensitivity Analysis - +- 10%
+    % Sensitivity Analysis - +- 10%
+    case 8 
         SR = SensitivityResults;
         % preperations: define the new scenario precentages and the year.
         %GeneralInputsDataBase.BaseYear = BaseYear;
@@ -218,7 +221,8 @@ switch orderIndex
             % Calculation on the Original values
             [FullScenariosTable1] = AllButOneChangesByScenarios(DataBase, 0, Years, ScenariosAndValues{:,9}, 'MileStones', false);
             [population] = populationCal(FullScenariosTable1);
-            [EmissionsByYearsTest1, ConsumptionAmounts1, Resources1, WaterFromFood1] = FullScenario(DataBase, FullScenariosTable1,Years,population,orderIndex,0);
+            [EmissionsByYearsTest1, ConsumptionAmounts1, Resources1, WaterFromFood1, Data1] = FullScenario(DataBase, FullScenariosTable1,Years,population,orderIndex,0);
+            
             TotalEmission1 = CalcUpDownStream(EmissionsByYearsTest1);
             Emission1_Sum = sum(TotalEmission1{1:11, Years}); 
             
@@ -240,7 +244,8 @@ switch orderIndex
 
             [FullScenariosTable2] = AllButOneChangesByScenarios(DataBase, 0, Years, ScenariosAndValues{:,9}, 'MileStones', false);
             [population] = populationCal(FullScenariosTable2);
-            [EmissionsByYearsTest2, ConsumptionAmounts2, Resources2, WaterFromFood2] = FullScenario(DataBase, FullScenariosTable2,Years,population,orderIndex,0);
+            [EmissionsByYearsTest2, ConsumptionAmounts2, Resources2, WaterFromFood2, Data1] = FullScenario(DataBase, FullScenariosTable2,Years,population,orderIndex,0);
+            
             TotalEmission2 = CalcUpDownStream(EmissionsByYearsTest2);
             Emission2_Sum = sum(TotalEmission2{1:11, Years});  % changed to Years instead of a Number!!!!!!!!!
             [AreaSum2, CostsSum2, WaterSum2] = CalcTotalResources(Resources2, ConsumptionAmounts2, WaterFromFood2);
@@ -265,7 +270,7 @@ switch orderIndex
 
             [FullScenariosTable3] = AllButOneChangesByScenarios(DataBase, 0, Years, ScenariosAndValues{:,9}, 'MileStones', false);
             [population] = populationCal(FullScenariosTable3);
-            [EmissionsByYearsTest3, ConsumptionAmounts3, Resources3, WaterFromFood3] = FullScenario(DataBase, FullScenariosTable3,Years,population,orderIndex,0);
+            [EmissionsByYearsTest3, ConsumptionAmounts3, Resources3, WaterFromFood3,Data1] = FullScenario(DataBase, FullScenariosTable3,Years,population,orderIndex,0);
             
             TotalEmission3 = CalcUpDownStream(EmissionsByYearsTest3);
             Emission3_Sum = sum(TotalEmission3{1:11, Years}); % changed to Years instead of a Number!!!!!!!!!
@@ -279,6 +284,7 @@ switch orderIndex
             
 
             % Compare the Results for the sensetivity Analisys
+            ChangeDataBase = Data1;
 
             BiggerMinusOriginal = TotalEmission2 - TotalEmission1;
             OriginalMinusSmaller = TotalEmission1 - TotalEmission3;
