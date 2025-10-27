@@ -51,3 +51,5 @@ for k = 1:numel(fnames)
     file2 = fullfile(OutDir, sprintf('%s_%s.xlsx', baseName, cityCode));
     writetable(T, file2, 'WriteRowNames', true);
 end
+
+clear file2 file1 baseName T k fnames

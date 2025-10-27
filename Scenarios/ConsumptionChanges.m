@@ -268,9 +268,11 @@ Data.Water_DataBase = WDB;
 ChangeInBuildingMixRatio = ScenariosTable{21,:}; % Multiplicative factor (e.g., 1.6 for 60% increase)
 ChangeInFloorPrintHighDensity = ScenariosTable{22,:}; % Row 22: Multiplicative factor for High-Density FloorPrint
 ChangeInFloorPrintLowDensity = ScenariosTable{23,:}; % Row 23: Multiplicative factor for Low-Density FloorPrint
+ChangeInFloorsNumber = ScenariosTable{24:32,:};
 
 BaseDistTable = Data.Const_DataBase.Building_Type_Distribution_Cell{1}; % Get the Base Table structure for updates
 BaseFootprintTable = Data.Const_DataBase.Precent_Floor_Footprint_Cell{1}; % נתוני בסיס של Footprint Ratio
+BaseFloorsTable = Data.Const_DataBase.ConstructionFloorsTable{:,1}; % numbers of floors base value
 
 % Ensure the Cell Array is initialized for all years (Building Type)
 MaxIndex = length(Data.Const_DataBase.Building_Type_Distribution_Cell);
@@ -287,6 +289,16 @@ if MaxIndex_Foot < Years
     BaseTableToCopy = Data.Const_DataBase.Precent_Floor_Footprint_Cell{1};
     for k = MaxIndex_Foot+1:Years
         Data.Const_DataBase.Precent_Floor_Footprint_Cell{k} = BaseTableToCopy;
+    end
+end
+
+
+% Ensure Cell Arrays are initialized for all years (Floors number)
+MaxIndex_Foot = width(Data.Const_DataBase.ConstructionFloorsTable);
+if MaxIndex_Foot < Years
+    BaseTableToCopy = Data.Const_DataBase.ConstructionFloorsTable{:,1};
+    for k = MaxIndex_Foot+1:Years
+        Data.Const_DataBase.ConstructionFloorsTable{:,k} = BaseTableToCopy;
     end
 end
 
@@ -317,6 +329,14 @@ for i = 1:Years
     NewFootTable{1,1} = NewHighFootprintRatio;
     NewFootTable{1,2} = NewLowFootprintRatio;
     Data.Const_DataBase.Precent_Floor_Footprint_Cell{i} = NewFootTable;
+
+
+    % --- Update Floors number (Scenario 24: 32.. ...) ---
+    CurrentFloorsChange = ChangeInFloorsNumber(i); 
+    InitialFloorNumber = BaseFloorsTable; % חילוץ מספר טהור (עובד ב-readValues) 
+
+    NewFloorNumber = InitialFloorNumber * CurrentFloorsChange;
+    Data.Const_DataBase.ConstructionFloorsTable{:,i} = NewFloorNumber;
 end
 
 
@@ -324,8 +344,11 @@ end
 ConstructionTable = Data.Const_DataBase.ConstructionTable;
 ConstructionTable_numRows = height(ConstructionTable) - 1;
 ConstructionInitialization = ConstructionTable{1:ConstructionTable_numRows,1};
+
 % Lidor's addition
 ConstructionFootprintTable = Data.Const_DataBase.ConstructionFootprintTable;
+ConstructionFloorsTable = Data.Const_DataBase.ConstructionFloorsTable;
+
 ConstructionFootprint_numRows = height(ConstructionFootprintTable) - 1;
 ConstructionFootprintInitialization = ConstructionFootprintTable{1:ConstructionFootprint_numRows,1};
 CDB = Data.Const_DataBase;
@@ -347,7 +370,9 @@ for i=2:Years
     ConstructionTable{1:9, i} = Total_Non_Residential_Area - sum(ConstructionTable{1:9, 1:i-1}, 2);
     
     % Floor Footprint Delta 
-    Total_Non_Residential_Footprint = Non_Residential_Growth_Ratio * ConstructionFootprintInitialization(1:9);
+    Floors_NonRes = ConstructionFloorsTable{1:9,i};
+    Floors_NonRes(Floors_NonRes == 0) = 1; % prevent division by zero
+    Total_Non_Residential_Footprint = Total_Non_Residential_Area ./ Floors_NonRes;
     ConstructionFootprintTable{1:9, i} = Total_Non_Residential_Footprint - sum(ConstructionFootprintTable{1:9, 1:i-1}, 2);
  
     % --- Residential Sectors (Rows 10 & 11) - Use New Master Plan Calculation ---
@@ -661,8 +686,8 @@ function [BuiltAreaRes, FloorFootprintRes, CDB] = CalculateAnnualResidentialArea
 
     % 2. Calculate Total Cumulative Residential Built Area and Floor Footprint
     for i = 1:Years
-        disp(i+2019-1);
-        disp(PopulationVector(i));
+        %disp(i+2019-1);
+        %disp(PopulationVector(i));
         
         % Total built area required for residential up to year i (Cumulative)
         % (Population * Area per Capita)

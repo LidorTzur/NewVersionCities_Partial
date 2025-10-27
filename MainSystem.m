@@ -36,3 +36,6 @@ end
 
 % שמירה של כל הערים בקובץ אחד
 save('AllCitiesResults.mat', 'AllCities');
+
+clear palestinians_base_pop_global PopulationStartYear_global RDB s1 cities i 
+clear Data scenarios

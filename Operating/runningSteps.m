@@ -193,7 +193,7 @@ switch orderIndex
         SR = SensitivityResults;
         % preperations: define the new scenario precentages and the year.
         %GeneralInputsDataBase.BaseYear = BaseYear;
-        Years = 2035 - BaseYear + 1; % for 2035
+        Years = 2050 - BaseYear + 1; % for 2035
         RelevantScenarios = [1, 2, 4, 5, 6, 7, 8, 12, 13, 14, 15, 16, 17, 19, 20];  % only choosing interesting scenarios
         rowNames = ScenariosAndValues.Properties.RowNames;
         RelevantScenarioNames = rowNames(RelevantScenarios);
@@ -273,7 +273,7 @@ switch orderIndex
             [EmissionsByYearsTest3, ConsumptionAmounts3, Resources3, WaterFromFood3,Data1] = FullScenario(DataBase, FullScenariosTable3,Years,population,orderIndex,0);
             
             TotalEmission3 = CalcUpDownStream(EmissionsByYearsTest3);
-            Emission3_Sum = sum(TotalEmission3{1:11, Years}); % changed to Years instead of a Number!!!!!!!!!
+            Emission3_Sum = sum(TotalEmission3{1:11, Years}); 
             
             [AreaSum3, CostsSum3, WaterSum3] = CalcTotalResources(Resources3, ConsumptionAmounts3, WaterFromFood3);
             Area3_Sum = sum(AreaSum3{1:4, Years});
@@ -357,6 +357,7 @@ GeneralInputsDataBase.ScenarioRowNames = DataBase.ScenarioRowNames;
 % clear orderIndex ScenarioNumber ScenariosAndValues TargetYear_global Years BaseYear
 % DataBase = rmfield(DataBase, {'Days_In_Year', 'Conversion_Liter_To_Kg', 'ScenarioRowNames'});
 clear SR RDB AllTogetherCell TotalResults BAU_Moderate BAU_Advanced Moderate_Advanced
+clear Data1
 
 beep;
 

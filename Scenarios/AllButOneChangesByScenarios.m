@@ -155,6 +155,19 @@ AllButOneScenariosTable{18,:} = CalcChangeVector(MilesTonesTable{18,:}, Years, S
 AllButOneScenariosTable{21,:} = CalcChangeVector(MilesTonesTable{21,:}, Years, S(21), 'Type', 'Linear', 'Growth', true);
 AllButOneScenariosTable{22,:} = CalcChangeVector(MilesTonesTable{22,:}, Years, S(22), 'Type', 'Linear', 'Growth', true);
 AllButOneScenariosTable{23,:} = CalcChangeVector(MilesTonesTable{23,:}, Years, S(23), 'Type', 'Linear', 'Growth', true);
+% For the all other categories floors number
+AllButOneScenariosTable{24,:} = CalcChangeVector(MilesTonesTable{24,:}, Years, S(24), 'Type', 'Linear', 'Growth', true);
+AllButOneScenariosTable{25,:} = CalcChangeVector(MilesTonesTable{25,:}, Years, S(25), 'Type', 'Linear', 'Growth', true);
+AllButOneScenariosTable{26,:} = CalcChangeVector(MilesTonesTable{26,:}, Years, S(26), 'Type', 'Linear', 'Growth', true);
+AllButOneScenariosTable{27,:} = CalcChangeVector(MilesTonesTable{27,:}, Years, S(27), 'Type', 'Linear', 'Growth', true);
+AllButOneScenariosTable{28,:} = CalcChangeVector(MilesTonesTable{28,:}, Years, S(28), 'Type', 'Linear', 'Growth', true);
+AllButOneScenariosTable{29,:} = CalcChangeVector(MilesTonesTable{29,:}, Years, S(29), 'Type', 'Linear', 'Growth', true);
+AllButOneScenariosTable{30,:} = CalcChangeVector(MilesTonesTable{30,:}, Years, S(30), 'Type', 'Linear', 'Growth', true);
+AllButOneScenariosTable{31,:} = CalcChangeVector(MilesTonesTable{31,:}, Years, S(31), 'Type', 'Linear', 'Growth', true);
+AllButOneScenariosTable{32,:} = CalcChangeVector(MilesTonesTable{32,:}, Years, S(32), 'Type', 'Linear', 'Growth', true);
+
+
+
 
 %% Everyone but one- If there is a scenario chosen : Apply specific changes based on scenario selection
 % We will neutralize the effect of the chosen scenario by changing all the factors except this one.

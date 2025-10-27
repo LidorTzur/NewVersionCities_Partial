@@ -237,8 +237,6 @@ TDB.TransitionToBus = readmatrix(Data,'Sheet','TransportationConsumption','Range
 TDB.TransitionToTrain = readmatrix(Data,'Sheet','TransportationConsumption','Range','I12:I12');
 
 
-
-
 %% ---------------------------------------- WATER ------------------------------------------------
 
 % Load water base consumption table
@@ -408,17 +406,24 @@ CDB.ConstructionEmissionTypes = {'Mining Waste', 'NOX', 'PM10', 'SO2'};
 % (Lidor's add)
 CDB.ConstructionTable = array2table(zeros(Construction_Row_Num,Years), 'RowNames', Construction_RowNames);
 CDB.ConstructionFootprintTable = array2table(zeros(Construction_Row_Num,Years), 'RowNames', Construction_RowNames);
+CDB.ConstructionFloorsTable = array2table(zeros(Construction_Row_Num,Years), 'RowNames', Construction_RowNames);
+
 s1 = "Area for Construction ";
 s2 = "Floor Area for Constructure ";
+s4 = "Number of floors for Constructure ";
 ColumnNames = cell(1,Years);
 for i=1:Years
     s3 = num2str(i+BaseYear-1);
     ColumnNames{i} = strcat(s1, s3);
     ColumnNames2{i} = strcat(s2, s3);
+    ColumnNames3{i} = strcat(s4, s3);
 end
+
 % Convert column names to string
 CDB.ConstructionTable.Properties.VariableNames = cellstr(ColumnNames); 
 CDB.ConstructionFootprintTable.Properties.VariableNames = cellstr(ColumnNames2); 
+CDB.ConstructionFloorsTable.Properties.VariableNames = cellstr(ColumnNames3); 
+
 % Put the values to the Base Year (first cell in the years-array)
 % The total area
 CDB.ConstructionTable{1:(Construction_Row_Num-1), 1} = table2array(readtable(Data,'Sheet','Construction','Range','B3:B13','ReadVariableNames',false));
@@ -426,6 +431,11 @@ CDB.ConstructionTable{Construction_Row_Num, 1} = sum(CDB.ConstructionTable{1:(Co
 % The floor area
 CDB.ConstructionFootprintTable{1:(Construction_Row_Num-1), 1} = table2array(readtable(Data,'Sheet','Construction','Range','C3:C13','ReadVariableNames',false));
 CDB.ConstructionFootprintTable{Construction_Row_Num, 1} = sum(CDB.ConstructionFootprintTable{1:(Construction_Row_Num-1), 1});
+
+% The floors area  ------- New Lidor's Adding
+CDB.ConstructionFloorsTable{1:(Construction_Row_Num-1), 1} = table2array(readtable(Data,'Sheet','Construction','Range','D3:D13','ReadVariableNames',false));
+CDB.ConstructionFloorsTable{Construction_Row_Num, 1} = sum(CDB.ConstructionFloorsTable{1:(Construction_Row_Num-1), 1});
+
 
 %%%% Variables
 % Lidor's addition
@@ -474,7 +484,6 @@ Building_Type_Distribution_Cell{1} =  array2table(zeros(1,Building_Type_Distribu
 Building_Type_Distribution_Cell{1}{:,:} = table2array(readtable(Data,'Sheet','ConstructionNew','Range','A16:B16','ReadVariableNames',false));
 Building_Type_Distribution_Cell{1}.Properties.VariableNames = Building_Type_Distribution_ColNames;
 CDB.Building_Type_Distribution_Cell = Building_Type_Distribution_Cell;
-
 
 Precent_Floor_Footprint_ColNames = {'High-Density Construction', 'Low-Density Construction'};
 Precent_Floor_Footprint_Col_Num = int64(numel(Precent_Floor_Footprint_ColNames));
@@ -594,3 +603,10 @@ clear i ColumnNames WaterFromFoodCategories
 clear meatRows RenewablePercents ScenarioRowNames EvSenarioLines
 clear Conversion_Liter_To_Kg 
 clear ColumnNames2 s3 
+clear s1 s2 s3 s4 ColumnNames3 ColumnNames2 ColumnNames
+clear ApartmentsDistribution_ColNames ApartmentsDistribution_RowNames
+clear ApartmentsDistribution_Row_Num ApartmentsDistribution_Col_Num ApartmentsDistributionCell
+clear Building_Type_Distribution_ColNames Building_Type_Distribution_Col_Num
+clear Building_Type_Distribution_Cell 
+clear Precent_Floor_Footprint_ColNames Precent_Floor_Footprint_Col_Num
+clear Precent_Floor_Footprint_Cell
