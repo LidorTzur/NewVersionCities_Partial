@@ -114,6 +114,11 @@ AllButOneScenariosTable{2,:} = CalcChangeVector(MilesTonesTable{2,:}, Years, S(2
 AllButOneScenariosTable{3,:} = CalcChangeVector(MilesTonesTable{3,:}, Years, S(3), 'Type', 'Linear', 'Growth', false); % Desalinated Water
 AllButOneScenariosTable{8,:} = CalcChangeVector(MilesTonesTable{8,:}, Years, S(8), 'Growth', false); % Electricity saving
 AllButOneScenariosTable{9,:} = CalcChangeVector(MilesTonesTable{9,:}, Years, S(9), 'Growth', false); % Fuel for Energy
+
+%%Lidor added
+AllButOneScenariosTable{10,:} = CalcChangeVector(MilesTonesTable{10,:}, Years, S(10), 'Growth', true); % Recycled Waste
+AllButOneScenariosTable{11,:} = CalcChangeVector(MilesTonesTable{11,:}, Years, S(11), 'Growth', true); % Burning Waste
+
 AllButOneScenariosTable{12,:} = CalcChangeVector(MilesTonesTable{12,:}, Years, S(12), 'Growth', false); % reducing mileage in the city
 AllButOneScenariosTable{13,:} = CalcChangeVector(MilesTonesTable{13,:}, Years, S(13), 'Growth', false); % Transition To Public Transportation
 AllButOneScenariosTable{19,:} = CalcChangeVector(MilesTonesTable{19,:}, Years, S(19), 'Growth', false); % Water Saving

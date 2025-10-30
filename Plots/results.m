@@ -1,6 +1,6 @@
 RDB = ResultsDataBase;
 
-Year_Stone = 2035;
+Year_Stone = 2050;
 Middle_Year  = (Year_Stone - BaseYear + 1);
 
 %% preparations
@@ -31,20 +31,45 @@ AreaSum3(1, :) = [];
 WaterSum3(1, :) = [];
 CostsSum3(1, :) = [];
 
-% Arranging the data and building the graphs
+%Arranging the data and building the graphs
+% colors1Em = [
+%    0.72, 0.27, 1.0; 
+%     0.49, 0.18, 0.56;  
+%     0.93, 0.69, 0.13;  
+%     0.51, 0.37, 0.01;  
+%     0.29, 0.89, 0.69;  
+%     0.47, 0.67, 0.19;  
+%     0.85, 0.33, 0.1;  
+%     0.64, 0.08, 0.18;  
+%     0.3, 0.75, 0.93;  
+%     0, 0.45, 0.74;
+%     0, 1, 0.74;
+% ];
 colors1Em = [
-   0.72, 0.27, 1.0; 
-    0.49, 0.18, 0.56;  
-    0.93, 0.69, 0.13;  
-    0.51, 0.37, 0.01;  
-    0.29, 0.89, 0.69;  
-    0.47, 0.67, 0.19;  
-    0.85, 0.33, 0.1;  
-    0.64, 0.08, 0.18;  
-    0.3, 0.75, 0.93;  
-    0, 0.45, 0.74;
-    0, 1, 0.74;
+    0.72, 0.27, 1.00;   % סגול עז
+    0.49, 0.18, 0.56;   % בורדו כהה
+    0.93, 0.69, 0.13;   % זהב
+    0.51, 0.37, 0.01;   % חום כהה
+    0.29, 0.89, 0.69;   % טורקיז בהיר
+    0.47, 0.67, 0.19;   % ירוק זית
+    0.85, 0.33, 0.10;   % כתום
+    0.64, 0.08, 0.18;   % אדום כהה
+    0.30, 0.75, 0.93;   % תכלת
+    0.00, 0.45, 0.74;   % כחול כהה
+    0.00, 1.00, 0.74;   % טורקיז רך
+    0.13, 0.55, 0.13;   % ירוק חורשה
+    0.75, 0.00, 0.75;   % מג’נטה
+    1.00, 0.60, 0.80;   % ורוד בהיר
+    0.40, 0.20, 0.00;   % חום אדמדם
+    0.25, 0.25, 0.75;   % כחול עמוק
+    0.80, 0.40, 0.00;   % כתום כהה
+    0.70, 0.70, 0.70;   % אפור בינוני
+    0.90, 0.50, 0.10;   % כתום זהוב
+    0.10, 0.10, 0.10;   % שחור כמעט מוחלט
 ];
+
+
+%colors1Em = lines(20); % MATLAB built-in color palette with 20 distinct colors
 
 colors2Area = [
     0.47, 0.67, 0.19;
@@ -52,6 +77,8 @@ colors2Area = [
     0.85, 0.33, 0.1; 
     0.72, 0.27, 1.0;
 ];
+
+%colors2Area = lines(20);
 
 colors3Water = [
     0.1, 0.31, 0.5;  
@@ -61,6 +88,8 @@ colors3Water = [
     0.72, 0.27, 1.0;
 ];
 
+%colors3Water = lines(20);
+
 colors4Cost = [
     0.1, 0.31, 0.5;  
     0, 0.45, 0.74;  
@@ -68,26 +97,7 @@ colors4Cost = [
     0.72, 0.27, 1.0;
 ];
 
-
-%% 1. Main graph - For the first base year
-% Order = {'BAU'};
-% x = categorical(Order);
-% x = reordercats(x, Order);
-% 
-% figure;
-% t = tiledlayout(1,3);
-% 
-% nexttile
-% plotStackedBar('Emissions', NoPolicy{1:11,1}, colors1Em, NoPolicy.Properties.RowNames(1:11), 'MtCO2Eq', {'Base Year'});
-% nexttile
-% plotStackedBar('Area', AreaSum1{1:4,1}, colors2Area, AreaSum1.Properties.RowNames(1:4), 'km^2', {'Base Year'});
-% nexttile
-% plotStackedBar('Water', WaterSum1{1:5,1}, colors3Water, WaterSum1.Properties.RowNames(1:5), 'Million m^3', {'Base Year'});
-% % nexttile
-% % plotStackedBar('Cost- 2019', CostsSum1{1:4,1}, colors4Cost, CostsSum1.Properties.RowNames(1:4), 'Billion ILS', {'Base Year'});
-% title(t, sprintf('Emissions, Area, and Water for Base Year - 2019 (%s)', cityCode), 'FontSize', 20, 'FontWeight', 'bold');
-% 
-
+%colors4Cost = lines(20); 
 
 %% 2. emissions-area-water-base year to Target year *****
 % To be used after selecting "all steps together" 
@@ -96,23 +106,27 @@ Order = {'2019','No Policy (2050)', 'Moderate (2050)', 'Advanced (2050)'};
 x = categorical({'2019','No Policy (2050)', 'Moderate (2050)', 'Advanced (2050)'});
 x = reordercats(x, Order);
 
+Size_Emission = (height(NoPolicy)-1);
+Size_Area = (height(AreaSum1)-1);
+Size_Water = (height(WaterSum1)-1);
+
 figure;
 t = tiledlayout(1,3);
 
 % Emissions
 nexttile
-dataEm = [NoPolicy{1:11,1}, NoPolicy{1:11,Years}, Scenario1{1:11,Years}, Scenario2{1:11,Years}];
-plotStackedBar('Emissions', dataEm, colors1Em, NoPolicy.Properties.RowNames(1:11), 'MtCO2Eq', Order);
+dataEm = [NoPolicy{1:Size_Emission,1}, NoPolicy{1:Size_Emission,Years}, Scenario1{1:Size_Emission,Years}, Scenario2{1:Size_Emission,Years}];
+plotStackedBar('Emissions', dataEm, colors1Em, NoPolicy.Properties.RowNames(1:Size_Emission), 'MtCO2Eq', Order);
 
 % Area
 nexttile
-dataArea = [AreaSum1{1:4,1}, AreaSum1{1:4,Years}, AreaSum2{1:4,Years}, AreaSum3{1:4,Years}];
-plotStackedBar('Area', dataArea, colors2Area, AreaSum3.Properties.RowNames(1:4), 'km^2', Order);
+dataArea = [AreaSum1{1:Size_Area,1}, AreaSum1{1:Size_Area,Years}, AreaSum2{1:Size_Area,Years}, AreaSum3{1:Size_Area,Years}];
+plotStackedBar('Area', dataArea, colors2Area, AreaSum3.Properties.RowNames(1:Size_Area), 'km^2', Order);
 
 % Water
 nexttile
-dataWater = [WaterSum1{1:5,1}, WaterSum1{1:5,Years}, WaterSum2{1:5,Years}, WaterSum3{1:5,Years}];
-plotStackedBar( 'Water', dataWater, colors3Water, WaterSum3.Properties.RowNames(1:5), 'Million m^3', Order);
+dataWater = [WaterSum1{1:Size_Water,1}, WaterSum1{1:Size_Water,Years}, WaterSum2{1:Size_Water,Years}, WaterSum3{1:Size_Water,Years}];
+plotStackedBar( 'Water', dataWater, colors3Water, WaterSum3.Properties.RowNames(1:Size_Water), 'Million m^3', Order);
 
 % % Costs
 % nexttile
@@ -141,6 +155,12 @@ function plotStackedBar(tileTitle, dataMat, colors, rowLabels, ylabelText, Order
     x = reordercats(x, Order);
     
     b = bar(x, y, 'stacked');
+
+    % % If there are more bars than colors, repeat the color list cyclically
+    % if size(colors,1) < numel(b)
+    %     colors = repmat(colors, ceil(numel(b)/size(colors,1)), 1);
+    % end
+
     for i = 1:numel(b)
         set(b(i), 'FaceColor', colors(i, :));
     end

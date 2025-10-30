@@ -381,8 +381,8 @@ FDB.OrganicWasteCoefficients = table2array(readtable(Data,'Sheet','Food','Range'
 
 % Organic Waste Quantity (Ton)
 FDB.OrganicWasteAmountsCell = cell(1,Years);
-FDB.OrganicWasteAmountsCell{1} = readtable(Data,'Sheet','Food','Range','H73:I76','ReadVariableNames',true);
-OrganicWasteAmounts_RowNames = {'Local Authorities', 'Food Industry', 'Agriculture'};
+FDB.OrganicWasteAmountsCell{1} = readtable(Data,'Sheet','Food','Range','H73:I74','ReadVariableNames',true);
+OrganicWasteAmounts_RowNames = {'Food - Local Authorities'};
 FDB.OrganicWasteAmountsCell{1}.Properties.RowNames = OrganicWasteAmounts_RowNames;
 
 %%%%%% area for food coefficient (m^2/kg)
@@ -503,22 +503,32 @@ CDB.Precent_Floor_Footprint_Cell = Precent_Floor_Footprint_Cell;
 
 % temp variables
 WateAndRecycling_RowNames = {'Organic Products','Plastic', 'Paper', 'Cardboard', 'Diapers', 'Garden Waste', 'Textile', 'Metal', 'Glass', 'Pruned Trees','Wood', 'Oils', 'Others'};
-WateAndRecycling_ColNames = {'Local Authorities - Waste', 'Local Authorities - Recycling', 'Industry - Waste', 'Industry - Recycling','Food Industry - Waste','Food Industry - Recycling' ,'Agriculture - Waste', 'Agriculture - Recycling'};
+WateAndRecycling_ColNames = {'Generated Waste', 'Recycling'};
 WateAndRecycling_Row_Num = int64(numel(WateAndRecycling_RowNames));
 WateAndRecycling_Col_Num = int64(numel(WateAndRecycling_ColNames));
 
-%%% Names Fuel for energy in the industry & others
-MDB.FuelConsumption_RowNames = {'Crude Oil Products - For Energy', 'LPG - Home', 'LPG - Commertiel'  };
-MDB.FuelConsumption_ColNames = {'Naptha', 'Mazut','Diesel','Kerosene','GWDB.Electricity_Drillind_Wateasoline','Liquified Petroleum Gas', 'Other'};
-
-%%%% Materials - generated waste and recycling - on hold, Need to Update!!!!!!!!!!!!!!!!!!!!!!!!!!!
+% generated waste and recycling
 WateAndRecyclingCell = cell(1,Years);
 WateAndRecyclingCell{1} =  array2table(zeros(WateAndRecycling_Row_Num,WateAndRecycling_Col_Num), 'RowNames', WateAndRecycling_RowNames);
-WateAndRecyclingCell{1}{:,:} = table2array(readtable(Data,'Sheet','Materials','Range','B4:I16','ReadVariableNames',false));
+WateAndRecyclingCell{1}{:,:} = table2array(readtable(Data,'Sheet','Materials','Range','B3:C15','ReadVariableNames',false));
 WateAndRecyclingCell{1}.Properties.VariableNames = WateAndRecycling_ColNames;
 MDB.WateAndRecyclingCell = WateAndRecyclingCell;
 
+% Emission coefficients for consumption and waste from solid materials
+%% === Emission coefficients for material production and waste treatment ===
+WateAndRecycling_Coeff_ColNames = {'Production_EF','Recycling_EF','RecyclingBenefit_EF'};
+WateAndRecycling_Coeff = readtable(Data, 'Sheet','Materials','Range','D3:F15','ReadVariableNames',false);
+WateAndRecycling_Coeff.Properties.VariableNames = WateAndRecycling_Coeff_ColNames;
+WateAndRecycling_Coeff.Properties.RowNames = WateAndRecycling_RowNames;
+MDB.WateAndRecycling_Coeff = WateAndRecycling_Coeff;
+
+
 %%%%% Amounts of Fuels For Industry in tons of oil equivelent
+%%% Names Fuel for energy in the industry & others
+
+MDB.FuelConsumption_RowNames = {'Crude Oil Products - For Energy', 'LPG - Home', 'LPG - Commertiel'  };
+MDB.FuelConsumption_ColNames = {'Naptha', 'Mazut','Diesel','Kerosene','GWDB.Electricity_Drillind_Wateasoline','Liquified Petroleum Gas', 'Other'};
+
 MDB.AmountsOfFuelsCells = cell(1,Years); %% including mazut, kerosene and LPG for transportation
 MDB.AmountsOfFuelsCells{1} = array2table(zeros(AmountsOfFuels_Row_Num,AmountsOfFuels_Col_Num),'RowNames', AmountsOfFuels_RowNames);
 MDB.AmountsOfFuelsCells{1}{1,:} = table2array(readtable(Data,'Sheet','Materials','Range','M15:S15','ReadVariableNames',false));
@@ -535,10 +545,19 @@ MDB.ConsumptionEmissionCoefficients = table2array(readtable(Data,'Sheet','Materi
 % CH4 Emissions Coefficients from Crude Oil Refining (Kg/Ton)
 MDB.CrudeOilRefiningEmissionsCoefficients = readtable(Data,'Sheet','Materials','Range','B38:H43','ReadVariableNames',false);
 
+
+
 %%%%%% Calc Waste and recycling  
 % Distributionof different materials for Export Waste For Recycling 
-MDB.ExportWasteForRecyclingPercentage = table2array(readtable(Data,'Sheet','Materials','Range','B20:B32','ReadVariableNames',false));
-    
+
+%MDB.ExportWasteForRecyclingPercentage = table2array(readtable(Data,'Sheet','Materials','Range','B20:B32','ReadVariableNames',false));
+ExportWasteForRecyclingPercentage_RowNames = {'Organic Products','Plastic', 'Paper', 'Cardboard', 'Diapers', 'Garden Waste', 'Textile', 'Metal', 'Glass', 'Pruned Trees','Wood', 'Oils', 'Others'};
+%ExportWasteForRecyclingPercentage_ColNames = 
+ExportWasteForRecyclingPercentage = cell(1,Years);
+ExportWasteForRecyclingPercentage{1} =  array2table(zeros(13,1), 'RowNames', ExportWasteForRecyclingPercentage_RowNames);
+ExportWasteForRecyclingPercentage{1}{:,:} = table2array(readtable(Data,'Sheet','Materials','Range','B20:B32','ReadVariableNames',false));
+%ExportWasteForRecyclingPercentage{1}.Properties.VariableNames = WateAndRecycling_ColNames;
+MDB.ExportWasteForRecyclingPercentage = ExportWasteForRecyclingPercentage;
 
 
 

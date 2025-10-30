@@ -421,30 +421,31 @@ Data.ConstructionFootprintTable = ConstructionFootprintTable;
 
 
 %% Materials - generated waste and recycling
-RowNames = {'Organic Products','Plastic', 'Paper', 'Cardboard', 'Diapers', 'Garden Waste', 'Textile', 'Metal', 'Glass', 'Pruned Trees','Wood', 'Oils', 'Others'};
-ColNames = {'Local Authorities - Waste', 'Local Authorities - Recycling', 'Industry - Waste', 'Industry - Recycling','Food Industry - Waste' , 'Food Industry - Recycling','Agriculture - Waste', 'Agriculture - Recycling'};
 
+% 1. All waste Growth by population
+RowNames = {'Organic Products','Plastic', 'Paper', 'Cardboard', 'Diapers', 'Garden Waste', 'Textile', 'Metal', 'Glass', 'Pruned Trees','Wood', 'Oils', 'Others'};
+ColNames = {'Generated Waste', 'Recycling'};
 WateAndRecyclingCell = Data.Materials_DataBase.WateAndRecyclingCell;
 for i =2:Years
-    CurrentRecyclingAndWate =  array2table(zeros(13,8), 'RowNames', RowNames);
+    CurrentRecyclingAndWate =  array2table(zeros(13,2), 'RowNames', RowNames);
     CurrentRecyclingAndWate.Properties.VariableNames = ColNames;
     CurrentRecyclingAndWate{:,:} = WateAndRecyclingCell{1}{:,:}*ScenariosTable{1,i};
     WateAndRecyclingCell{i} = CurrentRecyclingAndWate;
 end
 
-%% Organic Waste (From food)
 
+% 2. Organic Waste (From food)- % Growth by population
 OrganicWasteAmount =  Data.Food_DataBase.OrganicWasteAmountsCell;
-RowNames = {'Local Authorities', 'Food Industry', 'Agriculture'};
+RowNames = {'Food - Local Authorities'};
 ColNames = OrganicWasteAmount{1}.Properties.VariableNames;
 for i = 2:Years
-    CurrentOrganicWaste = array2table(zeros(3,2), 'RowNames',RowNames, 'VariableNames',ColNames);
+    CurrentOrganicWaste = array2table(zeros(1,2), 'RowNames',RowNames, 'VariableNames',ColNames);
     CurrentOrganicWaste{:,:} = OrganicWasteAmount{1}{:,:}*ScenariosTable{1,i};
     OrganicWasteAmount{i} = CurrentOrganicWaste;
 end    
 
-
-%% Amounts of Fuels (for industry) - Tons ------ Removed from the City model (Lidor) - values 0
+% 3. -------------------------- NOT RELEVENT IN THE CITY MODEL- CALL ON ZERO 0 ----------------------
+% Amounts of Fuels (for industry) - Tons ------ Removed from the City model (Lidor) - values 0
 RowNames = {'Crude Oil Products - Not for Energy', 'Crude Oil For Export', 'Crude Oil Import', 'Crude Oil Products - For Energy', 'LPG - Home', 'LPG - Commertiel' };
 ColNames = {'Naptha', 'Diesel','Mazut','Kerosene','Gasoline','Liquified Petroleum Gas', 'Other'};
 AmountsOfFuelsCells = Data.Materials_DataBase.AmountsOfFuelsCells;
@@ -460,9 +461,15 @@ for i = 1:Years
     AmountsOfFuelsCells{i} = CurrentFuelConsumption;
 end   
 
+
+% 4. Change in Recycled Waste
+
+
+
+
+
 %% ADJUSTING FOR 2035:
 %  REMOVING UNECESSARY COLUMNS FROM THE TABLES:
-
 if (orderIndex >= 7 && width(ScenariosTable) <= Years) 
    ElectricityConsumptionTable = ElectricityConsumptionTable(:, 1:Years);
    TransportationConsumptionTable = TransportationConsumptionTable(:, 1:Years);
@@ -479,7 +486,9 @@ end
 Data.Const_DataBase.ConstructionTable = ConstructionTable;
 Data.Const_DataBase.ConstructionFootprintTable = ConstructionFootprintTable;
 
-%%
+
+
+%% Relevent functions
 function PercentVector = CalcChangeVector(MileStoneVector, Years, S, varargin)
     p = inputParser;
     addOptional(p,'Type','Exponential');

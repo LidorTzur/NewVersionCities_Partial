@@ -11,8 +11,7 @@ for i=1:Years
 end
 
 %% TotalResults = array2table(zeros(9, Years), 'VariableNames', {YearsStringsForColNames}, 'RowNames', {'BAU - TotalEmission (Ton Eco2)', 'Moderate - TotalEmission (Ton Eco2)', 'Advanced - TotalEmission (Ton Eco2)', 'BAU - TotalArea (Km^2)', 'Moderate - TotalArea (Km^2)', 'Advanced - TotalArea (Km^2)', 'BAU - TotalWater (m^3)', 'Moderate - TotalWater (m^3)', 'Advanced - TotalWater (m^3)'});
-TotalResults = array2table(zeros(27, Years));
-TotalResults.Properties.RowNames = {'BAU - Emission_Local (Ton MEco2)','Moderate - Emission_Local (Ton MEco2)', 'Advanced - Emission_Local (Ton MEco2)'...
+Total_Results_Names = {'BAU - Emission_Local (Ton MEco2)','Moderate - Emission_Local (Ton MEco2)', 'Advanced - Emission_Local (Ton MEco2)'...
     ,'BAU - Emission_Global (Ton MEco2)','Moderate - Emission_Global (Ton MEco2)', 'Advanced - Emission_Global (Ton MEco2)'...
     ,'BAU - Emission_Total (Ton MEco2)','Moderate - Emission_Total (Ton MEco2)', 'Advanced - Emission_Total (Ton MEco2)'...
     ,'BAU - Area_Local (Km^2)', 'Moderate - Area_Local (Km^2)', 'Advanced - Area_Local (Km^2)' ...
@@ -21,52 +20,69 @@ TotalResults.Properties.RowNames = {'BAU - Emission_Local (Ton MEco2)','Moderate
     ,'BAU - Water_Local (10^6*m^3)', 'Moderate - Water_Local (10^6*m^3)', 'Advanced - Water_Local (10^6*m^3)'...
     ,'BAU - Water_Global (10^6*m^3)', 'Moderate - Water_Global (10^6*m^3)', 'Advanced - Water_Global (10^6*m^3)'...
     ,'BAU - Water_Total (10^6*m^3)', 'Moderate - Water_Total (10^6*m^3)', 'Advanced - Water_Total (10^6*m^3)'};
+Total_len = numel(Total_Results_Names);
+
+TotalResults = array2table(zeros(Total_len, Years));
+TotalResults.Properties.RowNames = Total_Results_Names;
 
 TotalResults.Properties.VariableNames = YearsStringsForColNames;
 
 
 %% BAU
 RDB.BAU_RDB.TotalEmission1 = CalcUpDownStream(RDB.BAU_RDB.EmissionsByYearsTest1);
-Emission1_Sum_Local = sum(RDB.BAU_RDB.TotalEmission1{[1,3,5,7,9,11], :}); 
-Emission1_Sum_Global = sum(RDB.BAU_RDB.TotalEmission1{[2,4,6,8,10], :}); 
-Emission1_Sum_Total = sum(RDB.BAU_RDB.TotalEmission1{1:11, :}); 
+Sum_Size = height(RDB.BAU_RDB.TotalEmission1)-1;
 
+Emission1_Sum_Local = sum(RDB.BAU_RDB.TotalEmission1{[1,3,5,7,9,11,12], :}); 
+Emission1_Sum_Global = sum(RDB.BAU_RDB.TotalEmission1{[2,4,6,8,10], :}); 
+Emission1_Sum_Total = sum(RDB.BAU_RDB.TotalEmission1{1:Sum_Size, :}); 
+
+
+Sum_Size = height(RDB.BAU_RDB.AreaSum1)-1;
 Area1_Sum_Local = sum(RDB.BAU_RDB.AreaSum1{[1, 2, 4], :});
 Area1_Sum_Global = RDB.BAU_RDB.AreaSum1{3, :};
-Area1_Sum_Total = sum(RDB.BAU_RDB.AreaSum1{1:4, :});
+Area1_Sum_Total = sum(RDB.BAU_RDB.AreaSum1{1:Sum_Size, :});
 
+
+Sum_Size = height(RDB.BAU_RDB.WaterSum1)-1;
 Water1_Sum_Local = sum(RDB.BAU_RDB.WaterSum1{1:4, :}); 
 Water1_Sum_Global = RDB.BAU_RDB.WaterSum1{5, :}; 
-Water1_Sum_Total = sum(RDB.BAU_RDB.WaterSum1{1:5, :}); 
+Water1_Sum_Total = sum(RDB.BAU_RDB.WaterSum1{1:Sum_Size, :}); 
 
 
 %% Moderate
 RDB.Moderate_RDB.TotalEmission2 = CalcUpDownStream(RDB.Moderate_RDB.EmissionsByYearsTest2);
-Emission2_Sum_Local = sum(RDB.Moderate_RDB.TotalEmission2{[1,3,5,7,9,11], :}); 
+Sum_Size = height(RDB.Moderate_RDB.TotalEmission2)-1;
+Emission2_Sum_Local = sum(RDB.Moderate_RDB.TotalEmission2{[1,3,5,7,9,11,12], :}); 
 Emission2_Sum_Global = sum(RDB.Moderate_RDB.TotalEmission2{[2,4,6,8,10], :}); 
-Emission2_Sum_Total = sum(RDB.Moderate_RDB.TotalEmission2{1:11, :}); 
+Emission2_Sum_Total = sum(RDB.Moderate_RDB.TotalEmission2{1:Sum_Size, :}); 
 
+Sum_Size = height(RDB.Moderate_RDB.AreaSum2)-1;
 Area2_Sum_Local = sum(RDB.Moderate_RDB.AreaSum2{[1, 2, 4], :});
 Area2_Sum_Global = RDB.Moderate_RDB.AreaSum2{3, :};
-Area2_Sum_Total = sum(RDB.Moderate_RDB.AreaSum2{1:4, :});
+Area2_Sum_Total = sum(RDB.Moderate_RDB.AreaSum2{1:Sum_Size, :});
 
+Sum_Size = height(RDB.Moderate_RDB.WaterSum2)-1;
 Water2_Sum_Local = sum(RDB.Moderate_RDB.WaterSum2{1:4, :}); 
 Water2_Sum_Global = RDB.Moderate_RDB.WaterSum2{5, :}; 
-Water2_Sum_Total = sum(RDB.Moderate_RDB.WaterSum2{1:5, :}); 
+Water2_Sum_Total = sum(RDB.Moderate_RDB.WaterSum2{1:Sum_Size, :}); 
 
 %% Advanced
 RDB.Advanced_RDB.TotalEmission3 = CalcUpDownStream(RDB.Advanced_RDB.EmissionsByYearsTest3);
-Emission3_Sum_Local = sum(RDB.Advanced_RDB.TotalEmission3{[1,3,5,7,9,11], :}); 
-Emission3_Sum_Global = sum(RDB.Advanced_RDB.TotalEmission3{[2,4,6,8,10], :}); 
-Emission3_Sum_Total = sum(RDB.Advanced_RDB.TotalEmission3{1:11, :}); 
+Sum_Size = height(RDB.Advanced_RDB.TotalEmission3)-1;
 
+Emission3_Sum_Local = sum(RDB.Advanced_RDB.TotalEmission3{[1,3,5,7,9,11,12], :}); 
+Emission3_Sum_Global = sum(RDB.Advanced_RDB.TotalEmission3{[2,4,6,8,10], :}); 
+Emission3_Sum_Total = sum(RDB.Advanced_RDB.TotalEmission3{1:Sum_Size, :}); 
+
+Sum_Size = height(RDB.Advanced_RDB.AreaSum3)-1;
 Area3_Sum_Local = sum(RDB.Advanced_RDB.AreaSum3{[1, 2, 4], :});
 Area3_Sum_Global = RDB.Advanced_RDB.AreaSum3{3, :};
-Area3_Sum_Total = sum(RDB.Advanced_RDB.AreaSum3{1:4, :});
+Area3_Sum_Total = sum(RDB.Advanced_RDB.AreaSum3{1:Sum_Size, :});
 
+Sum_Size = height(RDB.Advanced_RDB.WaterSum3)-1;
 Water3_Sum_Local = sum(RDB.Advanced_RDB.WaterSum3{1:4, :}); 
 Water3_Sum_Global = RDB.Advanced_RDB.WaterSum3{5, :}; 
-Water3_Sum_Total = sum(RDB.Advanced_RDB.WaterSum3{1:5, :}); 
+Water3_Sum_Total = sum(RDB.Advanced_RDB.WaterSum3{1:Sum_Size, :}); 
 
 %% Compare the Results for the "All the steps together"
 BAU_Moderate = RDB.BAU_RDB.TotalEmission1 - RDB.Moderate_RDB.TotalEmission2;

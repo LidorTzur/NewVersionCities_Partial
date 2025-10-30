@@ -1,4 +1,4 @@
-function [EmissionsByYears,ConsumptionAmounts, Resources, WaterFromFoodCell, Data] = FullScenario(Data,ScenariosTable,Years,pop,orderIndex, index, varargin)
+function [EmissionsByYears,ConsumptionAmounts, Resources, WaterFromFoodCell, Data1] = FullScenario(Data,ScenariosTable,Years,pop,orderIndex, index, varargin)
 
 % INPUTS:
 % - Data: Structure with base environmental data.
@@ -34,7 +34,7 @@ addpath("CalcFunctions");
 
 %% Initialize the Results calculated data-base
 % Initialize the row names
-Emission_RowNames = {'Food (Ton ECo2)', 'Electricity - Direct (Ton ECo2)', 'Electricity - Indirect (Ton ECo2)', 'Transportation - Direct (Ton ECo2)', 'Train Emissions (Ton ECo2)','Transportation - Indirect (Ton ECo2)', 'Construction (Ton ECo2)', 'Consumption Emissions' ,'Fuel for Industry (Ton ECo2)', 'Sewege Treatment'}; %, 'Water from food'
+Emission_RowNames = {'Food (Ton ECo2)', 'Electricity - Direct (Ton ECo2)', 'Electricity - Indirect (Ton ECo2)', 'Transportation - Direct (Ton ECo2)', 'Train Emissions (Ton ECo2)','Transportation - Indirect (Ton ECo2)', 'Construction (Ton ECo2)', 'Consumption Emissions' ,'Fuel for Industry (Ton ECo2)', 'Sewege Treatment', 'Solid Waste (Ton ECo2)'}; %, 'Water from food'
 consumption_RowNames = {'Water (10^6*m^3)', 'Fuels For Electriciy Manufacturing (Ton)', 'Fuels For Transportation Amounts (Ton)', 'Materials For Construction (Ton)', 'Fuels For Energy Industry (Ton)'};
 %Resources_RowNames = {'Area For Electricity', 'Cumulative Area','Area For Food', 'Operating Costs', 'Setting Costs', 'Fuels Costs', 'Cost Of Area For PV','Area For Construction'};
 Resources_RowNames = {'Area For Electricity (Km^2)', 'Cumulative Area For Electricity (Km^2)','Area For Food (Km^2)', 'Operating Costs', 'Setting Costs', 'Fuels Costs', 'Cost Of Area For PV', 'Area For Construction (Km^2)', 'Cumulative Area For Construction (Km^2)'};
@@ -378,32 +378,65 @@ end
 % end
 
 
-%% recycled waste - scenario 10
+%% Recycled waste growth - Get better - scenario 10
+
+% every year Recycled percentage
+ExportWasteForRecyclingPercentage{1} = Data.Materials_DataBase.ExportWasteForRecyclingPercentage{1};
+colNames = ExportWasteForRecyclingPercentage{1}.Properties.VariableNames;
+
+for i = 2:Years
+    PrevRecyclePerc = ExportWasteForRecyclingPercentage{i-1}{:,:};
+    NewRecyclePerc = PrevRecyclePerc .* RecycleWaste(i);
+
+    % Save to the relevant year
+    ExportWasteForRecyclingPercentage{i} = array2table(NewRecyclePerc,'VariableNames', colNames);
+    Data1.Materials_DataBase.ExportWasteForRecyclingPercentage{i} = ExportWasteForRecyclingPercentage{i};
+end
 
 for i=1:Years
     CurrentWaste = WasteAndRecyclingCell{i};
-    for j = 1:2:width(CurrentWaste)
-        CurrentBurial = CurrentWaste{:,j};
-        NewBurial = CurrentBurial.*RecycleWaste(i);
-        diff = CurrentBurial-NewBurial;
-        CurrentWaste{:,j+1} = CurrentWaste{:,j+1}+diff;
-        CurrentWaste{:,j} = NewBurial;
+
+    if i == 1
+        % נתוני הבסיס מהקובץ
+        TotalWaste  = CurrentWaste{:,1};   % סה"כ פסולת
+        Recycled    = CurrentWaste{:,2};   % ממוחזרת
+        NewBurial = TotalWaste - Recycled;
+        NewRecycled = Recycled;
+    else
+        TotalWaste = CurrentWaste{:,1};
+        RecycleShare = ExportWasteForRecyclingPercentage{i}{:,:}; % New Recycle percentage
+        NewRecycled = TotalWaste .* RecycleShare;
+        NewBurial   = TotalWaste - NewRecycled;
     end
+    % Update the table
+    CurrentWaste{:,1} = NewBurial;  %Update it to be amount for burial
+    CurrentWaste{:,2} = NewRecycled; 
+
     WasteAndRecyclingCell{i} = CurrentWaste;
+    Data1.Materials_DataBase.WasteAndRecyclingCell{i} = WasteAndRecyclingCell{i};
+    
 end
 
 %% burning waste - scenario 11
 WasteInciniration = zeros(1,Years); %% amounts of waste to incinirate
 for i=1:Years
     CurrentWaste = WasteAndRecyclingCell{i};
-    for j = 1:2:width(CurrentWaste)
-        CurrentBurial = CurrentWaste{:,j};
-        NewBurial = CurrentBurial.*BurningWaste(i); % Calculates the amount of waste that will remain for burial after subtracting the amount designated for incineration.
-        WasteInciniration(i) = WasteInciniration(i) + sum(CurrentBurial-NewBurial); %% how much waste in incinareted
-        CurrentWaste{:,j} = NewBurial;
-    end
+
+    CurrentBurial = CurrentWaste{:,1};
+    NewBurial = CurrentBurial.*BurningWaste(i); % Calculates the amount of waste that will remain for burial after subtracting the amount designated for incineration.
+    WasteInciniration(i) = WasteInciniration(i) + sum(CurrentBurial-NewBurial); %% how much waste in incinareted
+    CurrentWaste{:,1} = NewBurial;
     WasteAndRecyclingCell{i} = CurrentWaste;
+    Data1.Materials_DataBase.WasteAndRecyclingCell{i} = WasteAndRecyclingCell{i};
 end
+
+
+%% Solid Waste Emission (Production + Waste) - Lidor Added
+for i=1:Years
+    [MaterialEmissionsByYear] = CalcMaterialEmissions(Data, WasteAndRecyclingCell{i});
+    EmissionsByYears{11,i} = MaterialEmissionsByYear;
+end
+
 
 %% Electricity emissions
 ElectricityBySources.Properties.VariableNames = YearsStringsForColNames;
@@ -580,7 +613,7 @@ end
 
 
 % Lidor add it - just so we can see the output
-Data.Water_DataBase.WaterConsumptionCell = WaterConsumptionCell;
+Data1.Water_DataBase.WaterConsumptionCell = WaterConsumptionCell;
 
 %% Create Final Table
 EmissionsByYears = cell2table(EmissionsByYears, 'RowNames', Emission_RowNames);
@@ -605,11 +638,11 @@ Data = Data1;
 
 %% Other Functions
 
-    function ElectricityFromWater = CalculateElectricityFromWaterAllYears(Data, WaterConsumptionCell, Years)
-    ElectricityFromWater = cell(1,Years);
-    for i=1:Years
-        ElectricityFromWater{i} = CalcElectricityForWater(Data, WaterConsumptionCell{i}, Data.Water_DataBase.ElectricityConsumptionCoefficients{:,i});
-    end
+function ElectricityFromWater = CalculateElectricityFromWaterAllYears(Data, WaterConsumptionCell, Years)
+ElectricityFromWater = cell(1,Years);
+for i=1:Years
+    ElectricityFromWater{i} = CalcElectricityForWater(Data, WaterConsumptionCell{i}, Data.Water_DataBase.ElectricityConsumptionCoefficients{:,i});
+end
 end
 
 
@@ -781,10 +814,11 @@ for i=2:Years
     %disp(NewVehicleAmountCell{i});
 end
 %disp(NewVehicleAmountCell{1});
+
+
+%clear fuel_LPG_coeff  fuel_MTOE_coeff Crude_Oil_To_Electricity ElectricityBySources_row_names
+
 end
-
-clear fuel_LPG_coeff  fuel_MTOE_coeff Crude_Oil_To_Electricity ElectricityBySources_row_names
-
 end
 
 

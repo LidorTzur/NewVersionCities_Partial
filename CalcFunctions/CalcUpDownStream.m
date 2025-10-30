@@ -3,10 +3,10 @@
     global BaseYear;
 
     % The rows of the final table
-    RowNames = {'Electricity-Local', 'Electricity-Global','Transportation-Local','Transportation-Global','Food-Local','Food-Global', 'Construction-Local','Construction-Global', 'Water-Local','Water-Global', 'Fuel for Industry - Local','Total'};%%'6 Food-Global'
+    RowNames = {'Electricity-Local', 'Electricity-Global','Transportation-Local','Transportation-Global','Food-Local','Food-Global', 'Construction-Local','Construction-Global', 'Water-Local','Water-Global', 'Fuel for Industry - Local', 'Solid Materials (Production + Waste) - Local', 'Total'};%%'6 Food-Global'
     
     %% Create the Final Tables
-    % Initialize result table with 12 rows and same number of columns as input
+    % Initialize result table with 13 rows and same number of columns as input
     UpDownStreamEmissions = array2table(zeros(numel(RowNames), width(EmissionsByYears)));
     UpDownStreamEmissions.Properties.RowNames = RowNames;
     
@@ -53,14 +53,18 @@
 
         % Fuel for Industry - Local: sum all columns in row 1, and specific cells in rows 2,3
         UpDownStreamEmissions{11,i} = (sum(EmissionsByYears{9,i}{1,1}{1,:})+EmissionsByYears{9,i}{1,1}{2,6}+EmissionsByYears{9,i}{1,1}{3,6})/1000000;
+        
+        % Solid Materials Production + Waste - LOCAL
+        UpDownStreamEmissions{12,i} = sum(EmissionsByYears{11,i}{1,1}{1:13,5})/1000000;
+
 
     end
     
 
 
-    % Compute total upstream + downstream emissions per year (sum of rows 1–11)
+    % Compute total upstream + downstream emissions per year (sum of rows 1–12)
     for i = 1:width(UpDownStreamEmissions)
-        UpDownStreamEmissions{12,i} = sum(UpDownStreamEmissions{1:11,i});
+        UpDownStreamEmissions{(numel(RowNames)),i} = sum(UpDownStreamEmissions{1:(numel(RowNames)-1),i});
     end   
 
     % Set column names as years, starting from BaseYear
