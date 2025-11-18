@@ -3,7 +3,7 @@
     global BaseYear;
 
     % The rows of the final table
-    RowNames = {'Electricity-Local', 'Electricity-Global','Transportation-Local','Transportation-Global','Food-Local','Food-Global', 'Construction-Local','Construction-Global', 'Water-Local','Water-Global', 'Fuel for Industry - Local', 'Solid Materials (Production + Waste) - Local', 'Total'};%%'6 Food-Global'
+    RowNames = {'Electricity-Local', 'Electricity-Global','Transportation-Local','Transportation-Global','Food-Local','Food-Global', 'Construction-Local','Construction-Global', 'Water-Local','Water-Global', 'Fuel for Industry - Local', 'Solid Materials (Production + Waste) - Global', 'Total'};%%'6 Food-Global'
     
     %% Create the Final Tables
     % Initialize result table with 13 rows and same number of columns as input
@@ -54,7 +54,7 @@
         % Fuel for Industry - Local: sum all columns in row 1, and specific cells in rows 2,3
         UpDownStreamEmissions{11,i} = (sum(EmissionsByYears{9,i}{1,1}{1,:})+EmissionsByYears{9,i}{1,1}{2,6}+EmissionsByYears{9,i}{1,1}{3,6})/1000000;
         
-        % Solid Materials Production + Waste - LOCAL
+        % Solid Materials Production + Waste - GLOBAL
         UpDownStreamEmissions{12,i} = sum(EmissionsByYears{11,i}{1,1}{1:13,5})/1000000;
 
 

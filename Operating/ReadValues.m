@@ -516,8 +516,8 @@ MDB.WateAndRecyclingCell = WateAndRecyclingCell;
 
 % Emission coefficients for consumption and waste from solid materials
 %% === Emission coefficients for material production and waste treatment ===
-WateAndRecycling_Coeff_ColNames = {'Production_EF','Recycling_EF','RecyclingBenefit_EF'};
-WateAndRecycling_Coeff = readtable(Data, 'Sheet','Materials','Range','D3:F15','ReadVariableNames',false);
+WateAndRecycling_Coeff_ColNames = {'Production_EF','Recycling_EF','RecyclingBenefit_EF', 'Landfilling'};
+WateAndRecycling_Coeff = readtable(Data, 'Sheet','Materials','Range','D3:G15','ReadVariableNames',false);
 WateAndRecycling_Coeff.Properties.VariableNames = WateAndRecycling_Coeff_ColNames;
 WateAndRecycling_Coeff.Properties.RowNames = WateAndRecycling_RowNames;
 MDB.WateAndRecycling_Coeff = WateAndRecycling_Coeff;
