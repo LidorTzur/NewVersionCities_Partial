@@ -160,18 +160,6 @@ for i =1:Years
    end
    waterData{'Water for  Nature', i} = selectedValue;
 
-   % Old solution
-   % switch true 
-   %     case i<7
-   %        waterData(row_num,i) = {25};
-   %     case i>=7 & i<12
-   %        waterData(row_num,i) = {35};
-   %     case i>=12 & i<22
-   %        waterData(row_num,i) = {50};
-   %     case i>=22 & i<32
-   %        waterData(row_num,i) = {75};
-   % end
-   
    % Driliing Water
 
    % first year (2019)
@@ -355,7 +343,7 @@ CDB = Data.Const_DataBase;
 
 % 1. Calculate the ACCUMULATIVE Residential Areas (Built Area and Floor Footprint) for all years
 % This uses the dynamic 'area per capita', 'building type distribution', and 'floor footprint ratio'
-[BuiltAreaRes_Acc, FloorFootprintRes_Acc, CDB] = CalculateAnnualResidentialAreas(CDB, pop, Years); 
+[BuiltAreaRes_Acc, FloorFootprintRes_Acc, CDB] = CalculateAnnualResidentialAreas(CDB, pop, Years, BaseYear); 
 Data.Const_DataBase = CDB;
 
 % 2. Loop to calculate the ANNUAL DELTA (Years 2 to End)
@@ -663,7 +651,7 @@ function FoodPercentegeByTheYearsGlobal = CalcFoodPercentegeByTheYearsGlobal(Sce
 end
 
 
-function [BuiltAreaRes, FloorFootprintRes, CDB] = CalculateAnnualResidentialAreas(CDB, pop, Years)
+function [BuiltAreaRes, FloorFootprintRes, CDB] = CalculateAnnualResidentialAreas(CDB, pop, Years, BaseYear)
 % CALCULATEANNUALRESIDENTIALAREAS calculates the cumulative built area and floor footprint
 % for residential sectors (High-Density and Low-Density) based on the city's
 % master plan logic and time-varying coefficients.
@@ -686,7 +674,12 @@ function [BuiltAreaRes, FloorFootprintRes, CDB] = CalculateAnnualResidentialArea
     
     % Annual linear growth
     for i = 2:Years
-        CDB.AreaPerCapitaVector(i) = CDB.AreaPerCapitaVector(i-1) + CDB.Annual_area_per_capita_growth_rate;
+        %Cap on the built-up capita area
+        if (BaseYear + i - 1) > CDB.UrbanPlan_Year
+           CDB.AreaPerCapitaVector(i) = CDB.AreaPerCapitaVector(i-1) ;
+        else
+            CDB.AreaPerCapitaVector(i) = CDB.AreaPerCapitaVector(i-1) + CDB.Annual_area_per_capita_growth_rate;
+        end
     end
     
     % City's Population Vector (assuming 'Israel population' row is used)

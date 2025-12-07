@@ -396,10 +396,8 @@ Construction_RowNames = {'Agriculture', 'Other Public Buildings', 'Helathcare', 
 Construction_Row_Num = int64(numel(Construction_RowNames));
 
 %%%% Construction Settings
-%CDB.ConstructionTypes = {'Agriculture', 'Other Public Buildings', 'Helathcare', 'Education', 'Industry and Storage', 'Transportation and Communications', 'Trade', 'Offices', 'Hosting', 'Residential - High-Density Construction', 'Residential - Low-Density Construction', 'Total for Construction', Improted Cement', 'Local Cement' };
 CDB.ConstructionTypes = Construction_RowNames;
 CDB.MaterialsForConstruction = {'Steel', 'Concrete', 'Asphalt', 'Autoclaved Aerated Concrete', 'Ceramic flooring', 'Gypsum plaster', 'Exterior cladding'};
-%CDB.ConstructionEmissionTypes = {'Mining Waste', 'CO2', 'NOX', 'PM10', 'SO2', 'CO2E From Mortar Production'};
 CDB.ConstructionEmissionTypes = {'Mining Waste', 'NOX', 'PM10', 'SO2'};
 
 %%%% Consumption table and floor_footprint table 
@@ -439,11 +437,8 @@ CDB.ConstructionFloorsTable{Construction_Row_Num, 1} = sum(CDB.ConstructionFloor
 
 %%%% Variables
 % Lidor's addition
-%CDB.Mining_Waste = readmatrix('Data.xlsx', 'Sheet','Construction','Range','A26:A26');	
 CDB.TotalBuiltArea = readmatrix(Data, 'Sheet','Construction','Range','I2:I2');   % square kilometer
 CDB.TotalAreaAllowed = readmatrix(Data, 'Sheet','Construction','Range','K2:K2');
-%Mortar Production Emissions Coefficients - CO2E (KG/KG)
-%CDB.MortarProductionCO2ECoefficient = readmatrix('Data.xlsx', 'Sheet','Construction','Range','L36:L36');
 
 %%%%%% Calc Construction Area Emission Coefficient, Material Waste Coefficients, Material consumption
 % Waste Coefficients (KG/KG) - Materials that are leftover during the peocess of extracting minerals.
@@ -493,10 +488,9 @@ Precent_Floor_Footprint_Cell{1}{:,:} = table2array(readtable(Data,'Sheet','Const
 Precent_Floor_Footprint_Cell{1}.Properties.VariableNames = Precent_Floor_Footprint_ColNames;
 CDB.Precent_Floor_Footprint_Cell = Precent_Floor_Footprint_Cell;
 
+% Year of urban plan in order to cap the built-up area per capita
+CDB.UrbanPlan_Year = readmatrix(Data, 'Sheet','ConstructionNew','Range','E15:E15');
 
-%%%%% Material consumption table (How much Cement for construction)
-% Probably will change, due to consideration of apartments construction!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-%CDB.MaterialConsumption = table2array(readtable(Data,'Sheet','Construction','Range','B41:G42','ReadVariableNames',false));
 
 
 %% ---------------------------------------- MATERIALS ------------------------------------------------
