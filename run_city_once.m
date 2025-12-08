@@ -15,14 +15,10 @@
 % assignin('base', 'cityCode',  cityCode);
 % assignin('base', 'scenariosFile',  scenariosFile);
 
-% =====================
-% 2. הרצת ה-MAIN הקיים שלך
-% =====================
 createPath;
 preparation;
 runningSteps;
 
-% כאן מניחים ש-ResultsDataBase נוצר ע"י הסקריפטים שלך
 RDB = ResultsDataBase;  
 
 % =====================

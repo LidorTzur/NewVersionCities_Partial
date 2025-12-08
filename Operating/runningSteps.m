@@ -85,11 +85,6 @@ switch orderIndex
 
     case 4  %% All the steps together
     RDB = ResultsDataBase;
-%   calculates 3 times: For:
-%                            BAU (ScenariosAndValues{:,4}) 
-%                            MODERATE(ScenariosAndValues{:,7})
-%                            ADVANCED(ScenariosAndValues{:,8})
-
         % First Table ([FullScenariosTable]): change in precentage for each parameter by the years
         % Second Table ([population]): population size per year, seperationg israel and the palestinians.
         % Returns: total Co2 by category, amounts of water/fuels/construction materials, all other resources by category, water for food.
@@ -107,7 +102,6 @@ switch orderIndex
         [RDB.Moderate_RDB.population] = populationCal(RDB.Moderate_RDB.FullScenariosTable2);
         [RDB.Moderate_RDB.EmissionsByYearsTest2, RDB.Moderate_RDB.ConsumptionAmounts2, RDB.Moderate_RDB.Resources2, RDB.Moderate_RDB.WaterFromFood2, Data1] = FullScenario(DataBase, RDB.Moderate_RDB.FullScenariosTable2,Years,RDB.Moderate_RDB.population,orderIndex, 0, RDB.BAU_RDB.WaterFromFood1);
         
-        %[EmissionsByYearsTest2, ConsumptionAmounts2, Resources2, WaterFromFood2] = FullScenarioCompare(DataBase, FullScenariosTable2,Years,population,WaterFromFood1,orderIndex);
         % Calculate the Resurces Tables
         [RDB.Moderate_RDB.AreaSum2, RDB.Moderate_RDB.CostsSum2, RDB.Moderate_RDB.WaterSum2] = CalcTotalResources(RDB.Moderate_RDB.Resources2, RDB.Moderate_RDB.ConsumptionAmounts2, RDB.Moderate_RDB.WaterFromFood2);
 
@@ -116,14 +110,14 @@ switch orderIndex
         [RDB.Advanced_RDB.population] = populationCal(RDB.Advanced_RDB.FullScenariosTable3);
         [RDB.Advanced_RDB.EmissionsByYearsTest3, RDB.Advanced_RDB.ConsumptionAmounts3, RDB.Advanced_RDB.Resources3, RDB.Advanced_RDB.WaterFromFood3, Data1] = FullScenario(DataBase, RDB.Advanced_RDB.FullScenariosTable3,Years,RDB.Advanced_RDB.population,orderIndex, 0, RDB.BAU_RDB.WaterFromFood1);
         
-        %[EmissionsByYearsTest3, ConsumptionAmounts3, Resources3, WaterFromFood3] = FullScenarioCompare(DataBase, FullScenariosTable3,Years,population,WaterFromFood1,orderIndex);
         % Calculate the Resurces Tables
         [RDB.Advanced_RDB.AreaSum3, RDB.Advanced_RDB.CostsSum3, RDB.Advanced_RDB.WaterSum3] = CalcTotalResources(RDB.Advanced_RDB.Resources3, RDB.Advanced_RDB.ConsumptionAmounts3, RDB.Advanced_RDB.WaterFromFood3);
         
         ChangeDataBase = Data1;
         ResultsDataBase = RDB;
-        AllTheStepsTogether_RESULTS;
-        results;
+        AllTheStepsTogether_RESULTS; % Give Tables results
+        results; % Give Graphs Results
+        
         % Export the results tables to excel to this project
         %export_results_to_excel;
         disp("All The Steps Together")

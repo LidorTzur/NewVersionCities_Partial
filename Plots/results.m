@@ -32,19 +32,6 @@ WaterSum3(1, :) = [];
 CostsSum3(1, :) = [];
 
 %Arranging the data and building the graphs
-% colors1Em = [
-%    0.72, 0.27, 1.0; 
-%     0.49, 0.18, 0.56;  
-%     0.93, 0.69, 0.13;  
-%     0.51, 0.37, 0.01;  
-%     0.29, 0.89, 0.69;  
-%     0.47, 0.67, 0.19;  
-%     0.85, 0.33, 0.1;  
-%     0.64, 0.08, 0.18;  
-%     0.3, 0.75, 0.93;  
-%     0, 0.45, 0.74;
-%     0, 1, 0.74;
-% ];
 colors1Em = [
     0.72, 0.27, 1.00;   % סגול עז
     0.49, 0.18, 0.56;   % בורדו כהה
@@ -68,17 +55,12 @@ colors1Em = [
     0.10, 0.10, 0.10;   % שחור כמעט מוחלט
 ];
 
-
-%colors1Em = lines(20); % MATLAB built-in color palette with 20 distinct colors
-
 colors2Area = [
     0.47, 0.67, 0.19;
     0.29, 0.89, 0.69; 
     0.85, 0.33, 0.1; 
     0.72, 0.27, 1.0;
 ];
-
-%colors2Area = lines(20);
 
 colors3Water = [
     0.1, 0.31, 0.5;  
@@ -88,16 +70,12 @@ colors3Water = [
     0.72, 0.27, 1.0;
 ];
 
-%colors3Water = lines(20);
-
 colors4Cost = [
     0.1, 0.31, 0.5;  
     0, 0.45, 0.74;  
     0.85, 0.33, 0.1; 
     0.72, 0.27, 1.0;
 ];
-
-%colors4Cost = lines(20); 
 
 %% 2. emissions-area-water-base year to Target year *****
 % To be used after selecting "all steps together" 
@@ -139,6 +117,11 @@ title(t, sprintf('Compare Emissions, Area, and Water for 2019 VS 2050 (%s)', cit
 % disp(UpdatedDeltaTable);
 
 ResultsDataBase = RDB;
+
+% Save the results
+outFolder = 'C:\Users\צור\Documents\MATLAB\NewVersionCities_Partial\Results_Plots\Cities_Graphs_Sep';
+fileName = sprintf('Compare_Emissions_Area_Water_%s.png', cityCode);
+exportgraphics(t, fullfile(outFolder, fileName), 'Resolution', 300);
 
 function plotStackedBar(tileTitle, dataMat, colors, rowLabels, ylabelText, Order)
     % % סדר לפי סכום כל שורה
