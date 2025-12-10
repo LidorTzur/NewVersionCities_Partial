@@ -8,3 +8,5 @@ addpath("results");
 addpath("AllTheStepsTogether_RESULTS");
 addpath("export_results_to_excel");
 addpath("Results_Plots");
+addpath("Cities_Integrated_Plots");
+addpath("helpers");

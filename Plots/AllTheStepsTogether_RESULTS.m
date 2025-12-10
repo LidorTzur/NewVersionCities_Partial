@@ -30,6 +30,8 @@ TotalResults.Properties.VariableNames = YearsStringsForColNames;
 
 %% BAU
 RDB.BAU_RDB.TotalEmission1 = CalcUpDownStream(RDB.BAU_RDB.EmissionsByYearsTest1);
+RDB.BAU_RDB.TotalEmissionSum1 = CalcUpDownStreamSum(RDB.BAU_RDB.TotalEmission1);
+
 Sum_Size = height(RDB.BAU_RDB.TotalEmission1)-1;
 
 Emission1_Sum_Local = sum(RDB.BAU_RDB.TotalEmission1{[1,3,5,7,9,11], :}); 
@@ -51,6 +53,9 @@ Water1_Sum_Total = sum(RDB.BAU_RDB.WaterSum1{1:Sum_Size, :});
 
 %% Moderate
 RDB.Moderate_RDB.TotalEmission2 = CalcUpDownStream(RDB.Moderate_RDB.EmissionsByYearsTest2);
+RDB.Moderate_RDB.TotalEmissionSum2 = CalcUpDownStreamSum(RDB.Moderate_RDB.TotalEmission2);
+
+
 Sum_Size = height(RDB.Moderate_RDB.TotalEmission2)-1;
 Emission2_Sum_Local = sum(RDB.Moderate_RDB.TotalEmission2{[1,3,5,7,9,11], :}); 
 Emission2_Sum_Global = sum(RDB.Moderate_RDB.TotalEmission2{[2,4,6,8,10,12], :}); 
@@ -68,6 +73,9 @@ Water2_Sum_Total = sum(RDB.Moderate_RDB.WaterSum2{1:Sum_Size, :});
 
 %% Advanced
 RDB.Advanced_RDB.TotalEmission3 = CalcUpDownStream(RDB.Advanced_RDB.EmissionsByYearsTest3);
+RDB.Advanced_RDB.TotalEmissionSum3 = CalcUpDownStreamSum(RDB.Advanced_RDB.TotalEmission3);
+
+
 Sum_Size = height(RDB.Advanced_RDB.TotalEmission3)-1;
 
 Emission3_Sum_Local = sum(RDB.Advanced_RDB.TotalEmission3{[1,3,5,7,9,11], :}); 
@@ -144,29 +152,6 @@ RDB.TotalResults       = TotalResults;
 RDB.DeltaTableFull     = AllTogetherTable;
 
 %%------------------------------- Add Names---------------------------
-
-%% Plots - Lidor
-% plotGroupedStackedEmissions( ...
-%         {RDB.BAU_RDB}, ...
-%         '2020', ...
-%         {'BAU', 'Moderate', 'Advanced'}, ...
-%         cityCode ...
-%         );
-
-        % plotGroupedStackedEmissions( ...
-        % {RDB.BAU_RDB, RDB.Moderate_RDB, RDB.Advanced_RDB}, ...
-        % '2030', ...
-        % {'BAU', 'Moderate', 'Advanced'} , ...
-        % cityCode ...
-        % );
-
-        % plotGroupedStackedEmissions( ...
-        % {RDB.BAU_RDB, RDB.Moderate_RDB, RDB.Advanced_RDB}, ...
-        % '2050', ...
-        % {'BAU', 'Moderate', 'Advanced'}, ...
-        % cityCode ...
-        % );
-
 ResultsDataBase = RDB;
 %writetable(ResultsDataBase.TotalResults, 'TotalResults.xlsx', 'WriteRowNames', true)
 
