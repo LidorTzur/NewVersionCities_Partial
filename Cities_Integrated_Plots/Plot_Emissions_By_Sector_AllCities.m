@@ -1,97 +1,102 @@
 %% =====================================================================
 %  Plot_Emissions_By_Sector_AllCities.m
-%  מייצר גרפים של פליטות לפי סקטור – לכל הערים יחד (Base vs Target)
-%  לא אינטראקטיבי
 %% =====================================================================
-
 addpath('helpers');
-
 cityNames = fieldnames(AllCities);
 cities    = struct2cell(AllCities);
 nCities   = numel(cities);
-
 scenarios = {'BAU','Moderate','Advanced'};
-baseCol   = 1;     % עמודת שנת בסיס
-targetCol = Years;    % עמודת שנת יעד (2050)
+baseCol   = 1;     
+targetCol = Years;    
 
-%% --- שליפת סדר גלובלי של סקטורים ---
+% --- הגדרות פונטים ---
+fs_axis = 12;
+fs_title_main = 24; % הגדלנו עוד את הכותרת הראשית
+fs_title_city = 13; % הגדלנו כותרת עיר
+
+%% --- שליפת סקטורים וצבעים (נשאר זהה) ---
 sectorOrder = string([]);
-
 for c = 1:nCities
-    tbl = getScenarioTable(cities{c}, 'BAU');   % מספיק BAU לצורך שמות
-    nRaw = height(tbl) - 1;                     % השורה האחרונה היא סה"כ
+    tbl = getScenarioTable(cities{c}, 'BAU');   
+    nRaw = height(tbl) - 1;                     
     names = string(tbl.Properties.RowNames(1:nRaw));
-
     for nm = names.'
-        if ~ismember(nm, sectorOrder)
-            sectorOrder(end+1) = nm;
-        end
+        if ~ismember(nm, sectorOrder), sectorOrder(end+1) = nm; end
     end
 end
-
 nSectors = numel(sectorOrder);
 colors   = getSectorColors(nSectors);
+
+%% Output path
+outputDir = 'C:\Users\צור\Documents\MATLAB\NewVersionCities_Partial\Results_Plots\Base_Target_All_Cities';
+if ~exist(outputDir,'dir'), mkdir(outputDir); end
 
 %% --- לולאה על תרחישים ---
 for s = 1:numel(scenarios)
     scen = scenarios{s};
-
-    % חלון גדול
+    
+    % --- שינוי 1: הגדלת רוחב החלון ל-550 פיקסלים לכל עיר ---
+    figWidth = max(550 * nCities, 1400); 
     fig = figure('Name',['Emissions by Sectors – ' scen], ...
                  'Color','w', 'Units','pixels', ...
-                 'Position',[100 100 max(400*nCities, 1200) 600]);
-
+                 'Position', [50 50 figWidth 700]); % הגבהנו מעט את החלון
+    
+    % --- שינוי 2: שימוש ב-compact כדי לנצל מקסימום שטח לגרפים ---
     t = tiledlayout(fig, 1, nCities, ...
-        'TileSpacing','compact', ...
-        'Padding','compact');
+        'TileSpacing', 'compact', ...
+        'Padding', 'compact'); 
 
+    % כותרת ראשית מוגדלת
+    titleStr = ['Emissions by Sectors (', scen, ') – Base vs Target'];
     try
-        title(t, ['Emissions by Sectors (', scen, ') – Base vs Target']);
+        ttl = title(t, titleStr);
+        ttl.FontSize = fs_title_main;
+        ttl.FontWeight = 'bold';
     catch
-        sgtitle(['Emissions by Sectors (', scen, ') – Base vs Target']);
+        st = sgtitle(fig, titleStr);
+        st.FontSize = fs_title_main;
+        st.FontWeight = 'bold';
     end
 
     %% ציור לכל עיר
     for c = 1:nCities
-
-        % --- שליפת טבלת סקטורים לעיר ותרחיש ---
         tbl = getScenarioTable(cities{c}, scen);
-
-        % --- הפקת מטריצת סקטורים Base/Target ---
-        y = extractSectorMatrix(tbl, sectorOrder, baseCol, targetCol);   % nSectors×2
-
-        % --- גרף ---
+        y = extractSectorMatrix(tbl, sectorOrder, baseCol, targetCol);
+        
         ax = nexttile(t);
-
         cats = categorical({'Base','Target'});
-        b = bar(ax, cats, y', 'stacked', 'BarWidth', 0.9);
-
-        % צבעים אחידים לכל סקטור
+        cats = reordercats(cats, {'Base','Target'}); % לוודא סדר
+        
+        % BarWidth = 0.8-0.9 בד"כ נראה יותר טוב מ-1 (שנראה כמו גוש אחד)
+        b = bar(ax, cats, y', 'stacked', 'BarWidth', 0.85);
+        
         for k = 1:nSectors
             b(k).FaceColor = colors(k,:);
         end
-
+        
         % עיצוב
         grid(ax,'on');
         ax.Box = 'off';
-        ax.FontSize = 10;
-        title(ax, cityNames{c}, 'FontSize', 13, 'FontWeight','bold');
-        ylabel(ax,'MtCO2Eq');
-
-        % Y-limits אחידים בין Base ל-Target של העיר הזו בלבד
+        ax.FontSize = fs_axis;
+        title(ax, cityNames{c}, 'FontSize', fs_title_city, 'FontWeight','bold');
+        
+        % רק בגרף הראשון נשים כותרת ציר Y
+        if c == 1
+            ylabel(ax, 'MtCO2Eq', 'FontSize', fs_axis + 2, 'FontWeight', 'bold');
+        end
+        
         ymax = max(sum(y,1));
-        ylim(ax, [0 ceil(ymax*1.10)]);
+        ylim(ax, [0 ceil(ymax*1.15)]);
     end
 
-    % --- מקרא יחיד (Legend) ---
-    lgd = legend(nexttile(1), cellstr(sectorOrder), ...
-        'NumColumns', min(4,nSectors), ...
-        'Location','southoutside', ...
-        'FontSize',10);
-    try
-        lgd.Layout.Tile = 'south';
-    end
+    % --- שינוי 3: מקרא בתחתית מבלי להסתיר את הצירים ---
+    lgd = legend(ax, cellstr(sectorOrder), ...
+        'NumColumns', ceil(nSectors/2), ...
+        'Location', 'southoutside', ...
+        'FontSize', 11, 'FontWeight', 'bold');
+    lgd.Layout.Tile = 'south';
+
+    fileName = ['Base_Target_All_Cities_', scen, '.png'];
+    saveas(fig, fullfile(outputDir, fileName));
 
 end
-
-disp('✔ סיימתי להפיק את הגרפים של "Emissions by Sectors – All Cities".');

@@ -1,133 +1,130 @@
 %% =====================================================================
-%  Plot_BaseSnapshot_Sectors_AllCities.m
-%  תמונת בסיס: פירוק פליטות לפי סקטורים – כל הערים יחד (2019, BAU)
-%  גרף אבסולוטי + גרף פר קפיטה, צבעים לפי סקטור
+%  Plot_BaseSnapshot_Sectors_Combined.m
+%  Window: Total Emissions (Loc vs Glob) + Sector Percentage Breakdown
+%  Consistent Colors using getSectorColors
 %% =====================================================================
-
 addpath('helpers');
 
-cityNames = fieldnames(AllCities);
-cities    = struct2cell(AllCities);
-nCities   = numel(cities);
-
+% --- Get fixed city order ---
+catOrder = getCityCategorical(AllCities); 
+customCityOrder = cellstr(catOrder);
 scenario = 'BAU';
-baseCol  = 1;   % 2019
+baseCol  = 1; % Year 2019
+
+% --- Global Font Settings ---
+fs_axis   = 15; 
+fs_label  = 16; 
+fs_title  = 20; 
+fs_data   = 13; 
+fs_legend = 13;
 
 %% ---------------------------------------------------------
-%  חילוץ סקטורים גלובליים
+%  Data Extraction & Consistent Colors
 %% ---------------------------------------------------------
-
 sectorOrder = string([]);
-
-for c = 1:nCities
-    tbl = getScenarioTable(cities{c}, scenario);
-    nRaw = height(tbl) - 1; % אחרונה = Total
-    sc = string(tbl.Properties.RowNames(1:nRaw));
-
-    for nm = sc.'
-        if ~ismember(nm, sectorOrder)
-            sectorOrder(end+1) = nm;
+for i = 1:numel(customCityOrder)
+    cityName = customCityOrder{i};
+    if isfield(AllCities, cityName)
+        tblSectors = getScenarioTable(AllCities.(cityName), scenario);
+        sc = string(tblSectors.Properties.RowNames(1:end-1)); 
+        for nm = sc.'
+            if ~ismember(nm, sectorOrder), sectorOrder(end+1) = nm; end
         end
     end
 end
-
 nSectors = numel(sectorOrder);
-sectorColors = lines(nSectors);
 
-%% ---------------------------------------------------------
-%  יצירת מטריצות נתונים
-%% ---------------------------------------------------------
+% --- שימוש באותה פונקציה מהקוד השני לקבלת צבעים אחידים ---
+sectorColors = getSectorColors(nSectors);
 
-AbsMat = zeros(nCities, nSectors);
-PCMat  = zeros(nCities, nSectors);
+nCities = numel(customCityOrder);
+AbsMat_Sectors = zeros(nCities, nSectors);
+Total_LocGlob  = zeros(nCities, 2); 
 
-for c = 1:nCities
-    C = cities{c};
-    tbl = getScenarioTable(C, scenario);
-
-    % מטריצה של פליטות מוחלטות לפי סקטור
-    yAbs = extractSectorMatrix(tbl, sectorOrder, baseCol, baseCol);
-    yAbs = yAbs(:,1);
-    AbsMat(c,:) = yAbs;
-
-    % אוכלוסייה
-    pop = getPopMillionsByCol(C, baseCol, scenario, tbl.Properties.VariableNames);
-
-    PCMat(c,:) = yAbs ./ max(pop, eps);
+for i = 1:nCities
+    cityName = customCityOrder{i};
+    if isfield(AllCities, cityName)
+        C = AllCities.(cityName);
+        tblSectors = getScenarioTable(C, scenario);
+        yAbs = extractSectorMatrix(tblSectors, sectorOrder, baseCol, baseCol);
+        AbsMat_Sectors(i,:) = yAbs(:,1);
+        
+        % חילוץ גלובלי/לוקאלי
+        totalTbl = C.TotalResults;
+        Total_LocGlob(i, 1) = totalTbl{1, baseCol}; % Local
+        Total_LocGlob(i, 2) = totalTbl{4, baseCol}; % Global
+    end
 end
 
-%% ---------------------------------------------------------
-%  יצירת חלון גרפים
-%% ---------------------------------------------------------
-
-fig = figure('Name','Base Snapshot – Sector Breakdown (All Cities, 2019 BAU)', ...
-             'Color','w','Units','pixels', ...
-             'Position',[120 80 1400 650]);
-
-tl = tiledlayout(fig, 1, 2, 'TileSpacing','compact','Padding','compact');
-
-try
-    title(tl,'Base Snapshot – Sector Breakdown (2019 BAU)');
-catch
-    sgtitle('Base Snapshot – Sector Breakdown (2019 BAU)');
-end
-
-%% =====================================================================
-%  גרף שמאל: פליטות אבסולוטיות לכל הערים יחד
-%% =====================================================================
-
-ax1 = nexttile(tl);
-
-cats = categorical(cityNames);
-b1 = bar(ax1, cats, AbsMat, 'stacked', 'BarWidth', 0.8);
-
-% צבעים קבועים לכל סקטור
-for s = 1:nSectors
-    b1(s).FaceColor = sectorColors(s,:);
-end
-
-ylabel(ax1,'MtCO2eq');
-title(ax1,'Absolute Emissions by Sector – 2019 (BAU)');
-grid(ax1,'on');
-ax1.Box = 'off';
-ax1.FontSize = 10;
-set(ax1,'XTickLabelRotation',45);
-
-%% =====================================================================
-%  גרף ימין: פליטות פר קפיטה לכל הערים יחד
-%% =====================================================================
-
-ax2 = nexttile(tl);
-
-b2 = bar(ax2, cats, PCMat, 'stacked', 'BarWidth', 0.8);
-
-for s = 1:nSectors
-    b2(s).FaceColor = sectorColors(s,:);
-end
-
-ylabel(ax2,'tCO2e per capita');
-title(ax2,'Per Capita Emissions by Sector – 2019 (BAU)');
-grid(ax2,'on');
-ax2.Box = 'off';
-ax2.FontSize = 10;
-set(ax2,'XTickLabelRotation',45);
-
-%% =====================================================================
-%  מקרא (יחיד לכל הסקטורים)
-%% =====================================================================
-
-lgd = legend(ax2, cellstr(sectorOrder), ...
-    'NumColumns', min(4,nSectors), 'Location','southoutside','FontSize',10);
-
-
-%% =====================================================================
-%  שמירה לתיקייה
-%% =====================================================================
+% חישוב מטריצת אחוזים
+PctMat_Sectors = (AbsMat_Sectors ./ max(sum(AbsMat_Sectors, 2), eps)) * 100;
 
 outputDir = 'C:\Users\צור\Documents\MATLAB\NewVersionCities_Partial\Results_Plots\Base_Snapshot_Sectors';
 if ~exist(outputDir,'dir'), mkdir(outputDir); end
 
-saveas(fig, fullfile(outputDir,'BaseSnapshot_Sectors_Sum_AllCities_GL_2019_BAU.png'));
-saveas(fig, fullfile(outputDir,'BaseSnapshot_Sectors_Sum_AllCities_GL_2019_BAU.fig'));
+%% =====================================================================
+%  יצירת חלון משולב
+%% =====================================================================
+figComb = figure('Name','Total and Sector Breakdown','Color','w','Position',[100 100 1600 850]);
+tl = tiledlayout(figComb, 1, 2, 'TileSpacing','loose','Padding','compact');
 
-disp('✔ נשמר בהצלחה: Base Snapshot Sum – Sector Breakdown for All Cities');
+% --- גרף שמאל: סה"כ פליטות (Local vs Global) ---
+axTotal = nexttile(tl);
+bTotal = bar(axTotal, catOrder, Total_LocGlob, 'stacked', 'BarWidth', 0.8);
+
+% קביעת צבעים לגרף השמאלי (משתמשים בצבעים הראשון והשני מהרשימה הגנרית)
+bTotal(1).FaceColor = sectorColors(1,:); % צבע לוקאלי
+bTotal(1).DisplayName = 'Local Emissions';
+bTotal(2).FaceColor = sectorColors(2,:); % צבע גלובאלי
+bTotal(2).DisplayName = 'Global Emissions';
+
+% Labels
+accT = zeros(nCities, 1);
+for s = 1:2
+    xPos = bTotal(s).XEndPoints; val = Total_LocGlob(:,s);
+    for j = 1:numel(xPos)
+        if val(j) > (max(sum(Total_LocGlob,2)) * 0.05)
+            text(axTotal, xPos(j), accT(j) + val(j)/2, num2str(val(j), '%.1f'), ...
+                'Horiz','center', 'Vertical','middle', 'FontSize', fs_data, 'FontWeight','bold', 'Color', 'w');
+        end
+    end
+    accT = accT + val;
+end
+ylabel(axTotal, 'MtCO2eq', 'FontSize', fs_label);
+title(axTotal, 'Total Emissions: Local vs Global', 'FontSize', fs_title);
+set(axTotal, 'FontSize', fs_axis, 'XTickLabelRotation', 45); grid on;
+legend(axTotal, 'Location', 'northeast', 'FontSize', fs_legend, 'Box', 'on');
+
+% --- גרף ימין: אחוזים לפי סקטורים ---
+axPct = nexttile(tl);
+bPct = bar(axPct, catOrder, PctMat_Sectors, 'stacked', 'BarWidth', 0.8);
+
+% יישום אותם צבעים לכל סקטור בדיוק כמו בקוד השני
+for s = 1:nSectors
+    bPct(s).FaceColor = sectorColors(s,:);
+end
+
+% Labels
+accPct = zeros(nCities, 1);
+for s = 1:nSectors
+    xPos = bPct(s).XEndPoints; val = PctMat_Sectors(:,s);
+    for j = 1:numel(xPos)
+        if val(j) > 6 
+            text(axPct, xPos(j), accPct(j) + val(j)/2, [num2str(round(val(j))),'%'], ...
+                'Horiz','center', 'Vertical','middle', 'FontSize', fs_data, 'FontWeight','bold', 'Color', 'w');
+        end
+    end
+    accPct = accPct + val;
+end
+ylabel(axPct, 'Percentage (%)', 'FontSize', fs_label);
+title(axPct, 'Sector Share Breakdown (%)', 'FontSize', fs_title);
+set(axPct, 'FontSize', fs_axis, 'XTickLabelRotation', 45); ylim([0 100]); grid on;
+
+% מקרא סקטורים (קובייה)
+lgd = legend(axPct, cellstr(sectorOrder), 'FontSize', fs_legend, 'Box', 'on');
+lgd.Layout.Tile = 'south'; 
+lgd.NumColumns = ceil(nSectors/2); 
+
+title(tl, 'Base Snapshot: Magnitude & Composition (2019 BAU)', 'FontSize', fs_title+2);
+saveas(figComb, fullfile(outputDir, 'BaseSnapshot_Total_and_Share_Combined.png'));
+disp('✔ Figure saved with consistent sector colors.');

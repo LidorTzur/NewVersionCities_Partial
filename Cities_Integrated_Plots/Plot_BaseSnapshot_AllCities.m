@@ -1,112 +1,125 @@
 %% =====================================================================
 %  Plot_BaseSnapshot_AllCities.m
-%  תמונת בסיס: פליטות אבסולוטיות ופר קפיטה לשנת 2019 (BAU)
+%  Base Snapshot: Absolute and Per Capita Emissions for 2019 (BAU)
+%  Fixed city order and enlarged font settings
 %% =====================================================================
-
 addpath('helpers');
 
-cityNames = fieldnames(AllCities);
-cities    = struct2cell(AllCities);
-nCities   = numel(cities);
+% 1. Get the categorical array (this contains the names and the fixed order)
+catOrder = getCityCategorical(AllCities); 
 
-scenario = 'BAU';    % תרחיש בסיס
-baseCol  = 1;        % שנת 2019
+% 2. Convert to a cell array of strings for the data collection loop
+% This allows you to use cityName as a key for the AllCities struct
+customCityOrder = cellstr(catOrder);
 
-%% --- מפה של צבעים עבור כל עיר ---
-cityColors = lines(nCities);   % צבעים שונים לכל עיר
+nCities  = numel(customCityOrder);
+scenario = 'BAU';    % Base scenario
+baseCol  = 1;        % Year 2019
 
-%% --- איסוף נתונים לכל עיר ---
+% --- Font Settings ---
+fs_axis   = 14; 
+fs_label  = 16; 
+fs_title  = 20; 
+fs_data   = 13; 
+
+%% --- Color map for each city ---
+cityColors = lines(nCities); 
+
+%% --- Collect data for each city based on defined order ---
 AbsValues = zeros(nCities,1);
 PCValues  = zeros(nCities,1);
 
-for c = 1:nCities
-    C = cities{c};
-    tbl = getScenarioTable(C, scenario);
-
-    % סה"כ פליטות (השורה האחרונה בטבלה)
-    totalRowName = tbl.Properties.RowNames{end};
-    AbsValues(c) = tbl{totalRowName, baseCol};
-
-    % אוכלוסייה במיליונים
-    pop = getPopMillionsByCol(C, baseCol, scenario, tbl.Properties.VariableNames);
-    PCValues(c) = AbsValues(c) ./ max(pop, eps);
+for i = 1:nCities
+    cityName = customCityOrder{i};
+    if isfield(AllCities, cityName)
+        C = AllCities.(cityName);
+        tbl = getScenarioTable(C, scenario);
+        
+        % Total emissions (the last row in the table)
+        totalRowName = tbl.Properties.RowNames{end};
+        AbsValues(i) = tbl{totalRowName, baseCol};
+        
+        % Population in millions
+        pop = getPopMillionsByCol(C, baseCol, scenario, tbl.Properties.VariableNames);
+        PCValues(i) = AbsValues(i) ./ max(pop, eps);
+    else
+        warning('City %s was not found in the data structure!', cityName);
+    end
 end
 
-%% --- יצירת חלון גרפים ---
+%% --- Create figure window ---
 fig = figure('Name','Base Snapshot – 2019 BAU', ...
              'Color','w','Units','pixels', ...
-             'Position',[200 150 1200 550]);
+             'Position',[200 150 1300 650]);
+tl = tiledlayout(fig, 1, 2, 'TileSpacing','loose','Padding','compact');
 
-tl = tiledlayout(fig, 1, 2, 'TileSpacing','compact','Padding','compact');
-
+% Create categorical axis that maintains the specified order
+%catCities = categorical(customCityOrder, customCityOrder, 'Ordinal', true);
 
 %% =====================================================================
-%  גרף שמאל: פליטות אבסולוטיות
+%  Left Plot: Absolute Emissions
 %% =====================================================================
-
 axAbs = nexttile(tl);
-
-bAbs = bar(axAbs, categorical(cityNames), AbsValues, 'BarWidth', 0.7);
-bAbs.FaceColor = 'flat';   % חשוב כדי שכל עיר תקבל צבע שונה
-
-for c = 1:nCities
-    bAbs.CData(c,:) = cityColors(c,:);
+bAbs = bar(axAbs, catOrder, AbsValues, 'BarWidth', 0.7);
+bAbs.FaceColor = 'flat'; 
+for i = 1:nCities
+    bAbs.CData(i,:) = cityColors(i,:);
 end
 
-ylabel(axAbs,'MtCO2eq');
-title(axAbs,'Absolute Emissions – 2019 (BAU)');
-grid(axAbs,'on'); 
-axAbs.Box = 'off';
-axAbs.FontSize = 10;
-set(axAbs,'XTickLabelRotation',45);
+% --- Add value labels ---
+xtips1 = bAbs.XEndPoints;
+ytips1 = bAbs.YEndPoints;
+for i = 1:nCities
+    text(axAbs, xtips1(i), ytips1(i), num2str(AbsValues(i), '%.1f'), ...
+        'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', ...
+        'FontSize', fs_data, 'FontWeight', 'bold');
+end
 
+ylabel(axAbs, 'MtCO2eq', 'FontSize', fs_label);
+title(axAbs, 'Total Emissions (2019 BAU)', 'FontSize', fs_title);
+grid(axAbs, 'on'); 
+axAbs.FontSize = fs_axis;
+set(axAbs, 'XTickLabelRotation', 45);
 
 %% =====================================================================
-%  גרף ימין: פליטות פר קפיטה
+%  Right Plot: Per Capita Emissions
 %% =====================================================================
-
 axPC = nexttile(tl);
-
-bPC = bar(axPC, categorical(cityNames), PCValues, 'BarWidth', 0.7);
-bPC.FaceColor = 'flat';  % חשוב כדי לאפשר צבעי עיר
-
-for c = 1:nCities
-    bPC.CData(c,:) = cityColors(c,:);
+bPC = bar(axPC, catOrder, PCValues, 'BarWidth', 0.7);
+bPC.FaceColor = 'flat';
+for i = 1:nCities
+    bPC.CData(i,:) = cityColors(i,:);
 end
 
-ylabel(axPC,'tCO2e per capita');
-title(axPC,'Per Capita Emissions – 2019 (BAU)');
-grid(axPC,'on'); 
-axPC.Box = 'off';
-axPC.FontSize = 10;
-set(axPC,'XTickLabelRotation',45);
-
-
-%% =====================================================================
-%  כותרת עליונה לכל החלון
-%% =====================================================================
-
-try
-    title(tl, 'Base Snapshot – Emissions of All Cities (2019, BAU)');
-catch
-    sgtitle('Base Snapshot – Emissions of All Cities (2019, BAU)');
+% --- Add value labels ---
+xtips2 = bPC.XEndPoints;
+ytips2 = bPC.YEndPoints;
+for i = 1:nCities
+    text(axPC, xtips2(i), ytips2(i), num2str(PCValues(i), '%.2f'), ...
+        'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', ...
+        'FontSize', fs_data, 'FontWeight', 'bold');
 end
 
+ylabel(axPC, 'tCO2e per capita', 'FontSize', fs_label);
+title(axPC, 'Per Capita Emissions (2019 BAU)', 'FontSize', fs_title);
+grid(axPC, 'on'); 
+axPC.FontSize = fs_axis;
+set(axPC, 'XTickLabelRotation', 45);
 
 %% =====================================================================
-%  שמירת הגרפים בתיקייה
+%  Top title for the entire layout
 %% =====================================================================
+t = title(tl, 'Base Snapshot – Emissions Summary (2019, BAU)');
+t.FontSize = fs_title + 2;
+t.FontWeight = 'bold';
 
+%% =====================================================================
+%  Save Figures
+%% =====================================================================
 outputDir = 'C:\Users\צור\Documents\MATLAB\NewVersionCities_Partial\Results_Plots\Base_Snapshot';
-if ~exist(outputDir, 'dir')
-    mkdir(outputDir);
-end
+if ~exist(outputDir, 'dir'), mkdir(outputDir); end
 
-fileNamePNG = fullfile(outputDir, 'BaseSnapshot_AllCities_2019_BAU.png');
-fileNameFIG = fullfile(outputDir, 'BaseSnapshot_AllCities_2019_BAU.fig');
+saveas(fig, fullfile(outputDir, 'BaseSnapshot_AllCities_Ordered.png'));
+saveas(fig, fullfile(outputDir, 'BaseSnapshot_AllCities_Ordered.fig'));
 
-saveas(fig, fileNamePNG);
-saveas(fig, fileNameFIG);
-
-disp(['✔ הגרפים נשמרו ב: ' outputDir]);
-disp('✔ סיימתי להפיק את תמונת הבסיס של כל הערים (2019 BAU).');
+disp('✔ Finished generating the ordered base snapshot plots.');
