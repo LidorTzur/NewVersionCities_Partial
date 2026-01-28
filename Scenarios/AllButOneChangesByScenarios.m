@@ -23,8 +23,6 @@ current_food_lost_global = Data.Food_DataBase.current_food_lost; % The global as
 YearsAfterAnalysis = Data.Electricity_DataBase.CurrentYearReal - BaseYear; % the number of years between 2023 to 2019
 RenewableEnergies = Data.Electricity_DataBase.RenewableEnergies_CurrentYear; % Percentage of renewable energy
 NaturalGas = Data.Electricity_DataBase.NaturalGas_CurrentYear; % Percentage of natural gas
-%EV = 0.06; % Percentage of electric vehicles
-%electricity_production_by_renewable_resources = 0.3; % Percentage of electricity production from renewable sources
 
 % Define the current situation of energy consumption based on data (e.g., electricity consumption)
 CurrentEnergyConsumptionFromRenewableEnergies = Data.Electricity_DataBase.InitialPercentage(3); % 0.05
@@ -160,8 +158,9 @@ AllButOneScenariosTable{18,:} = CalcChangeVector(MilesTonesTable{18,:}, Years, S
 AllButOneScenariosTable{21,:} = CalcChangeVector(MilesTonesTable{21,:}, Years, S(21), 'Type', 'Linear', 'Growth', true);
 AllButOneScenariosTable{22,:} = CalcChangeVector(MilesTonesTable{22,:}, Years, S(22), 'Type', 'Linear', 'Growth', true);
 AllButOneScenariosTable{23,:} = CalcChangeVector(MilesTonesTable{23,:}, Years, S(23), 'Type', 'Linear', 'Growth', true);
+AllButOneScenariosTable{24,:} = CalcChangeVector(MilesTonesTable{24,:}, Years, S(24), 'Type', 'Linear', 'Growth', true); % Moving to a green materials
+
 % For the all other categories floors number
-AllButOneScenariosTable{24,:} = CalcChangeVector(MilesTonesTable{24,:}, Years, S(24), 'Type', 'Linear', 'Growth', true);
 AllButOneScenariosTable{25,:} = CalcChangeVector(MilesTonesTable{25,:}, Years, S(25), 'Type', 'Linear', 'Growth', true);
 AllButOneScenariosTable{26,:} = CalcChangeVector(MilesTonesTable{26,:}, Years, S(26), 'Type', 'Linear', 'Growth', true);
 AllButOneScenariosTable{27,:} = CalcChangeVector(MilesTonesTable{27,:}, Years, S(27), 'Type', 'Linear', 'Growth', true);
@@ -170,6 +169,8 @@ AllButOneScenariosTable{29,:} = CalcChangeVector(MilesTonesTable{29,:}, Years, S
 AllButOneScenariosTable{30,:} = CalcChangeVector(MilesTonesTable{30,:}, Years, S(30), 'Type', 'Linear', 'Growth', true);
 AllButOneScenariosTable{31,:} = CalcChangeVector(MilesTonesTable{31,:}, Years, S(31), 'Type', 'Linear', 'Growth', true);
 AllButOneScenariosTable{32,:} = CalcChangeVector(MilesTonesTable{32,:}, Years, S(32), 'Type', 'Linear', 'Growth', true);
+AllButOneScenariosTable{33,:} = CalcChangeVector(MilesTonesTable{33,:}, Years, S(33), 'Type', 'Linear', 'Growth', true);
+
 
 
 

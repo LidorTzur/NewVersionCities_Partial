@@ -1,4 +1,4 @@
- function [ElectricityConsumptionTable, TransportationConsumptionTable, VehicleAmountsCell, FoodConsumptionCell, WaterConsumptionCell, ConstructionTable, ConstructionFootprintTable, WateAndRecyclingCell, AmountsOfFuelsCells, OrganicWasteAmount, Data] = ConsumptionChanges(Data, ScenariosTable,Years,pop,orderIndex, varargin)
+ function [ElectricityConsumptionTable, TransportationConsumptionTable, VehicleAmountsCell, FoodConsumptionCell, WaterConsumptionCell, ConstructionTable, ConstructionFootprintTable, WateAndRecyclingCell, AmountsOfFuelsCells, OrganicWasteAmount, Data, ConstructionECO2Coefficients_ByMaterial] = ConsumptionChanges(Data, ScenariosTable,Years,pop,orderIndex, varargin)
 % This function calculates consumption changes based on population growth and predefined coefficients.
 % Input:
 %   - Data: Structure containing base data for various consumption categories.
@@ -256,11 +256,14 @@ Data.Water_DataBase = WDB;
 ChangeInBuildingMixRatio = ScenariosTable{21,:}; % Multiplicative factor (e.g., 1.6 for 60% increase)
 ChangeInFloorPrintHighDensity = ScenariosTable{22,:}; % Row 22: Multiplicative factor for High-Density FloorPrint
 ChangeInFloorPrintLowDensity = ScenariosTable{23,:}; % Row 23: Multiplicative factor for Low-Density FloorPrint
-ChangeInFloorsNumber = ScenariosTable{24:32,:};
+ChangeInGreenMaterials = ScenariosTable{24,:};
+ChangeInFloorsNumber = ScenariosTable{25:33,:};
 
 BaseDistTable = Data.Const_DataBase.Building_Type_Distribution_Cell{1}; % Get the Base Table structure for updates
 BaseFootprintTable = Data.Const_DataBase.Precent_Floor_Footprint_Cell{1}; % נתוני בסיס של Footprint Ratio
 BaseFloorsTable = Data.Const_DataBase.ConstructionFloorsTable{:,1}; % numbers of floors base value
+BaseEmissionMaterials = Data.Const_DataBase.ConstructionECO2Coefficients_ByMaterial{1}; 
+Saving_Green_Cement = Data.Const_DataBase.Saving_Green_Cement;
 
 % Ensure the Cell Array is initialized for all years (Building Type)
 MaxIndex = length(Data.Const_DataBase.Building_Type_Distribution_Cell);
@@ -319,12 +322,21 @@ for i = 1:Years
     Data.Const_DataBase.Precent_Floor_Footprint_Cell{i} = NewFootTable;
 
 
-    % --- Update Floors number (Scenario 24: 32.. ...) ---
+    % --- Update Floors number (Scenario 25: 33.. ...) ---
     CurrentFloorsChange = ChangeInFloorsNumber(i); 
     InitialFloorNumber = BaseFloorsTable; % חילוץ מספר טהור (עובד ב-readValues) 
 
     NewFloorNumber = InitialFloorNumber * CurrentFloorsChange;
     Data.Const_DataBase.ConstructionFloorsTable{:,i} = NewFloorNumber;
+
+
+    % --- Update Materials Emission by Green Transition ---
+    CurrentEmissionChange = (ChangeInGreenMaterials(i)-1); % We keep only the percent
+    InitialEmission = BaseEmissionMaterials; % חילוץ מספר טהור (עובד ב-readValues) 
+    NewEmissionMaterial = InitialEmission;
+    NewEmissionMaterial(:,:) = InitialEmission(:,:) - InitialEmission(:,:).*Saving_Green_Cement'*CurrentEmissionChange; % Just the Cement Changes
+    Data.Const_DataBase.ConstructionECO2Coefficients_ByMaterial{i} = NewEmissionMaterial;
+
 end
 
 
@@ -336,6 +348,7 @@ ConstructionInitialization = ConstructionTable{1:ConstructionTable_numRows,1};
 % Lidor's addition
 ConstructionFootprintTable = Data.Const_DataBase.ConstructionFootprintTable;
 ConstructionFloorsTable = Data.Const_DataBase.ConstructionFloorsTable;
+ConstructionECO2Coefficients_ByMaterial = Data.Const_DataBase.ConstructionECO2Coefficients_ByMaterial;
 
 ConstructionFootprint_numRows = height(ConstructionFootprintTable) - 1;
 ConstructionFootprintInitialization = ConstructionFootprintTable{1:ConstructionFootprint_numRows,1};
@@ -393,6 +406,8 @@ ConstructionTable{:, :} = max(ConstructionTable{:, :}, 0);
 ConstructionFootprintTable{:, :} = max(ConstructionFootprintTable{:, :}, 0);
 
 % Set Base Year 2019 Delta to 2020 Delta (as done in the original code)
+% it will be different from scenarios- because in the second year the
+% scenario cjange the value
 ConstructionFootprintTable{1:ConstructionFootprint_numRows, 1} = ConstructionFootprintTable{1:ConstructionFootprint_numRows, 2};
 ConstructionTable{1:ConstructionTable_numRows, 1} = ConstructionTable{1:ConstructionTable_numRows, 2};
 
@@ -400,7 +415,7 @@ ConstructionTable{1:ConstructionTable_numRows, 1} = ConstructionTable{1:Construc
 % Save Results
 Data.ConstructionTable = ConstructionTable;
 Data.ConstructionFootprintTable = ConstructionFootprintTable;
-
+Data.ConstructionECO2Coefficients_ByMaterial = ConstructionECO2Coefficients_ByMaterial;
 
 
 

@@ -406,6 +406,9 @@ CDB.ConstructionTable = array2table(zeros(Construction_Row_Num,Years), 'RowNames
 CDB.ConstructionFootprintTable = array2table(zeros(Construction_Row_Num,Years), 'RowNames', Construction_RowNames);
 CDB.ConstructionFloorsTable = array2table(zeros(Construction_Row_Num,Years), 'RowNames', Construction_RowNames);
 
+% The emission coefficient per material type (lidor)
+CDB.ConstructionECO2Coefficients_ByMaterial = cell(1,Years);
+
 s1 = "Area for Construction ";
 s2 = "Floor Area for Constructure ";
 s4 = "Number of floors for Constructure ";
@@ -434,6 +437,9 @@ CDB.ConstructionFootprintTable{Construction_Row_Num, 1} = sum(CDB.ConstructionFo
 CDB.ConstructionFloorsTable{1:(Construction_Row_Num-1), 1} = table2array(readtable(Data,'Sheet','Construction','Range','D3:D13','ReadVariableNames',false));
 CDB.ConstructionFloorsTable{Construction_Row_Num, 1} = sum(CDB.ConstructionFloorsTable{1:(Construction_Row_Num-1), 1});
 
+% The Emission Factors
+CDB.ConstructionECO2Coefficients_ByMaterial{1} = table2array(readtable(Data,'Sheet','Construction','Range','B22:H22','ReadVariableNames',false));
+
 
 %%%% Variables
 % Lidor's addition
@@ -452,8 +458,6 @@ CDB.ConstructionMaterialCoefficients_LowDensity = table2array(readtable(Data,'Sh
 % The ratio between imported and local production of materials in israel
 CDB.ConstructionMaterialImprotedRate = table2array(readtable(Data,'Sheet','Construction','Range','B24:H24','ReadVariableNames',false));
 CDB.ConstructionMaterialLocalProductionRate = table2array(readtable(Data,'Sheet','Construction','Range','B25:H25','ReadVariableNames',false));
-% The emission coefficient per material type (lidor)
-CDB.ConstructionECO2Coefficients_ByMaterial = table2array(readtable(Data,'Sheet','Construction','Range','B22:H22','ReadVariableNames',false));
 
 %----------------------------------------------------- New Application-----------------------------------
 %% The ConstructionNew Sheet to calculations
@@ -491,7 +495,8 @@ CDB.Precent_Floor_Footprint_Cell = Precent_Floor_Footprint_Cell;
 % Year of urban plan in order to cap the built-up area per capita
 CDB.UrbanPlan_Year = readmatrix(Data, 'Sheet','ConstructionNew','Range','E15:E15');
 
-
+% precent of saving by moving to a green material- cement
+CDB.Saving_Green_Cement = table2array(readtable(Data,'Sheet','ConstructionNew','Range','R3:R9','ReadVariableNames',false));
 
 %% ---------------------------------------- MATERIALS ------------------------------------------------
 

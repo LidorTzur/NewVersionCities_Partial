@@ -98,10 +98,12 @@ ReducingMeatConsumptionPercentage = ScenariosTable{20,:};
 ChangeInBuildingMixRatio = ScenariosTable{21,:}; % Row 21: High-Density Ratio (0 to 1)
 ChangeInFloorPrintHighDensity = ScenariosTable{22,:}; % Row 22: FloorPrint High-Density Multiplier
 ChangeInFloorPrintLowDensity = ScenariosTable{23,:}; % Row 23: FloorPrint Low-Density Multiplier
+ChangeInGreenMaterials = ScenariosTable{24,:}; 
+
 
 %% Calculate Base Consumptions (No scenario)
 % Calculate the base consumption data based on population growth
-[ElectricityConsumptionTable, TransportationConsumptionTable, VehicleAmountsCell, FoodConsumptionCell, WaterConsumptionCell, ConstructionTable, ConstructionFootprintTable ,WasteAndRecyclingCell,AmountsOfFuelsCells, OrganicWasteCell, Data1] = ConsumptionChanges(Data,ScenariosTable, Years, pop, orderIndex);
+[ElectricityConsumptionTable, TransportationConsumptionTable, VehicleAmountsCell, FoodConsumptionCell, WaterConsumptionCell, ConstructionTable, ConstructionFootprintTable ,WasteAndRecyclingCell,AmountsOfFuelsCells, OrganicWasteCell, Data1, ConstructionECO2Coefficients_ByMaterial] = ConsumptionChanges(Data,ScenariosTable, Years, pop, orderIndex);
 
 %% Create the years column names (based on the years)
 YearsStringsForColNames = cell(1,Years);
@@ -358,8 +360,9 @@ for i = 1:Years
     CurrentConstruction = ConstructionTable{:,i};
     %prevConstruction = ConstructionTable{:,i-1};
     CurrentConstructionFootprint = ConstructionFootprintTable{:, i};
-    %prevConstructionFootprint = ConstructionFootprintTable{:,i-1};
-    [ConsumptionAmounts{4,i},EmissionsByYears{7,i}] = CalcConstruction(Data, CurrentConstruction, CurrentConstructionFootprint);
+    CurrentConstructionECO2Coefficients_ByMaterial = ConstructionECO2Coefficients_ByMaterial{i};
+    %%%%%%%%%%%%%%%%%%%%%%%%% CHECKKKKKKKKKKKKKK
+    [ConsumptionAmounts{4,i},EmissionsByYears{7,i}] = CalcConstruction(Data1, CurrentConstruction, CurrentConstructionFootprint, CurrentConstructionECO2Coefficients_ByMaterial);
     % The base year has no emissions and material, cause all the next years
     % are comparing to the first one. - so we give it the delta of 2020.
     ConsumptionAmounts{4,1} = ConsumptionAmounts{4,2};
