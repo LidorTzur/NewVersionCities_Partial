@@ -127,8 +127,6 @@ EDB.DualPVPercentage = readmatrix(Data, 'Sheet','Area','Range','F3:F3');
 % Waste Inciniration
 %% Waste incinaration values 
 EDB.WasteToElectricity = readmatrix(Data, 'Sheet','ElectricityManufactureEmissions','Range','H6:H6'); % How much waste needed to burn to get 1 kWh of electricity
-%EDB.IncinarationEmissionCoefficient = readmatrix(Data, 'Sheet','ElectricityManufactureEmissions','Range','H8:H8'); % Emission coefficient of waste incineration
-
 
 %% ------------------------------------- TRANSPORTATION ------------------------------------------------
 %%%%%% TEMPS
@@ -173,7 +171,7 @@ TDB.TransportationConsumptionTable.Properties.VariableNames = cellstr(ColumnName
 TDB.TransportationConsumptionTable{1:(Transportation_Consumption_Row_Num-1), 1} = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','B3:B10','ReadVariableNames',false));
 TDB.TransportationConsumptionTable{Transportation_Consumption_Row_Num, 1} = sum(TDB.TransportationConsumptionTable{1:(Transportation_Consumption_Row_Num-1),1}); % Create a sum row for the table
 
-%%%%%%%%%%%% Vehicle Amounts - Needs to Updates with Trains!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+%%%%%%%%%%%% Vehicle Amounts
 % This is a one-demantional array that contain columns for each year.
 % Ideally each cell of it will contain a table with the year data of the number of vehicle. For now its just the first cell that contain the table (for 2019)
 TDB.VehicleAmountsCell = cell(1,Years);
@@ -181,7 +179,6 @@ TDB.VehicleAmountsCell{1} = array2table(zeros(Vehicle_Amounts_Row_Num,Vehicle_Am
 % Read the 2019 Data from the Data File
 TDB.VehicleAmountsCell{1}{:,:} = table2array(readtable(Data,'Sheet','TransportationConsumption','Range','E3:J8','ReadVariableNames',false));
 TDB.VehicleAmountsCell{1}.Properties.VariableNames = TDB.Vehicle_Amounts_ColNames;
-
 
 %%%%%%%%%%%% Calc transportation consumption
 
@@ -227,10 +224,8 @@ TDB.EmissionsCoefficientsUpstream = table2array(readtable(Data,'Sheet','Transpor
 
 % Rides per day
 TDB.RidesPerDay = readmatrix(Data,'Sheet','TransportationConsumption','Range','A13:A13'); % 4
-% Car Bus Ratio - Define the ratio between car to bus use
-TDB.BusCarRatio = readmatrix(Data,'Sheet','TransportationConsumption','Range','F12:F12');
-% Car Train Ratio - Define the ratio between car to Train use
-TDB.TrainCarRatio = readmatrix(Data,'Sheet','TransportationConsumption','Range','E12:E12');
+TDB.BusCarRatio = readmatrix(Data,'Sheet','TransportationConsumption','Range','F12:F12'); % Car Bus Ratio - Define the ratio between car to bus use
+TDB.TrainCarRatio = readmatrix(Data,'Sheet','TransportationConsumption','Range','E12:E12'); % Car Train Ratio - Define the ratio between car to Train use
 
 % Distribution of - Transition to buses and trains 
 TDB.TransitionToBus = readmatrix(Data,'Sheet','TransportationConsumption','Range','H12:H12');
@@ -250,35 +245,10 @@ WDB.Water_Electricity_Types = {'Drilling Water', 'Desalinated Water', 'Moving Re
 WDB.WaterConsumptionCell = cell(1,Years); 
 WDB.WaterConsumptionCell{1} = array2table(zeros(1,numel(WDB.water_Names)), 'VariableNames', WDB.water_Names);
 
-%% Old Water
-% Water_Consumption_RowNames = {'Agriculture', 'Marginal Water Percentage', 'Home Consumption(Urban)', 'Industry', 'Water for Nature', 'Water for Neighbors'};
-% Water_Consumption_ColNames = {'Water From Nature', 'Diselinated Water','Brackish Water','Treated WasteWater','Flood Water'};
-% Water_Consumption_Row_Num = int32(numel(Water_Consumption_RowNames));
-% Water_Consumption_Col_Num = int32(numel(Water_Consumption_ColNames));
-% % choosing brakish, treated water water and flood of 2019. and put it in the 3-5 columns of the table in the first cell
-% DataBase.WaterConsumptionCell{1}{:,3:5} = table2array(readtable(Data,'Sheet','Water','Range','F12:H17','ReadVariableNames',false));
-% % choosing drinking water for all purpuses. (Save it in another variable)
-% DataBase.DrinkingWater = table2array(readtable(Data,'Sheet','Water','Range','E12:E17','ReadVariableNames',false));
-% % precentage of desalinated water from all SHAFIRIM (all drinking water) 
-% DiselinatedWaterPercntage = readtable(Data,'Sheet','Water','Range','N44:N44','ReadVariableNames',false);
-% DataBase.DiselinatedWaterPercntage = DiselinatedWaterPercntage{1,1}; 
-% DiselinatedWaterPercntage = DiselinatedWaterPercntage{1,1};
-% % the total water from nature is all the drinkingWater X precentage of not desalinated
-% DataBase.WaterConsumptionCell{1}{:,1} = DataBase.DrinkingWater*(1-DiselinatedWaterPercntage);
-% % the total Diselinated water is all the drinkingWater X precentage of desalinated
-% DataBase.WaterConsumptionCell{1}{:,2} = DataBase.DrinkingWater*DiselinatedWaterPercntage;
-% % Basicaly this is the Drinking Water
-% DataBase.WaterConsumptionCell{1}{5,1} = DataBase.WaterConsumptionCell{1}{5,1}+DataBase.WaterConsumptionCell{1}{5,2};
-% % Water for nature doesn't get desalinated
-% DataBase.WaterConsumptionCell{1}{5,2} = 0;
-% % Give column names to the table we just built above
-% DataBase.WaterConsumptionCell{1}.Properties.VariableNames = Water_Consumption_ColNames;
+% Water-New load (Dor's model) - Lidor's Update, Load all the constant values
 
-%% Water-New load (Dor's model) - Lidor's Update
-% Load all the constant values
 % Agriculture_water
 WDB.AgriculturePerCapitaFactor_water = readmatrix(Data, 'Sheet','WaterNew','Range','D20:D20');
-%WDB.AgriculturePerCapitaFactor_water_Not_Base_Year = readmatrix('Data.xlsx', 'Sheet','WaterNew','Range','D21:D21');
 WDB.AgriculturePerCapitaOffset_water = readmatrix(Data, 'Sheet','WaterNew','Range','D22:D22');
 WDB.AgricultureBaseYear_water = readmatrix(Data, 'Sheet','WaterNew','Range','D19:D19');
 
@@ -287,7 +257,7 @@ WDB.ChangeFreshWater           = readmatrix(Data, 'Sheet','WaterNew','Range','B2
 WDB.FreshWaterForAgriculture   = readmatrix(Data, 'Sheet','WaterNew','Range','B21:B21');
 WDB.FreshWaterForDomestic      = readmatrix(Data, 'Sheet','WaterNew','Range','C31:C31');
 WDB.LossRatio                  = 1 + readmatrix(Data, 'Sheet','WaterNew','Range','B22:B22');
-WDB.ChangeDrillingWater        = readmatrix(Data, 'Sheet','WaterNew','Range','B23:B23');
+WDB.ChangeDrillingWater        =( 1- readmatrix(Data, 'Sheet','WaterNew','Range','B23:B23'));
 % Calculate the yeasrly Change in drilling water (25% less until 2050)
 WDB.Yearly_ChangeDrillingWater = WDB.ChangeDrillingWater^(1/Years);
 WDB.ReclaimedRatio             = readmatrix(Data, 'Sheet','WaterNew','Range','B24:B24'); 
@@ -312,20 +282,11 @@ WDB.SewegeTreatmentEmissionsCoefficitns.Properties.VariableNames = {'Air Polluta
 % Read the electricity consumption as a result of water beeing desalinated,pump, moving, Seweage Treatment...
 WDB.ElectricityConsumptionForWaterCell = cell(1,1);
 WDB.ElectricityConsumptionForWaterCell{1} = array2table(zeros(ElectricityConsumptionForWater_Row_Num,1), 'RowNames', ElectricityConsumptionForWater_RowNames);
-%WDB.Electricity_DataBase.ElectricityConsumptionForWaterCell{1}{:,1} = table2array(readtable(Data,'Sheet','Water','Range','I33:I37','ReadVariableNames',false));
 
 % Calc Electricity for water
 % Electricity For Water Coefficints (kwh/m^3)
 WDB.ElectricityConsumptionCoefficients = readmatrix(Data, 'Sheet', 'WaterNew', 'Range', 'B12:B17');
-
-% % Distribution in uses of Urban SHAPIRIM 
-% WDB.UrbanConsumptionPercentages = table2array(readtable(Data,'Sheet','Water','Range','M20:R20','ReadVariableNames',false));
-% % Distribution of Brackish Water to Gardening and Trade and Crafts
-% WDB.RatioForBrackishWater = table2array(readtable(Data,'Sheet','Water','Range','P23:Q23','ReadVariableNames',false));
-
 WDB.Electricity_Drillind_Water_Coeff = WDB.ElectricityConsumptionCoefficients(2,1) + WDB.ElectricityConsumptionCoefficients(6,1); % Electricity water coeff
-
-
 
 
 
@@ -338,12 +299,9 @@ Food_Consumption_Row_Num = int32(numel(Food_Consumption_RowNames));
 Food_Consumption_Col_Num = int32(numel(Food_Consumption_ColNames));
 
 %%%%%%% For function uses
-% Meat rows in the excel table
-FDB.meatRows = meatRows;
-% Food Loss
-FDB.current_food_lost = readmatrix(Data,'Sheet','Food','Range','S2:S2'); % The assumption was that 33% of the food manufactured is lost 
-% {'Local Water For Humans','Local Water For Animals', 'Global Water For Humans', 'Global Water For Animals'}
-FDB.WaterFromFoodCategories = WaterFromFoodCategories;
+FDB.meatRows = meatRows; % Meat rows in the excel table
+FDB.current_food_lost = readmatrix(Data,'Sheet','Food','Range','S2:S2'); % % Food Loss - The assumption was that 33% of the food manufactured is lost 
+FDB.WaterFromFoodCategories = WaterFromFoodCategories; % {'Local Water For Humans','Local Water For Animals', 'Global Water For Humans', 'Global Water For Animals'}
 
 %%%%%%%%%%%% Food Cosnumption
 % This is a one-demantional array that contain columns for each year.
@@ -400,8 +358,7 @@ CDB.ConstructionTypes = Construction_RowNames;
 CDB.MaterialsForConstruction = {'Steel', 'Concrete', 'Asphalt', 'Autoclaved Aerated Concrete', 'Ceramic flooring', 'Gypsum plaster', 'Exterior cladding'};
 CDB.ConstructionEmissionTypes = {'Mining Waste', 'NOX', 'PM10', 'SO2'};
 
-%%%% Consumption table and floor_footprint table 
-% (Lidor's add)
+%%%% Consumption table and floor_footprint table - (Lidor's add)
 CDB.ConstructionTable = array2table(zeros(Construction_Row_Num,Years), 'RowNames', Construction_RowNames);
 CDB.ConstructionFootprintTable = array2table(zeros(Construction_Row_Num,Years), 'RowNames', Construction_RowNames);
 CDB.ConstructionFloorsTable = array2table(zeros(Construction_Row_Num,Years), 'RowNames', Construction_RowNames);
@@ -498,6 +455,7 @@ CDB.UrbanPlan_Year = readmatrix(Data, 'Sheet','ConstructionNew','Range','E15:E15
 % precent of saving by moving to a green material- cement
 CDB.Saving_Green_Cement = table2array(readtable(Data,'Sheet','ConstructionNew','Range','R3:R9','ReadVariableNames',false));
 
+
 %% ---------------------------------------- MATERIALS ------------------------------------------------
 
 % temp variables
@@ -539,23 +497,15 @@ MDB.AmountsOfFuelsCells{1}{6,6} = table2array(readtable(Data,'Sheet','Materials'
 MDB.AmountsOfFuelsCells{1}.Properties.VariableNames = AmountsOfFuels_ColNames;
 
 %%%%%% Calc Consumption emissions 
-% CH4 Emission Coefficients from Waste (Kg/Kg)
-MDB.ConsumptionEmissionCoefficients = table2array(readtable(Data,'Sheet','Materials','Range','G21:G33','ReadVariableNames',false));
-% CH4 Emissions Coefficients from Crude Oil Refining (Kg/Ton)
-MDB.CrudeOilRefiningEmissionsCoefficients = readtable(Data,'Sheet','Materials','Range','B38:H43','ReadVariableNames',false);
+MDB.ConsumptionEmissionCoefficients = table2array(readtable(Data,'Sheet','Materials','Range','G21:G33','ReadVariableNames',false)); % CH4 Emission Coefficients from Waste (Kg/Kg)
+MDB.CrudeOilRefiningEmissionsCoefficients = readtable(Data,'Sheet','Materials','Range','B38:H43','ReadVariableNames',false); % CH4 Emissions Coefficients from Crude Oil Refining (Kg/Ton)
 
 
-
-%%%%%% Calc Waste and recycling  
-% Distributionof different materials for Export Waste For Recycling 
-
-%MDB.ExportWasteForRecyclingPercentage = table2array(readtable(Data,'Sheet','Materials','Range','B20:B32','ReadVariableNames',false));
+%%%%%% Calc Waste and recycling  - Distributionof different materials for Export Waste For Recycling 
 ExportWasteForRecyclingPercentage_RowNames = {'Organic Products','Plastic', 'Paper', 'Cardboard', 'Diapers', 'Garden Waste', 'Textile', 'Metal', 'Glass', 'Pruned Trees','Wood', 'Oils', 'Others'};
-%ExportWasteForRecyclingPercentage_ColNames = 
 ExportWasteForRecyclingPercentage = cell(1,Years);
 ExportWasteForRecyclingPercentage{1} =  array2table(zeros(13,1), 'RowNames', ExportWasteForRecyclingPercentage_RowNames);
 ExportWasteForRecyclingPercentage{1}{:,:} = table2array(readtable(Data,'Sheet','Materials','Range','B20:B32','ReadVariableNames',false));
-%ExportWasteForRecyclingPercentage{1}.Properties.VariableNames = WateAndRecycling_ColNames;
 MDB.ExportWasteForRecyclingPercentage = ExportWasteForRecyclingPercentage;
 
 
@@ -601,13 +551,6 @@ DataBase.Materials_DataBase = MDB;
 DataBase.Area_DataBase = ADB;
 DataBase.Money_DataBase = MONDB;
 
-%% read the trends in consumption for the target year (empty)- Needs to change!!!!!!!!!!!!!!!!!!
-DataBase.ChnageStruct = struct;
-DataBase.ChnageStruct.Electricity = readtable(scenariosFile,'Sheet','ChangesInConsumptionType','Range','A2:B5','ReadRowNames',true);
-DataBase.ChnageStruct.Water = readtable(scenariosFile,'Sheet','ChangesInConsumptionType','Range','A8:B12','ReadRowNames',true);
-DataBase.ChnageStruct.Transportation = readtable(scenariosFile,'Sheet','ChangesInConsumptionType','Range','A15:B21','ReadRowNames',true);
-DataBase.ChnageStruct.Food = readtable(scenariosFile,'Sheet','ChangesInConsumptionType','Range','D2:E65','ReadRowNames',true);
-
 %%%% Delete all the temps
 clear Transportation_Consumption_RowNames Transportation_Consumption_Row_Num Vehicle_Amounts_Row_Num Vehicle_Amounts_Col_Num AmountsOfFuels_RowNames AmountsOfFuels_ColNames AmountsOfFuels_Row_Num AmountsOfFuels_Col_Num FuelConsumptionCoefficients_RowNames FuelConsumptionCoefficients_Row_Num FuelConsumptionCoefficients_Col_Num
 clear Food_Consumption_RowNames Food_Consumption_ColNames Food_Consumption_Row_Num Food_Consumption_Col_Num
@@ -616,15 +559,10 @@ clear Construction_Row_Num Construction_RowNames
 clear WateAndRecycling_RowNames WateAndRecycling_ColNames WateAndRecycling_Row_Num WateAndRecycling_Col_Num WateAndRecyclingCell
 clear TDB FDB EDB WDB CDB MDB ADB MONDB
 clear M FuelConsumptionCoefficients Days_In_Year
-clear s1 s2 OrganicWasteAmounts_RowNames PVType BusCarRatio LowerBoundForArea
-clear i ColumnNames WaterFromFoodCategories
+clear s1 s2 OrganicWasteAmounts_RowNames PVType BusCarRatio LowerBoundForArea i ColumnNames WaterFromFoodCategories
 clear meatRows RenewablePercents ScenarioRowNames EvSenarioLines
-clear Conversion_Liter_To_Kg 
-clear ColumnNames2 s3 
+clear Conversion_Liter_To_Kg ColumnNames2 s3 
 clear s1 s2 s3 s4 ColumnNames3 ColumnNames2 ColumnNames
-clear ApartmentsDistribution_ColNames ApartmentsDistribution_RowNames
-clear ApartmentsDistribution_Row_Num ApartmentsDistribution_Col_Num ApartmentsDistributionCell
-clear Building_Type_Distribution_ColNames Building_Type_Distribution_Col_Num
-clear Building_Type_Distribution_Cell 
-clear Precent_Floor_Footprint_ColNames Precent_Floor_Footprint_Col_Num
-clear Precent_Floor_Footprint_Cell
+clear ApartmentsDistribution_ColNames ApartmentsDistribution_RowNames ApartmentsDistribution_Row_Num ApartmentsDistribution_Col_Num ApartmentsDistributionCell
+clear Building_Type_Distribution_ColNames Building_Type_Distribution_Col_Num Building_Type_Distribution_Cell 
+clear Precent_Floor_Footprint_ColNames Precent_Floor_Footprint_Col_Num Precent_Floor_Footprint_Cell

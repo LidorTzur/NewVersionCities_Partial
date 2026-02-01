@@ -22,17 +22,6 @@
  DesalinatedWater = WaterConsumption{1,8};
  ReclaimedWastewater = WaterConsumption{1,6};
 
- %{
-     %% Urban 
-     UrbanConsumptionPercentages = Data.UrbanConsumptionPercentages;
-     UrbanConsumption_FreshWater = WaterConsumption{1,1}*0.89; %Fresh water for domestic consumption without 11 percent of non-fresh water
-     UrbanConsumption = WaterConsumption{1,1};
-     Construction = UrbanConsumption_FreshWater*UrbanConsumptionPercentages(6);
-     
-     Gardening = (WaterConsumption{1,1}*0.11)*UrbanConsumptionPercentages(4);
-     Residential =(WaterConsumption{1,1})*UrbanConsumptionPercentages(1);
-     UrbanNoConstruction = UrbanConsumption - Construction;
- %}
 
  %% Calculate Electricity consumption - milionm^3*Kwh/m^3 = milion Kwh
  DrillingWaterElectrcity = (ElectricityConsumptionCoefficients(2) + ElectricityConsumptionCoefficients(6))* DrillingWater;
@@ -40,13 +29,7 @@
  MovingReclaimedWastewaterElectricity = ElectricityConsumptionCoefficients(4)*ReclaimedWastewater;
  ReclaimedWastewaterElectricity = ReclaimedWastewater*ElectricityConsumptionCoefficients(5);
  MovingBrackishandReservoirWater = WaterConsumption{1,7}*ElectricityConsumptionCoefficients(2);
- 
- %{ 
- UrbanElectricity = UrbanNoConstruction*ElectricityConsumptionCoefficients(3);
- FromNatureElectrcity = FromNature*(ElectricityConsumptionCoefficients(2) + ElectricityConsumptionCoefficients(6));
- TreatedWasteWaterElectricity = TreatedWasteWater*ElectricityConsumptionCoefficients(4);
- TotalSewege = UrbanConsumption-Contruction-Gardening-0.15*Residential;
- %}
+
 
  %% Output
 
@@ -62,14 +45,5 @@
  ElectricityForWaterConsumption{5,1} = MovingBrackishandReservoirWater*LossRatio*1000000;
  ElectricityForWaterConsumption{6,1} = sum(ElectricityForWaterConsumption{1:5,1}); %to compare to a cubic meter
  
- %{ 
-     ElectricityForWaterConsumption{1,1} = FromNatureElectrcity*LossRatio;
-     ElectricityForWaterConsumption{2,1} = UrbanElectricity*LossRatio;
-     ElectricityForWaterConsumption{3,1} = DesalinatedElectricity*LossRatio;
-     ElectricityForWaterConsumption{4,1} = TreatedWasteWaterElectricity*LossRatio;
-     ElectricityForWaterConsumption{5,1} = SewewgeElectricity*LossRatio;
-    
-     ElectricityForWaterConsumption{6,1} = sum(ElectricityForWaterConsumption{1:5,1});
- %}
 end
 

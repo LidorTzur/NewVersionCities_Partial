@@ -1,89 +1,12 @@
 %% running steps
 
 %% scenario type input from the user
-orderIndex = choiceList('Select a scenario','Choose one of the scenarios and follow the instructions.',{'Manual Input','Only One Step','All But One','All the steps together','Business as Usual', 'Sensitivity Analysis', 'All the steps together - new scenario table', 'Sensitivity Analysis +- 10%'});
-if (orderIndex ~= 1 && orderIndex ~= 4 && orderIndex ~= 5  && orderIndex ~= 7 &&  orderIndex ~= 8)
-    scenarioIndex = choiceList('Select a scenario','Choose one of the scenarios',{'S1','S2','S3','Busnness as Usual','Othen_OnlyOne','Othen_AllButOne','Moderate','Advanced'});
-end
+orderIndex = choiceList('Select a scenario','Choose one of the scenarios and follow the instructions.',{'All the steps together', 'Sensitivity Analysis +- 10%'});
 
 switch orderIndex
 
-    case 1 %% Manual changes
-        % ManualScenariosTable = ManualChangesByScenarios(DataBase);
-        % [EmissionsByYearsCurrent, ConsumptionAmountsCurrent] = FullScenario(DataBase, ManualScenariosTable, Years);
-        % EmissionsSumCurrent = EmissionsSumCalcOnlyOneStep(EmissionsByYearsCurrent,Years);
-        disp('Manual changes');
-
-    case 2 %% Only one step
-        % % each iteration calculates scenario i.
-        % for i = 1:ScenarioNumber
-        %     OnlyOneStepScenariosTable = AllButOneChangesByScenarios(DataBase, i, Years, ScenariosAndValues{:,scenarioIndex}, 'OnlyOne', true);
-        %     % returns a table where only the i row changes
-        % 
-        %     [population] = populationCal(OnlyOneStepScenariosTable);
-        %     [EmissionsByYears, ConsumptionAmounts, Resources, WaterFromFood] = FullScenario(DataBase, OnlyOneStepScenariosTable, Years,population,orderIndex,i);
-        %     EmissionsSumCurrentBase = EmissionsSumCalcOnlyOneStep(EmissionsByYears,Years);
-        %     GlobalLocalEmissions = CalcGlobalLocal(EmissionsByYears);
-        %     GlobalDiff = sum(GlobalLocalEmissions{2,width(GlobalLocalEmissions)}{1,:}) - sum(GlobalLocalEmissions{2,1}{1,:});
-        %     % total emissions of 2050 minus total of 2019 - GLOBAL
-        %     LocalDiff = sum(GlobalLocalEmissions{1,width(GlobalLocalEmissions)}{1,:}) - sum(GlobalLocalEmissions{1,1}{1,:});
-        %     % total emissions of 2050 minus total of 2019 - LOCAL
-        % 
-        %     [WaterSumCurrent, GlobalWaterDiff, LocalWaterDiff] = WaterSumCalcOnlyOne(ConsumptionAmounts, WaterFromFood,i);
-        %     [AreaSumCurrent, GlobalAreaDiff, LocalAreaDiff] = AreaSumCalcOnlyOne(Resources);
-        % 
-        %     %טבלה שנותנת את ההפרש בפליטות בין 2019 ל2050
-        %     %OnlyOneAnalysis{i,1} = EmissionsSumCurrentBase(1);
-        %     OnlyOneAnalysis{i,1} = GlobalDiff+LocalDiff;
-        %     OnlyOneAnalysis{i,2} = GlobalDiff;
-        %     OnlyOneAnalysis{i,3} = LocalDiff;
-        %     OnlyOneAnalysis{i,4} = WaterSumCurrent;
-        %     OnlyOneAnalysis{i,5} = GlobalWaterDiff;
-        %     OnlyOneAnalysis{i,6} = LocalWaterDiff;
-        %     OnlyOneAnalysis{i,7} = AreaSumCurrent;
-        %     OnlyOneAnalysis{i,8} = GlobalAreaDiff;
-        %     OnlyOneAnalysis{i,9} = LocalAreaDiff;
-        % end
-        disp('Only one step');
-
-    case 3 %% All steps but one
-        % AllButOneScenariosTable = AllButOneChangesByScenarios(DataBase, 0, Years, ScenariosAndValues{:,scenarioIndex});
-        % % will return 17X34 table, each cell is the change of this factor
-        % % for that year, when 2050 is dictated by "the three scenarios".
-        % [population] = populationCal(AllButOneScenariosTable);
-        % [EmissionsByYearsFull, ConsumptionAmountsFull, ResourcesFull, WaterFromFoodFull] = FullScenario(DataBase, AllButOneScenariosTable, Years, population,orderIndex,0);
-        % GlobalLocalEmissionsFull = CalcGlobalLocal(EmissionsByYearsFull);
-        % for i = 1:ScenarioNumber
-        %     AllButOneScenariosTable = AllButOneChangesByScenarios(DataBase, i, Years, ScenariosAndValues{:,scenarioIndex});
-        %     [population] = populationCal(AllButOneScenariosTable);
-        %     [EmissionsByYears, ConsumptionAmounts, Resources, WaterFromFood] = FullScenario(DataBase, AllButOneScenariosTable, Years, population,orderIndex,0);
-        %     CurrentEmissions = EmissionsSumCalcAllButOne(EmissionsByYears, EmissionsByYearsFull,Years);
-        %     GlobalLocalEmissions = CalcGlobalLocal(EmissionsByYears);
-        %     GlobalDiff = sum(GlobalLocalEmissionsFull{2,width(GlobalLocalEmissionsFull)}{1,:}) - sum(GlobalLocalEmissions{2,width(GlobalLocalEmissions)}{1,:});
-        %     LocalDiff = sum(GlobalLocalEmissionsFull{1,width(GlobalLocalEmissionsFull)}{1,:}) - sum(GlobalLocalEmissions{1,width(GlobalLocalEmissions)}{1,:});
-        %     [CurrentWater, GlobalWaterDiff, LocalWaterDiff] = WaterSumCalcAllButOne(ConsumptionAmounts, ConsumptionAmountsFull, WaterFromFood, WaterFromFoodFull);
-        %     [CurrentArea, GlobalAreaDiff, LocalAreaDiff] = AreaSumCalcAllButOne(Resources, ResourcesFull);
-        % 
-        %     %AllButOneAnalysis{i,1} = CurrentEmissions;
-        %     AllButOneAnalysis{i,1} = GlobalDiff+LocalDiff;
-        %     AllButOneAnalysis{i,2} = GlobalDiff;
-        %     AllButOneAnalysis{i,3} = LocalDiff;
-        %     AllButOneAnalysis{i,4} = CurrentWater;
-        %     AllButOneAnalysis{i,5} = GlobalWaterDiff;
-        %     AllButOneAnalysis{i,6} = LocalWaterDiff;
-        %     AllButOneAnalysis{i,7} = CurrentArea;
-        %     AllButOneAnalysis{i,8} = GlobalAreaDiff;
-        %     AllButOneAnalysis{i,9} = LocalAreaDiff;
-        % end
-        disp('All steps but one');
-
-
-
-
-
-
-
-    case 4  %% All the steps together
+    
+    case 1  %% All the steps together
     RDB = ResultsDataBase;
         % First Table ([FullScenariosTable]): change in precentage for each parameter by the years
         % Second Table ([population]): population size per year, seperationg israel and the palestinians.
@@ -117,7 +40,7 @@ switch orderIndex
         ChangeDataBase = Data1;
         ResultsDataBase = RDB;
         AllTheStepsTogether_RESULTS; % Give Tables results
-        results; % Give Graphs Results
+        %results; % Give Graphs Results
         
         % Export the results tables to excel to this project
         %export_results_to_excel;
@@ -125,78 +48,11 @@ switch orderIndex
 
 
 
-
-
-
-
-
-
-
-    case 5 %% Buisness as usual
-        % FullBAUScenariosTable = AllButOneChangesByScenarios(DataBase, 0, Years, ScenariosAndValues{:,4});
-        % [EmissionsByYearsBAU, ConsumptionAmountsBAU,ResourcesBAU, WaterFromFoodBAU] = FullScenario(DataBase, FullBAUScenariosTable, Years,population,orderIndex,0);
-        % YearlyEmissionsBAU = YearlySumCalc(EmissionsByYearsBAU);
-        disp('Buisness as usual');
-
-
-
-
-
-
-
-
-
-
-    % case 6 %% SensitivityAnalysis
-    %     SensitivityAnalysisCell = cell(3, 3*3);
-    %     l = 1; %index that marks in which combination we are (for 3 options of 2 categories)
-    %     for i = 1:3
-    %         for j = 1:3
-    %             % in each iteration: changing the pop-growth to 0/45%/90%
-    %             ScenariosAndValues{1,scenarioIndex} =  PopulationGrowth{1,i};
-    %             % in each iteration: changing the electricity consumption to 0/20%/41%
-    %             ScenariosAndValues{2,scenarioIndex} =  ElectricityPerCapita{1,j};
-    %             % in each iteration: changing the desalination to 0/132%/264%, matching the population growth.
-    %             ScenariosAndValues{3,scenarioIndex} =  DesalinatedWater{1,i};
-    %             ScenariosTable = AllButOneChangesByScenarios(DataBase, 0, Years, ScenariosAndValues{:,scenarioIndex}, 'MileStones', false);
-    %             % ScenariosTable will be the same as the THREE SCENARIOS
-    %             % table, except rows 1-3 (poplation, electricity, desalination)
-    %             [population] = populationCal(ScenariosTable);
-    %             [EmissionsTable, ConsumptioTable, Resources] = FullScenario(DataBase, ScenariosTable, Years,population,orderIndex,0);
-    %             SensitivityAnalysisCell{1, l} = EmissionsTable;
-    %             SensitivityAnalysisCell{2, l} = ConsumptioTable;
-    %             SensitivityAnalysisCell{3, l} = Resources;
-    %             l = l+1;
-    %         end
-    %     end
-    %     disp('SensitivityAnalysis');
-    % 
-    % case 7  % All the steps together - WITH NEW SCENARIO VALUES
-    % 
-    %     % NOTE: MUST RE-RUN THE WHOLE MainSystem FOR THIS PART!
-    % 
-    %     % NO POLICY
-    %     [FullScenariosTable1] = AllButOneChangesByScenarios(DataBase, 0, Years, ScenariosAndValues{:,4}, 'MileStones', false);
-    %     [population] = populationCal(FullScenariosTable1);
-    %     [EmissionsByYearsTest1, ConsumptionAmounts1, Resources1, WaterFromFood1] = FullScenario(DataBase, FullScenariosTable1,Years,population,orderIndex,0);
-    %     Years = 17; % for 2035, and change to "ScenarioNumber" after it works!!!!!!!!!!!!!!!!!!!!
-    %     EmissionsByYearsTest1 = EmissionsByYearsTest1(:,1:Years);
-    %     ConsumptionAmounts1 = ConsumptionAmounts1(:,1:Years);
-    %     Resources1 = Resources1(:,1:Years);
-    %     WaterFromFood1 = WaterFromFood1(:,1:Years);
-    % 
-    %     % NEW POLICY
-    %     [FullScenariosTable3] = AllButOneChangesByScenarios(DataBase, 0, Years, ScenariosAndValues{:,9}, 'MileStones', false);
-    %     [population] = populationCal(FullScenariosTable3);
-    %     [EmissionsByYearsTest3, ConsumptionAmounts3, Resources3, WaterFromFood3] = FullScenarioCompare(DataBase, FullScenariosTable3,Years,population,WaterFromFood1,orderIndex);
-    % 
-
-    % Sensitivity Analysis - +- 10%
-    case 8 
+    
+    case 2 %% Sensitivity Analysis - +- 10%
         SR = SensitivityResults;
         % preperations: define the new scenario precentages and the year.
-        %GeneralInputsDataBase.BaseYear = BaseYear;
-        Years = TargetYear - BaseYear + 1; % for 2035
+        Years = TargetYear - BaseYear + 1; 
         RelevantScenarios = [1, 2, 4, 5, 6, 7, 8, 12, 13, 14, 15, 16, 17, 19, 20];  % only choosing interesting scenarios
         rowNames = ScenariosAndValues.Properties.RowNames;
         RelevantScenarioNames = rowNames(RelevantScenarios);
@@ -225,7 +81,8 @@ switch orderIndex
             [FullScenariosTable1] = AllButOneChangesByScenarios(DataBase, 0, Years, ScenariosAndValues{:,9}, 'MileStones', false);
             [population] = populationCal(FullScenariosTable1);
             [EmissionsByYearsTest1, ConsumptionAmounts1, Resources1, WaterFromFood1, Data1] = FullScenario(DataBase, FullScenariosTable1,Years,population,orderIndex,0);
-            
+                   
+
             TotalEmission1 = CalcUpDownStream(EmissionsByYearsTest1);
             Emission1_Sum = sum(TotalEmission1{1:11, Years}); 
             
@@ -333,12 +190,11 @@ switch orderIndex
         clear RelevantScenarioNames rowNames RelevantScenarios Years ScenarioIndex OriginalPrecentage
         clear TotalEmissionByScenarioChanged TotalAreaByScenarioChanged TotalWaterByScenarioChanged SensitivityAnalysisCell SensitivityAnalysisTable
         clear FullScenariosTable1 population EmissionsByYearsTest1 ConsumptionAmounts1 Resources1 WaterFromFood1 TotalEmission1 Emission1_Sum
-        clear AreaSum1 CostsSum1 WaterSum1 Area1_Sum Water1_Sum 
+        clear AreaSum1 CostsSum1 WaterSum1 Area1_Sum Water1_Sum AreaSum2 CostsSum2 WaterSum2 Area2_Sum Water2_Sum
         clear FullScenariosTable2 population EmissionsByYearsTest2 ConsumptionAmounts2 Resources2 WaterFromFood2 TotalEmission2 Emission2_Sum
-        clear AreaSum2 CostsSum2 WaterSum2 Area2_Sum Water2_Sum 
         clear FullScenariosTable3 population EmissionsByYearsTest3 ConsumptionAmounts3 Resources3 WaterFromFood3 TotalEmission3 Emission3_Sum
-        clear AreaSum3 CostsSum3 WaterSum3 Area3_Sum Water3_Sum i
-        clear BiggerMinusOriginal OriginalMinusSmaller
+        clear AreaSum3 CostsSum3 WaterSum3 Area3_Sum Water3_Sum i BiggerMinusOriginal OriginalMinusSmaller
+        
         SensitivityResults = SR;
         disp('SensitivityAnalysis');
 
@@ -348,7 +204,6 @@ end
 % Define the general inputs into the matching DataBase
 GeneralInputsDataBase.orderIndex = orderIndex;
 GeneralInputsDataBase.BaseYear = BaseYear;
-GeneralInputsDataBase.ScenarioNumber = ScenarioNumber;
 GeneralInputsDataBase.ScenariosAndValues = ScenariosAndValues;
 GeneralInputsDataBase.TargetYear_global = TargetYear_global;
 GeneralInputsDataBase.Conversion_Liter_To_Kg = DataBase.Conversion_Liter_To_Kg;

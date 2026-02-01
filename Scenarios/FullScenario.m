@@ -16,7 +16,7 @@ function [EmissionsByYears,ConsumptionAmounts, Resources, WaterFromFoodCell, Dat
 % - WaterFromFoodCell: Water use from food scenarios.
  
 
-% ------------------------------------------ COMPARE -------------------
+%% ------------------------------------------ COMPARE -------------------
 %% Handle optional comparison input
 if nargin > 6
     WaterFromFood_BAU = varargin{1};
@@ -25,7 +25,7 @@ else
 end
 
 
-%% Preperations
+%% ----------------------------------------- Preperations
 
 RidesPerDay = Data.Trans_DataBase.RidesPerDay;
 Days_In_Year = Data.Days_In_Year;
@@ -36,7 +36,6 @@ addpath("CalcFunctions");
 % Initialize the row names
 Emission_RowNames = {'Food (Ton ECo2)', 'Electricity - Direct (Ton ECo2)', 'Electricity - Indirect (Ton ECo2)', 'Transportation - Direct (Ton ECo2)', 'Train Emissions (Ton ECo2)','Transportation - Indirect (Ton ECo2)', 'Construction (Ton ECo2)', 'Consumption Emissions' ,'Fuel for Industry (Ton ECo2)', 'Sewege Treatment', 'Solid Waste (Ton ECo2)'}; %, 'Water from food'
 consumption_RowNames = {'Water (10^6*m^3)', 'Fuels For Electriciy Manufacturing (Ton)', 'Fuels For Transportation Amounts (Ton)', 'Materials For Construction (Ton)', 'Fuels For Energy Industry (Ton)'};
-%Resources_RowNames = {'Area For Electricity', 'Cumulative Area','Area For Food', 'Operating Costs', 'Setting Costs', 'Fuels Costs', 'Cost Of Area For PV','Area For Construction'};
 Resources_RowNames = {'Area For Electricity (Km^2)', 'Cumulative Area For Electricity (Km^2)','Area For Food (Km^2)', 'Operating Costs', 'Setting Costs', 'Fuels Costs', 'Cost Of Area For PV', 'Area For Construction (Km^2)', 'Cumulative Area For Construction (Km^2)'};
 
 % Initialize the final tables
@@ -58,7 +57,6 @@ ElectricityBySources.Properties.RowNames = ElectricityBySources_row_names;
 
 % Renewable Sources Electricity table
 Renewable_Electricity_row_names = Data.Electricity_DataBase.Renewable_Electricity_row_names;
-Renewable_Electricity_row_num = numel(Renewable_Electricity_row_names);
 
 % Electricity Fuels coeff
 Crude_Oil_To_Electricity = Data.Electricity_DataBase.Crude_Oil_To_Electricity; % Crude oil to electricity - Needs to understand where it is came from
@@ -73,15 +71,13 @@ RidesPerDay_global = Data.Trans_DataBase.RidesPerDay;
 
 % Cut Vectors from Scenarios Table
 % Extracting values from the ScenariosTable for each factor
-PopulationGrowthPercentage = ScenariosTable{1,:};
 ChangeInElectricityConsumptionPercentage = ScenariosTable{2,:};
-IncreaseInDiselinatedWater = ScenariosTable{3,:};
 ReducingBeefConsumptionPercentage = ScenariosTable{4,:};
 PreventingFoodLoss = ScenariosTable{5,:};
 IncreaseInEnergyConsumptionFromRenewableEnergiesPercentage = ScenariosTable{6,:};
 IncreaseInEnergyConsumptionFromNaturalGasPercentage  = ScenariosTable{7,:};
 ElectricitySavingPercentage = ScenariosTable{8,:};
-FuelForEnergyPercentage = ScenariosTable{9,:};
+%FuelForEnergyPercentage = ScenariosTable{9,:};
 RecycleWaste = ScenariosTable{10,:};
 BurningWaste = ScenariosTable{11,:};
 ReductionOfMileage = ScenariosTable{12,:};
@@ -93,29 +89,22 @@ TransitionToElectricBus = ScenariosTable{17,:};
 %%Scenario18 = ScenariosTable{18,:}; %% vehicles improved emissions coefficients
 WaterSaving = ScenariosTable{19,:};
 ReducingMeatConsumptionPercentage = ScenariosTable{20,:};
-
-% New - Lidor's adding - construction scenario
-ChangeInBuildingMixRatio = ScenariosTable{21,:}; % Row 21: High-Density Ratio (0 to 1)
-ChangeInFloorPrintHighDensity = ScenariosTable{22,:}; % Row 22: FloorPrint High-Density Multiplier
-ChangeInFloorPrintLowDensity = ScenariosTable{23,:}; % Row 23: FloorPrint Low-Density Multiplier
-ChangeInGreenMaterials = ScenariosTable{24,:}; 
+ChangeInGreenMaterials = ScenariosTable{24,:};
 
 
-%% Calculate Base Consumptions (No scenario)
+%% ----------------------------------------- Calculate Base Consumptions (No scenario)
 % Calculate the base consumption data based on population growth
-[ElectricityConsumptionTable, TransportationConsumptionTable, VehicleAmountsCell, FoodConsumptionCell, WaterConsumptionCell, ConstructionTable, ConstructionFootprintTable ,WasteAndRecyclingCell,AmountsOfFuelsCells, OrganicWasteCell, Data1, ConstructionECO2Coefficients_ByMaterial] = ConsumptionChanges(Data,ScenariosTable, Years, pop, orderIndex);
+[ElectricityConsumptionTable, TransportationConsumptionTable, VehicleAmountsCell, FoodConsumptionCell, WaterConsumptionCell, ConstructionTable, ConstructionFootprintTable ,WasteAndRecyclingCell,AmountsOfFuelsCells, OrganicWasteCell, Data1] = ConsumptionChanges(Data,ScenariosTable, Years, pop, orderIndex);
 
-%% Create the years column names (based on the years)
+%% ----------------------------------------- Create the years column names (based on the years)
 YearsStringsForColNames = cell(1,Years);
 for i=1:Years
     s1 = num2str(i+BaseYear-1); % changed
     YearsStringsForColNames{i} = s1;
 end
 
-%% Fuels Consumption and Emissions
-% Loop over each year and calculate the fuel consumption and emissions
-% For industry Fuels (Materials)
-
+%% ----------------------------------------- Fuels Consumption and Emissions
+% Loop over each year and calculate the fuel consumption and emissions For industry Fuels (Materials)
 temp_row_num = find(strcmpi(consumption_RowNames, 'Fuels For Energy Industry (Ton)'));
 temp_row_num_2 = find(strcmpi(Emission_RowNames, 'Fuel for Industry (Ton ECo2)'));
 for i=1:Years 
@@ -126,7 +115,7 @@ for i=1:Years
    EmissionsByYears{temp_row_num_2,i} = array2table(EmissionsByYears{temp_row_num_2,i}{:,:},'RowNames', FuelConsumption_RowNames,'VariableNames',FuelConsumption_ColNames);
  end
 
-%% Food Emissions and Consumption (food and water) 
+%% ----------------------------------------- Food Emissions and Consumption (food and water) 
 % Reducing beef consumption -- scenario 4
 % When reducing beef consumption, we considered a replacement by other food products.
 % the calories will be divided equally among the legumes (bean, chickpea, lentil, broad bean and green pea).
@@ -138,7 +127,6 @@ CaloricCompletion = ones(1,Years) + (1-(ReducingBeefConsumptionPercentage))/5 + 
 % Food loss -- - scenario 5
 for i = 1:Years
     CurrentFoodConsumption = FoodConsumptionCell{i};
-
     % Check if food consumption should be adjusted based on specific scenarios
     if (index == 4 || (index == 5 && orderIndex == 2)) || (orderIndex ~= 2)
         % Reduce beef consumption based on two scenarios:
@@ -161,25 +149,37 @@ for i = 1:Years
         end    
 
         % Apply food waste reduction across all food categories
+        % disp("first");
+        % disp(CurrentFoodConsumption);
         for j = 1:width(CurrentFoodConsumption)
-            CurrentFoodConsumption{:,j} = CurrentFoodConsumption{:,j} .* PreventingFoodLoss(i);
+            CurrentFoodConsumption{:,j} = CurrentFoodConsumption{:,j} .* PreventingFoodLoss(i); 
         end
+        % disp("second");
+        % disp(CurrentFoodConsumption);
     end
 
 
-    % Calculate water consumption based on the updated food consumption
-    % data (m^3)
+    % Calculate water consumption based on the updated food consumption data (m^3)
     WaterFromFoodCell{i} = CalcWaterForFoodConsumption(Data, CurrentFoodConsumption); 
 
     % ------------------------------------- COMPARE ---------------------
     % >>> BAU COMPARISON: Adjust WaterConsumptionCell based on gap from BAU <<<
     % Because we have 'prevent food loss' in the scenario table for Moderate and Advanced, so we take the diff form the BAU
-
-    if ~isempty(WaterFromFood_BAU)
+       % Here we reduces the water saved from food (which is agriculture
+       % water in the water model, so that we will show emission savings
+       % from this scenario in water too. we take tha gap off from the
+       % desilinated water- because it answers to a lack of water for it.
+      
+       if ~isempty(WaterFromFood_BAU)
         A =  sum(WaterFromFood_BAU{i}{1,1:2}) / 10^6;
         B =  sum(WaterFromFoodCell{i}{1,1:2}) / 10^6;
         gap = A - B;
-        WaterConsumptionCell{i}{1,8} =  WaterConsumptionCell{i}{1,8} - gap;
+        %disp(gap);
+        WaterConsumptionCell{i}{1,8} =  WaterConsumptionCell{i}{1,8} - gap; %desilinated water
+        disp(['Year: ', num2str(i)]);
+        disp(['BAU Water (A): ', num2str(sum(WaterFromFood_BAU{i}{1,1:2}) / 10^6)]);
+        disp(['Current Water (B): ', num2str(sum(WaterFromFoodCell{i}{1,1:2}) / 10^6)]);
+        disp(['Resulting GAP: ', num2str(gap)]);
     end
 
 
@@ -193,7 +193,7 @@ for i = 1:Years
 end
 
 
-%% Water
+%% ----------------------------------------- Water
 % ---------------------------- Lidor: MATCHED TO DOR'S MODEL: 
 
 % Water Emissions (from sewege)
@@ -202,16 +202,6 @@ for i = 1:Years
     EmmisionsFromSewegeTreatment = CalcSewegeEmissions(Data, WaterConsumptionCell{i});
     EmissionsByYears{temp_row_num,i} = EmmisionsFromSewegeTreatment;
 end
-
-%%  change in diselinated water consumption - scenario 3  - old- now we calculate it by the needs
-%{
-for i =1:Years
-    DiselinatedWaterConsumption = WaterConsumptionCell{i}{:,2};
-    DiselinatedWaterConsumption = DiselinatedWaterConsumption*IncreaseInDiselinatedWater(i);
-    WaterConsumptionCell{i}{:,2} = DiselinatedWaterConsumption;
-end ConsumptionAmounts{1
-%}
-
 
 % water saving - scenario 19
 temp_row_num = find(strcmpi(consumption_RowNames, 'Water (10^6*m^3)'));
@@ -237,7 +227,7 @@ for i = 1:Years
     ConsumptionAmounts{temp_row_num,i} = (NewCurrentWater); 
 end    
 
-%% Transportation - Downstream
+%% ----------------------------------------- Transportation - Downstream
 
 % change in mileage - scenario 12
 for i = 1:Years
@@ -262,15 +252,15 @@ for i = 1:Years
     TransportationConsumptionTable{2,i} = TransportationConsumptionTable{2,i}*TransitionToPublicTransportationPercentage(i); 
     % increase the km for buses
     TransportationConsumptionTable{1,i} = TransportationConsumptionTable{1,i}*PercentageOfBusTransportation(i); 
-    %Lidor's add
-    % increase the km for Passenger Train
+    %Lidor's add - increase the km for Passenger Train
     TransportationConsumptionTable{7,i} = TransportationConsumptionTable{7,i}*PercentageOfTrainTransportation(i);
 end
 
 %%change in vehicle amounts due to transition to train and buses
 VehicleAmountsCell = CalulateChangeInVehicleAmountsTransitionToPublicTransport(TransportationConsumptionTable, VehicleAmountsCell);
 
-%% Transition to EV - consider the electricity and emission from it (Lidor)
+
+% Transition to EV - consider the electricity and emission from it (Lidor)
 ElectricityConsumptionEmissionsInTransportation = Data.Electricity_DataBase.ElectricityConsumptionEmissionsInTransportation;
 KWHForElectricCar = zeros(1,Years);
 KWHForElectricVan = zeros(1,Years);
@@ -283,7 +273,6 @@ for i = 1:Years
     % chnging the annual travel of each regular vehicle base on the
     % tranistion to electric one (the precentage vector of tranisition is given in the scenario)
     % Calculate the amount of Km that transform to an electric Km by the precentage vector (to every year)
-
     % printWithCommas('BEFORE: Km Traveled by car', i + 2018, TransportationConsumptionTable{2,i});
 
     [KMTraveledByElectricCar(i), TransportationConsumptionTable{2,i}] = CalcTransitionToEV(TransportationConsumptionTable{2,i},TransitionToElectricCar(i));
@@ -326,7 +315,7 @@ end
     %end
 %end
 
-%% Electricity - Consumption
+%% ----------------------------------------- Electricity - Consumption
 
 % change in electricity consumption per capita - scenario 2
 for i = 1:Years
@@ -354,34 +343,32 @@ for i = 1:Years
     ElectricityConsumptionTable{5,i} = KWHForElectricCar(i)+KWHForElectricVan(i)+KWHForElectricTruck(i)+KWHForElectricBus(i);
 end
 
-%% construction waste
+%% ----------------------------------------- construction waste
 % For the base year the consumption and emission is the 2020 delta
+BaseEmissionMaterials = Data.Const_DataBase.ConstructionECO2Coefficients_ByMaterial{1}; 
+Saving_Green_Cement = Data.Const_DataBase.Saving_Green_Cement;
+
+% Calculate Emissions from construction
 for i = 1:Years
     CurrentConstruction = ConstructionTable{:,i};
-    %prevConstruction = ConstructionTable{:,i-1};
     CurrentConstructionFootprint = ConstructionFootprintTable{:, i};
-    CurrentConstructionECO2Coefficients_ByMaterial = ConstructionECO2Coefficients_ByMaterial{i};
-    %%%%%%%%%%%%%%%%%%%%%%%%% CHECKKKKKKKKKKKKKK
+
+    % --- Update Materials Emission by Green Transition (Scenario 24) ---
+    %NewEmissionMaterial = BaseEmissionMaterials;
+    NewEmissionMaterial(:,:) = BaseEmissionMaterials(:,:) - BaseEmissionMaterials(:,:).*Saving_Green_Cement'*(ChangeInGreenMaterials(i)-1); % Just the Cement Changes
+    CurrentConstructionECO2Coefficients_ByMaterial = NewEmissionMaterial;
+
+    %% Emissions construction
     [ConsumptionAmounts{4,i},EmissionsByYears{7,i}] = CalcConstruction(Data1, CurrentConstruction, CurrentConstructionFootprint, CurrentConstructionECO2Coefficients_ByMaterial);
-    % The base year has no emissions and material, cause all the next years
-    % are comparing to the first one. - so we give it the delta of 2020.
+    % The base year has no emissions and material, cause all the next years are comparing to the first one. - so we give it the delta of 2020.
     ConsumptionAmounts{4,1} = ConsumptionAmounts{4,2};
     EmissionsByYears{7,1} = EmissionsByYears{7,2};
 end
 
-% %% waste minimization - scenario 9
-% for i=1:Years
-%     CurrentWaste = WasteAndRecyclingCell{i};
-%     for j = 1:height(WasteAndRecyclingCell{i})
-%         for k =1:width(CurrentWaste)
-%            CurrentWaste{j,k} = WasteMinimazation(i)*CurrentWaste{j,k};
-%         end
-%     end
-%     WasteAndRecyclingCell{i} = CurrentWaste;
-% end
 
+%% ----------------------------------------- Materials Waste
 
-%% Recycled waste growth - Get better - scenario 10
+% 1. Recycled waste growth - Get better - scenario 10
 
 % every year Recycled percentage
 ExportWasteForRecyclingPercentage{1} = Data.Materials_DataBase.ExportWasteForRecyclingPercentage{1};
@@ -420,7 +407,7 @@ for i=1:Years
     
 end
 
-%% burning waste - scenario 11
+% 2. burning waste - scenario 11
 WasteInciniration = zeros(1,Years); %% amounts of waste to incinirate
 for i=1:Years
     CurrentWaste = WasteAndRecyclingCell{i};
@@ -434,14 +421,14 @@ for i=1:Years
 end
 
 
-%% Solid Waste Emission (Production + Waste) - Lidor Added
+% 3. Solid Waste Emission (Production + Waste) - Lidor Added
 for i=1:Years
     [MaterialEmissionsByYear] = CalcMaterialEmissions(Data, WasteAndRecyclingCell{i});
     EmissionsByYears{11,i} = MaterialEmissionsByYear;
 end
 
 
-%% Electricity emissions
+%% ----------------------------------------- Electricity emissions
 ElectricityBySources.Properties.VariableNames = YearsStringsForColNames;
 PreviousYearElectricity = ElectricityBySources{:,1}; %tables of zeros- for the first iteration.
 addKWHfromFuels = array2table(zeros(3,Years)); % for the industry fuels (materials sheet)
@@ -477,17 +464,16 @@ for i=1:Years
     [EmissionsByYears{2,i}, ElectricityBySources{1:6,i}] = CalcElectricityConsumption(Data, CurrentYearElectricity, PercentageOfElectricitySourcesByYears{:,i},WasteInciniration(i), i);
 
     % PV
-    % Shiri's Adjustments: allowing changes in PV emissions - sending the
-    % function the consumption of the prev year in order to find the delta,and the year (i) so we can calculate the current emissions
+    % Shiri's Adjustments: allowing changes in PV emissions - sending the function the consumption of the prev year in order to find the delta,and the year (i) so we can calculate the current emissions
     [EmissionsByYears{3,i},ConsumptionAmounts{2,i}] = CalcElectricityManufacturing(Data, CurrentYearElectricity, PreviousYearElectricity, PercentageOfElectricitySourcesByYears{:,:}, i);
     Sum_row = numel(ElectricityBySources_row_names);
     ElectricityBySources{Sum_row,i} = sum(ElectricityBySources{1:(Sum_row-1),i});
     PreviousYearElectricity = CurrentYearElectricity; % updating for the next iteration
 end
 
-%% Area
+%% ----------------------------------------- Area
 
-% Electricity Area
+% 1. Electricity Area
 Renewable_Electricity_row_num = numel(Renewable_Electricity_row_names);
 KWForElectricity = array2table(zeros(Renewable_Electricity_row_num,Years));
 for i = 1:Years
@@ -534,7 +520,7 @@ for i = 1:Years
 end
 
 
-% Area for food
+% 2. Area for food
 temp_row_num = find(strcmpi(Resources_RowNames, 'Area For Food (Km^2)'));
 for i = 1:Years
     CurrentAreaForFood = CalcAreaForFoodConsumption(FoodConsumptionCell{i},  Data.Food_DataBase.AreaForFoodCoefficients);
@@ -542,14 +528,12 @@ for i = 1:Years
     Resources{temp_row_num,i} = CurrentAreaForFood; 
 end
 
-% Construction area 
+% 3. Construction area 
 temp_row_num = find(strcmpi(Resources_RowNames, 'Area For Construction (Km^2)')); % Find the match row for contruction
 temp_row_num2 = find(strcmpi(Resources_RowNames, 'Cumulative Area For Construction (Km^2)')); 
 
 InitBuiltArea = Data.Const_DataBase.TotalBuiltArea; % The initial built Area in the Base year
-
 Resources{temp_row_num,1} = ConstructionFootprintTable{height(ConstructionFootprintTable),2}; % For the first year- we took the delta of the 2020 year
-%Resources{temp_row_num2,1} = Resources{temp_row_num,1}; % For the first year
 Resources{temp_row_num2,1} = ConstructionFootprintTable{height(ConstructionFootprintTable),1}; % For the first year
 
 for i = 2:Years
@@ -578,7 +562,7 @@ for i = 1:Years
     end
 end
 
-%% Money
+%% ----------------------------------------- Money
 
 %OperationCost
 % if(Data.PVType == "Ground")
@@ -618,7 +602,7 @@ end
 % Lidor add it - just so we can see the output
 Data1.Water_DataBase.WaterConsumptionCell = WaterConsumptionCell;
 
-%% Create Final Table
+%% ----------------------------------------- Create Final Table
 EmissionsByYears = cell2table(EmissionsByYears, 'RowNames', Emission_RowNames);
 EmissionsByYears.Properties.VariableNames = YearsStringsForColNames;
 
@@ -631,15 +615,8 @@ Resources.Properties.VariableNames = YearsStringsForColNames;
 
 Data = Data1;
 
-%% Inputs to the functions
-% TransRowNames = Data.Trans_DataBase.Vehicle_Amounts_RowNames;
-% TransColNames = Data.Trans_DataBase.Vehicle_Amounts_ColNames;
-% TransRow_Num = numel(TransRowNames);
-% TransColNum = numel(TransColNames);
-% ElectricityRowName = Data.Electricity_DataBase.Electricity_Sources;
-% ElectricityRowNum = numel(ElectricityRowName);
 
-%% Other Functions
+%% ----------------------------------------- Other Functions
 
 function ElectricityFromWater = CalculateElectricityFromWaterAllYears(Data, WaterConsumptionCell, Years)
 ElectricityFromWater = cell(1,Years);

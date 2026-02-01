@@ -1,4 +1,4 @@
- function [ElectricityConsumptionTable, TransportationConsumptionTable, VehicleAmountsCell, FoodConsumptionCell, WaterConsumptionCell, ConstructionTable, ConstructionFootprintTable, WateAndRecyclingCell, AmountsOfFuelsCells, OrganicWasteAmount, Data, ConstructionECO2Coefficients_ByMaterial] = ConsumptionChanges(Data, ScenariosTable,Years,pop,orderIndex, varargin)
+ function [ElectricityConsumptionTable, TransportationConsumptionTable, VehicleAmountsCell, FoodConsumptionCell, WaterConsumptionCell, ConstructionTable, ConstructionFootprintTable, WateAndRecyclingCell, AmountsOfFuelsCells, OrganicWasteAmount, Data] = ConsumptionChanges(Data, ScenariosTable,Years,pop,orderIndex, varargin)
 % This function calculates consumption changes based on population growth and predefined coefficients.
 % Input:
 %   - Data: Structure containing base data for various consumption categories.
@@ -10,7 +10,7 @@
 % Output:
 %   - Various consumption tables and cells.
 
-%% Variables
+%% -------------------------------------------------Variables-------------------------------------------
 
 global BaseYear
 
@@ -38,7 +38,13 @@ p = inputParser;
 addOptional(p,'ChangesStruct', []);
 parse(p,varargin{:});
 
-%% Electricity Consumption
+%% -------------------------------------------------Finished Variables-------------------------------------------
+
+
+
+
+
+%% ---------------------------------- Electricity Consumption
 
 % NEW: Electicity that the industry consumes isn't affected by the population growth.
 ElectricityConsumptionTable = Data.Electricity_DataBase.ElectricityConsumptionTable;
@@ -48,7 +54,6 @@ IndustryElectricityConsumptionChange = Data.Electricity_DataBase.IndustryElectri
 ChangeInElectricityConsumptionPercentageIndustry = CalculatePercentageLinear(1, IndustryElectricityConsumptionChange, Years);
 
 for i=2:Years
-  %  ElectricityConsumptionTable{:, i} = PrecentegeByTheYears(i)*ElectricityConsumptionTable{:,1};
   ElectricityConsumptionTable{1, i} = ScenariosTable{1,i} * ElectricityConsumptionTable{1,1}; %home
   ElectricityConsumptionTable{2, i} = ScenariosTable{1,i} * ElectricityConsumptionTable{2,1}; %public/commercial
   ElectricityConsumptionTable{4, i} = ScenariosTable{1,i} * ElectricityConsumptionTable{4,1}; %other
@@ -59,7 +64,8 @@ for i=2:Years
   end
 end
 
-%% Transportation Consumption
+
+%% ---------------------------------- Transportation Consumption
 for i=1:Years
     %Growth = ScenariosTable{1,i}*1.011; %% didnt understant why?!?!?!
     Growth = ScenariosTable{1,i};
@@ -67,7 +73,8 @@ for i=1:Years
     TransportationConsumptionTable{9,i} = sum(TransportationConsumptionTable{1:8,i});
 end
 
-%% Vehicle Amoount
+
+%% ---------------------------------- Vehicle Amoount
 for i = 1:Years
     CurrentAmount = array2table(zeros(VehicleAmounts_Row_Num,VehicleAmounts_Col_Num), 'RowNames', VehicleAmounts_RowNames);
     CurrentAmount{:,:} = VehicleAmountsCell{1}{:,:}*(ScenariosTable{1,i});
@@ -75,10 +82,10 @@ for i = 1:Years
     VehicleAmountsCell{i} =  CurrentAmount;
 end
 
-%% Food Consumption
+
+%% ---------------------------------- Food Consumption
 % assuming perfect corrrelation between population growth and food consumption.
-% SHIRI'S UPDATE:
-% adding upper-bound to the growth of local consumption due to area limitation.
+% SHIRI'S UPDATE: adding upper-bound to the growth of local consumption due to area limitation.
 UpperBound =  Data.Food_DataBase.TotalGrowthForLocalFood;
 if (width(ScenariosTable) == Years) % making sure the table has enough columns
 
@@ -98,8 +105,7 @@ FoodPercentageByTheYearsOriginal = ScenariosTable{1,:};
 
 
 for i = 1:Years
-    % each column is multiplied by the relevant percentages, in order to
-    % limit the area for food in Israel to 4500 Km^2
+    % each column is multiplied by the relevant percentages, in order to limit the area for food in Israel to 4500 Km^2
     CurrentConsumption = array2table(zeros(food_numRows,food_numCols), 'RowNames', RowNames);
     CurrentConsumption{:,1} = Initialization(:,1)*(FoodPercentegeByTheYearsLocal(i));
     CurrentConsumption{:,2} = Initialization(:,2)*(FoodPercentegeByTheYearsLocal(i));
@@ -108,30 +114,21 @@ for i = 1:Years
     CurrentConsumption.Properties.VariableNames = ColNames;
 
     for j = OnlyImportedFoodIndex
-        % food that is grown only overseas isnt affacted by the area
-        % limitation, and therefore only by the population growth: 
+        % food that is grown only overseas isnt affacted by the area limitation, and therefore only by the population growth: 
         % (change when updating the area coefficients in the orignal DATA)
         CurrentConsumption{j,:} = Initialization(j,:) * FoodPercentageByTheYearsOriginal(i);
     end
-
     FoodConsumptionCell{i} =  CurrentConsumption;
 end
 
-% for i = 1:Years
-%    CurrentConsumption = array2table(zeros(food_numRows,food_numCols), 'RowNames', RowNames);
-%    CurrentConsumption{:,:} = Initialization*(PrecentegeByTheYears(i));
-%    CurrentConsumption.Properties.VariableNames = ColNames;
-%    FoodConsumptionCell{i} =  CurrentConsumption;
-% end
 
 
-
-%% WATER
+%% ---------------------------------- WATER
 
 % Lidor's Update to be generic
 WDB = Data.Water_DataBase;
 
-%% WaterData HELP TABLE - For the changing Sectors not just by population (changing in years not by population)
+% WaterData HELP TABLE - For the changing Sectors not just by population (changing in years not by population)
 
 water_Names = WDB.water_Names; % {'Water for Domestic & Industrial', 'Water for Agriculture', 'Water for Neighbors', 'Water for  Nature', 'Drilling Water', 'Reclaimed Wastewater', 'Brackish water, fresh and non-fresh reservoir water', 'Desalinated Water'};
 waterData  = array2table(zeros(numel(water_Names), Years), 'RowNames', water_Names);
@@ -146,10 +143,9 @@ for i =1:Years
    waterData{'Desalinated Water',i} = NaN; % complete the demand in each year
    
    %2. FOR THE CHANGING SECTORS
-
    % Agriculture per capita to all years
-   waterData{'Water for Agriculture',i} = WDB.AgriculturePerCapitaFactor_water * log(i + (BaseYear - WDB.AgricultureBaseYear_water + 1)) + WDB.AgriculturePerCapitaOffset_water;
-   
+    waterData{'Water for Agriculture',i} = WDB.AgriculturePerCapitaFactor_water * log(i + (BaseYear - WDB.AgricultureBaseYear_water + 1)) + WDB.AgriculturePerCapitaOffset_water;
+
    % water for nature (conditions to be between some years ...) from the
    % "צרכנים" sheet in the water model excel in the projects files of dor
    idx = find(i < WDB.Nature_water_yearThresholds, 1); 
@@ -175,21 +171,11 @@ for i =1:Years
    end
 end
 
-%% Water Consumption
+
+%% ---------------------------------- Water Consumption
 WaterConsumptionCell = WDB.WaterConsumptionCell;
 sectorNames = WDB.WaterConsumptionTableNew.Properties.RowNames;
 CurrentConsumption = array2table(zeros(1, numel(sectorNames)), 'VariableNames', sectorNames);
-% Initialization = WaterConsumptionCell{1}{:,1:5};
-
-% %%2019 Data - from Dor's Model
-% CurrentConsumption{1,'Water for Domestic & Industrial'} = 1022;
-% CurrentConsumption{1,'Water for Agriculture'} = 1193;
-% CurrentConsumption{1,'Water for Neighbors'} = 146;
-% CurrentConsumption{1,'Water for  Nature'} = 24;
-% CurrentConsumption{1,'Drilling Water'} = 828;
-% CurrentConsumption{1,'Reclaimed Wastewater'} = 630;
-% CurrentConsumption{1,'Brackish water, fresh and non-fresh reservoir water'} = 250;
-% CurrentConsumption{1,'Desalinated Water'} = 609;
 
 CurrentConsumption{1, :} = WDB.WaterConsumptionTableNew{:, '2019'}';
 WaterConsumptionCell{1} =  CurrentConsumption;
@@ -197,19 +183,7 @@ WaterConsumptionCell{1} =  CurrentConsumption;
 %The essential change that ensures the correctness of the water model in a single scenario
 %  Put the base values - Data for 2022 - another point we insert to increase accuracy
 if (ScenariosTable{1,1}) == ScenariosTable{1,width(ScenariosTable)} && (orderIndex == 2) 
-    for i =2:Years
-        % % Consumers - Prediction for 2022 year
-        % CurrentConsumption = array2table(zeros(1,numel(water_Names)), 'VariableNames', water_Names);
-        % CurrentConsumption{1,1} = 1070;
-        % CurrentConsumption{1,2} = 1300;
-        % CurrentConsumption{1,3} = 190;
-        % CurrentConsumption{1,4} = 25;
-        % % Suppliers - Prediction for 2022 year
-        % CurrentConsumption{1,5} = 1080;
-        % CurrentConsumption{1,6} = 636;
-        % CurrentConsumption{1,7} = 250;
-        % CurrentConsumption{1,8} = 524;  
-
+    for i =2:Years 
         CurrentConsumption{1, :} = WDB.WaterConsumptionTableNew{:,'2022'}';
         WaterConsumptionCell{i} =  CurrentConsumption;
     end
@@ -225,22 +199,12 @@ else
         CurrentConsumption{1,'Water for  Nature'} = waterData{'Water for  Nature', i}; 
         % Suppliers
         CurrentConsumption{1,'Drilling Water'} = waterData{'Drilling Water',i}; %% natural 
-        CurrentConsumption{1,'Reclaimed Wastewater'} = WDB.ReclaimedRatio*CurrentConsumption{1,'Water for Domestic & Industrial'}; 
+        CurrentConsumption{1,'Reclaimed Wastewater'} = WDB.ReclaimedRatio*CurrentConsumption{1,'Water for Domestic & Industrial'}*WDB.FreshWaterForDomestic; 
         CurrentConsumption{1,'Brackish water, fresh and non-fresh reservoir water'} = waterData{'Brackish water, fresh and non-fresh reservoir water',i}; 
-        CurrentConsumption{1,'Desalinated Water'} = CurrentConsumption{1,'Water for Domestic & Industrial'}*WDB.FreshWaterForDomestic  + CurrentConsumption{1,'Water for Agriculture'}*WDB.FreshWaterForAgriculture  + CurrentConsumption{1,'Water for Neighbors'} - CurrentConsumption{1,'Drilling Water'}; 
+        CurrentConsumption{1,'Desalinated Water'} = CurrentConsumption{1,'Water for Domestic & Industrial'}*WDB.FreshWaterForDomestic  + CurrentConsumption{1,'Water for Agriculture'}*WDB.FreshWaterForAgriculture  + CurrentConsumption{1,'Water for Neighbors'} + CurrentConsumption{1,'Water for  Nature'} - CurrentConsumption{1,'Drilling Water'}; 
         
         if i == (2022-BaseYear+1) % Adjustment to the water model data for 2022, until all the data in the software is updated - to give extra data to the predictions
             % % Consumers
-            % CurrentConsumption{1,1} = 1070;
-            % CurrentConsumption{1,2} = 1300;
-            % CurrentConsumption{1,3} = 190;
-            % CurrentConsumption{1,4} = 25;
-            % % Suppliers
-            % CurrentConsumption{1,5} = 1080;
-            % CurrentConsumption{1,6} = 636;
-            % CurrentConsumption{1,7} = 250;
-            % CurrentConsumption{1,8} = 524;  
-
             CurrentConsumption{1, :} = WDB.WaterConsumptionTableNew{:, '2022'}';
         end
           WaterConsumptionCell{i} =  CurrentConsumption;
@@ -256,16 +220,13 @@ Data.Water_DataBase = WDB;
 ChangeInBuildingMixRatio = ScenariosTable{21,:}; % Multiplicative factor (e.g., 1.6 for 60% increase)
 ChangeInFloorPrintHighDensity = ScenariosTable{22,:}; % Row 22: Multiplicative factor for High-Density FloorPrint
 ChangeInFloorPrintLowDensity = ScenariosTable{23,:}; % Row 23: Multiplicative factor for Low-Density FloorPrint
-ChangeInGreenMaterials = ScenariosTable{24,:};
 ChangeInFloorsNumber = ScenariosTable{25:33,:};
 
 BaseDistTable = Data.Const_DataBase.Building_Type_Distribution_Cell{1}; % Get the Base Table structure for updates
 BaseFootprintTable = Data.Const_DataBase.Precent_Floor_Footprint_Cell{1}; % נתוני בסיס של Footprint Ratio
 BaseFloorsTable = Data.Const_DataBase.ConstructionFloorsTable{:,1}; % numbers of floors base value
-BaseEmissionMaterials = Data.Const_DataBase.ConstructionECO2Coefficients_ByMaterial{1}; 
-Saving_Green_Cement = Data.Const_DataBase.Saving_Green_Cement;
 
-% Ensure the Cell Array is initialized for all years (Building Type)
+% Ensure the Cell Array is initialized for all years (Building Type), (Floor Print), (Floors number)
 MaxIndex = length(Data.Const_DataBase.Building_Type_Distribution_Cell);
 if MaxIndex < Years
     BaseTableToCopy = Data.Const_DataBase.Building_Type_Distribution_Cell{1};
@@ -274,7 +235,6 @@ if MaxIndex < Years
     end
 end
 
-% Ensure Cell Arrays are initialized for all years (Floor Print)
 MaxIndex_Foot = length(Data.Const_DataBase.Precent_Floor_Footprint_Cell);
 if MaxIndex_Foot < Years
     BaseTableToCopy = Data.Const_DataBase.Precent_Floor_Footprint_Cell{1};
@@ -283,8 +243,6 @@ if MaxIndex_Foot < Years
     end
 end
 
-
-% Ensure Cell Arrays are initialized for all years (Floors number)
 MaxIndex_Foot = width(Data.Const_DataBase.ConstructionFloorsTable);
 if MaxIndex_Foot < Years
     BaseTableToCopy = Data.Const_DataBase.ConstructionFloorsTable{:,1};
@@ -329,18 +287,10 @@ for i = 1:Years
     NewFloorNumber = InitialFloorNumber * CurrentFloorsChange;
     Data.Const_DataBase.ConstructionFloorsTable{:,i} = NewFloorNumber;
 
-
-    % --- Update Materials Emission by Green Transition ---
-    CurrentEmissionChange = (ChangeInGreenMaterials(i)-1); % We keep only the percent
-    InitialEmission = BaseEmissionMaterials; % חילוץ מספר טהור (עובד ב-readValues) 
-    NewEmissionMaterial = InitialEmission;
-    NewEmissionMaterial(:,:) = InitialEmission(:,:) - InitialEmission(:,:).*Saving_Green_Cement'*CurrentEmissionChange; % Just the Cement Changes
-    Data.Const_DataBase.ConstructionECO2Coefficients_ByMaterial{i} = NewEmissionMaterial;
-
 end
 
 
-%% The tables (Applying the core logic)
+% The tables (Applying the core logic)
 ConstructionTable = Data.Const_DataBase.ConstructionTable;
 ConstructionTable_numRows = height(ConstructionTable) - 1;
 ConstructionInitialization = ConstructionTable{1:ConstructionTable_numRows,1};
@@ -348,10 +298,8 @@ ConstructionInitialization = ConstructionTable{1:ConstructionTable_numRows,1};
 % Lidor's addition
 ConstructionFootprintTable = Data.Const_DataBase.ConstructionFootprintTable;
 ConstructionFloorsTable = Data.Const_DataBase.ConstructionFloorsTable;
-ConstructionECO2Coefficients_ByMaterial = Data.Const_DataBase.ConstructionECO2Coefficients_ByMaterial;
 
 ConstructionFootprint_numRows = height(ConstructionFootprintTable) - 1;
-ConstructionFootprintInitialization = ConstructionFootprintTable{1:ConstructionFootprint_numRows,1};
 CDB = Data.Const_DataBase;
 
 % 1. Calculate the ACCUMULATIVE Residential Areas (Built Area and Floor Footprint) for all years
@@ -375,26 +323,12 @@ for i=2:Years
     Floors_NonRes(Floors_NonRes == 0) = 1; % prevent division by zero
     Total_Non_Residential_Footprint = Total_Non_Residential_Area ./ Floors_NonRes;
     ConstructionFootprintTable{1:9, i} = Total_Non_Residential_Footprint - sum(ConstructionFootprintTable{1:9, 1:i-1}, 2);
- 
-    % --- Residential Sectors (Rows 10 & 11) - Use New Master Plan Calculation ---
-    % Row 10: Residential - High-Density, Row 11: Residential - Low-Density
-    
-    % Built Area Delta (using the result from the new helper function)
-    %ConstructionTable{10, i} = BuiltAreaRes_Acc(1, i) - sum(ConstructionTable{10, 1:i-1}, 2); % High-Density
-    %ConstructionTable{11, i} = BuiltAreaRes_Acc(2, i) - sum(ConstructionTable{11, 1:i-1}, 2); % Low-Density
-    
-    % Floor Footprint Delta (using the result from the new helper function)
-    %ConstructionFootprintTable{10, i} = FloorFootprintRes_Acc(1, i) - sum(ConstructionFootprintTable{10, 1:i-1}, 2); % High-Density
-    %ConstructionFootprintTable{11, i} = FloorFootprintRes_Acc(2, i) - sum(ConstructionFootprintTable{11, 1:i-1}, 2); % Low-Density
-    
 
     % דלתא אמיתית = שינוי בין שני ערכים מצטברים סמוכים
     ConstructionTable{10, i} = BuiltAreaRes_Acc(1, i) - BuiltAreaRes_Acc(1, i-1);
     ConstructionTable{11, i} = BuiltAreaRes_Acc(2, i) - BuiltAreaRes_Acc(2, i-1);
-    
     ConstructionFootprintTable{10, i} = FloorFootprintRes_Acc(1, i) - FloorFootprintRes_Acc(1, i-1);
     ConstructionFootprintTable{11, i} = FloorFootprintRes_Acc(2, i) - FloorFootprintRes_Acc(2, i-1);
-
 
     % Update Total Rows
     ConstructionTable{ConstructionTable_numRows+1, i} = sum(ConstructionTable{1:ConstructionTable_numRows, i});
@@ -411,19 +345,14 @@ ConstructionFootprintTable{:, :} = max(ConstructionFootprintTable{:, :}, 0);
 ConstructionFootprintTable{1:ConstructionFootprint_numRows, 1} = ConstructionFootprintTable{1:ConstructionFootprint_numRows, 2};
 ConstructionTable{1:ConstructionTable_numRows, 1} = ConstructionTable{1:ConstructionTable_numRows, 2};
 
-
 % Save Results
 Data.ConstructionTable = ConstructionTable;
 Data.ConstructionFootprintTable = ConstructionFootprintTable;
-Data.ConstructionECO2Coefficients_ByMaterial = ConstructionECO2Coefficients_ByMaterial;
 
 
 
 
-
-
-
-%% Materials - generated waste and recycling
+%% ---------------------------------- Materials - generated waste and recycling
 
 % 1. All waste Growth by population
 RowNames = {'Organic Products','Plastic', 'Paper', 'Cardboard', 'Diapers', 'Garden Waste', 'Textile', 'Metal', 'Glass', 'Pruned Trees','Wood', 'Oils', 'Others'};
@@ -465,13 +394,7 @@ for i = 1:Years
 end   
 
 
-% 4. Change in Recycled Waste
-
-
-
-
-
-%% ADJUSTING FOR 2035:
+%% ---------------------------------- ADJUSTING FOR 2035:
 %  REMOVING UNECESSARY COLUMNS FROM THE TABLES:
 if (orderIndex >= 7 && width(ScenariosTable) <= Years) 
    ElectricityConsumptionTable = ElectricityConsumptionTable(:, 1:Years);
@@ -491,7 +414,7 @@ Data.Const_DataBase.ConstructionFootprintTable = ConstructionFootprintTable;
 
 
 
-%% Relevent functions
+%% ---------------------------------- Relevent functions --------------------------------------
 function PercentVector = CalcChangeVector(MileStoneVector, Years, S, varargin)
     p = inputParser;
     addOptional(p,'Type','Exponential');
