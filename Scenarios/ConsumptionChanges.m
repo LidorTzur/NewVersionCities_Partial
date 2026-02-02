@@ -178,6 +178,7 @@ sectorNames = WDB.WaterConsumptionTableNew.Properties.RowNames;
 CurrentConsumption = array2table(zeros(1, numel(sectorNames)), 'VariableNames', sectorNames);
 
 CurrentConsumption{1, :} = WDB.WaterConsumptionTableNew{:, '2019'}';
+CurrentConsumption{1,'Desalinated Water'} = CurrentConsumption{1,'Water for Domestic & Industrial'}*WDB.FreshWaterForDomestic  + CurrentConsumption{1,'Water for Agriculture'}*WDB.FreshWaterForAgriculture  + CurrentConsumption{1,'Water for Neighbors'} + CurrentConsumption{1,'Water for  Nature'} - CurrentConsumption{1,'Drilling Water'}; 
 WaterConsumptionCell{1} =  CurrentConsumption;
 
 %The essential change that ensures the correctness of the water model in a single scenario
@@ -204,7 +205,6 @@ else
         CurrentConsumption{1,'Desalinated Water'} = CurrentConsumption{1,'Water for Domestic & Industrial'}*WDB.FreshWaterForDomestic  + CurrentConsumption{1,'Water for Agriculture'}*WDB.FreshWaterForAgriculture  + CurrentConsumption{1,'Water for Neighbors'} + CurrentConsumption{1,'Water for  Nature'} - CurrentConsumption{1,'Drilling Water'}; 
         
         if i == (2022-BaseYear+1) % Adjustment to the water model data for 2022, until all the data in the software is updated - to give extra data to the predictions
-            % % Consumers
             CurrentConsumption{1, :} = WDB.WaterConsumptionTableNew{:, '2022'}';
         end
           WaterConsumptionCell{i} =  CurrentConsumption;

@@ -66,9 +66,6 @@ fuel_LPG_coeff = Data.Electricity_DataBase.fuel_LPG_coeff;
 % food
 meatRows = Data.Food_DataBase.meatRows;
 
-% Transportation
-RidesPerDay_global = Data.Trans_DataBase.RidesPerDay;
-
 % Cut Vectors from Scenarios Table
 % Extracting values from the ScenariosTable for each factor
 ChangeInElectricityConsumptionPercentage = ScenariosTable{2,:};
@@ -174,22 +171,18 @@ for i = 1:Years
         A =  sum(WaterFromFood_BAU{i}{1,1:2}) / 10^6;
         B =  sum(WaterFromFoodCell{i}{1,1:2}) / 10^6;
         gap = A - B;
-        %disp(gap);
         WaterConsumptionCell{i}{1,8} =  WaterConsumptionCell{i}{1,8} - gap; %desilinated water
-        disp(['Year: ', num2str(i)]);
-        disp(['BAU Water (A): ', num2str(sum(WaterFromFood_BAU{i}{1,1:2}) / 10^6)]);
-        disp(['Current Water (B): ', num2str(sum(WaterFromFoodCell{i}{1,1:2}) / 10^6)]);
-        disp(['Resulting GAP: ', num2str(gap)]);
+        % disp(['Year: ', num2str(i)]);
+        % disp(['BAU Water (A): ', num2str(sum(WaterFromFood_BAU{i}{1,1:2}) / 10^6)]);
+        % disp(['Current Water (B): ', num2str(sum(WaterFromFoodCell{i}{1,1:2}) / 10^6)]);
+        % disp(['Resulting GAP: ', num2str(gap)]);
     end
-
 
     % Compute emissions from food consumption based on the updated values
     EmissionsFromFood = CalcCo2eFromFoodConsumption(Data, CurrentFoodConsumption, OrganicWasteCell{i});    
-    % Store the emissions in the corresponding year
     temp_row_num = find(strcmpi(Emission_RowNames, 'Food (Ton ECo2)'));
-    EmissionsByYears{temp_row_num,i} = EmissionsFromFood;   
-    % Update the food consumption table after applying the modifications
-    FoodConsumptionCell{i} = CurrentFoodConsumption;
+    EmissionsByYears{temp_row_num,i} = EmissionsFromFood; % Store the emissions in the corresponding year   
+    FoodConsumptionCell{i} = CurrentFoodConsumption; % Update the food consumption table after applying the modifications
 end
 
 
@@ -242,23 +235,18 @@ PercentageToTrains = Data.Trans_DataBase.TransitionToTrain;
 
 TransitionToBus = (1-TransitionToPublicTransportationPercentage)*PercentageToBuses;
 TransitionToTrain = (1-TransitionToPublicTransportationPercentage)*PercentageToTrains;
-% 1.+ vector to increase the km for buses
-PercentageOfBusTransportation = CalculateBusPercentages(TransitionToBus);
-%Lidor's add - 1.+ vector to increase the km for Trains
-PercentageOfTrainTransportation = CalculateTrainPercentages(TransitionToTrain);
+
+PercentageOfBusTransportation = CalculateBusPercentages(TransitionToBus); % 1.+ vector to increase the km for buses
+PercentageOfTrainTransportation = CalculateTrainPercentages(TransitionToTrain); %Lidor's add - 1.+ vector to increase the km for Trains
 
 for i = 1:Years
-    % decrease in km for cars from transition to bus and train
-    TransportationConsumptionTable{2,i} = TransportationConsumptionTable{2,i}*TransitionToPublicTransportationPercentage(i); 
-    % increase the km for buses
-    TransportationConsumptionTable{1,i} = TransportationConsumptionTable{1,i}*PercentageOfBusTransportation(i); 
-    %Lidor's add - increase the km for Passenger Train
-    TransportationConsumptionTable{7,i} = TransportationConsumptionTable{7,i}*PercentageOfTrainTransportation(i);
+    TransportationConsumptionTable{2,i} = TransportationConsumptionTable{2,i}*TransitionToPublicTransportationPercentage(i); % decrease in km for cars from transition to bus and train
+    TransportationConsumptionTable{1,i} = TransportationConsumptionTable{1,i}*PercentageOfBusTransportation(i); % increase the km for buses
+    TransportationConsumptionTable{7,i} = TransportationConsumptionTable{7,i}*PercentageOfTrainTransportation(i); %Lidor's add - increase the km for Passenger Train
 end
 
 %%change in vehicle amounts due to transition to train and buses
 VehicleAmountsCell = CalulateChangeInVehicleAmountsTransitionToPublicTransport(TransportationConsumptionTable, VehicleAmountsCell);
-
 
 % Transition to EV - consider the electricity and emission from it (Lidor)
 ElectricityConsumptionEmissionsInTransportation = Data.Electricity_DataBase.ElectricityConsumptionEmissionsInTransportation;
@@ -646,7 +634,6 @@ function PercentageByYears = CalculatePercentageOfElectricitySourcesByYears(Rene
 ElectricityRowName = Data.Electricity_DataBase.Electricity_Sources;
 ElectricityRowNum = numel(ElectricityRowName);
 PercentageByYears = array2table(zeros(ElectricityRowNum,Years)); %% cell array that contains the percentages of manufacturing
-%RowNames = {'Coal', 'Natural Gas', 'Renewable', 'Soler', 'Mazut'};
 ColumnNames = cell(1,Years);
 for i=1:Years
     s1 = num2str(i+BaseYear-1); 
@@ -710,8 +697,7 @@ end
 % end
 
 function NewVehicleAmountCell = CalulateChangeInVehicleAmountsTransitionToPublicTransport(TrasnportationConsumptionTable, VehicleAmountCell)
-% Inputs
-% Include decrease due to train and bus transitions
+% Inputs, Include decrease due to train and bus transitions
 
 TransRowNames = Data.Trans_DataBase.Vehicle_Amounts_RowNames;
 TransColNames = Data.Trans_DataBase.Vehicle_Amounts_ColNames;
