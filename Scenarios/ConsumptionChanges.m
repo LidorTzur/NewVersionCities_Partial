@@ -618,6 +618,8 @@ function [BuiltAreaRes, FloorFootprintRes, CDB] = CalculateAnnualResidentialArea
         else
             CDB.AreaPerCapitaVector(i) = CDB.AreaPerCapitaVector(i-1) + CDB.Annual_area_per_capita_growth_rate;
         end
+        % disp(i);
+        % disp(CDB.AreaPerCapitaVector(i));
     end
     
     % City's Population Vector (assuming 'Israel population' row is used)
@@ -632,6 +634,9 @@ function [BuiltAreaRes, FloorFootprintRes, CDB] = CalculateAnnualResidentialArea
         % Total built area required for residential up to year i (Cumulative)
         % (Population * Area per Capita)
         TotalBuiltAreaResidential = PopulationVector(i) * 1000000 * CDB.AreaPerCapitaVector(i);
+        % disp(i);
+        % disp(CDB.AreaPerCapitaVector(i));
+        % disp(TotalBuiltAreaResidential);
 
         % --- Retrieve Time-Varying Coefficients for the current year ---
         % If data is not provided for all years in the Cell Array, use the data from year 1
@@ -654,6 +659,7 @@ function [BuiltAreaRes, FloorFootprintRes, CDB] = CalculateAnnualResidentialArea
 
         Footprint_Ratio_High = Footprint_Table{1,1};
         Footprint_Ratio_Low = Footprint_Table{1,2};
+       
        
         
         % 3. Calculate Cumulative Built Area (Rows 10 & 11)

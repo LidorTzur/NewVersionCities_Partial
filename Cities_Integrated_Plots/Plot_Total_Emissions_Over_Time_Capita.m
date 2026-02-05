@@ -31,7 +31,7 @@ fs_legend = 13;
 % שורות הפליטה הכוללת בטבלת TotalResults
 rows.Emission_Total = [7 8 9]; % BAU / Moderate / Advanced
 
-outputDir = 'C:\Users\צור\Documents\MATLAB\NewVersionCities_Partial\Results_Plots\PerCapita_Emissions';
+outputDir = 'C:\Users\צור\Documents\MATLAB\NewVersionCities_Partial\Results_Plots\Plot_Total_Emissions_Over_Time_Capita';
 if ~exist(outputDir,'dir'), mkdir(outputDir); end
 
 %% --- לולאה על תרחישים ---

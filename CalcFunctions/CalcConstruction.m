@@ -98,6 +98,6 @@ GlobalEmission = materialAmounts * globalFactors';
 TotalConstructionEmissionsAndWaste = addvars(TotalConstructionEmissionsAndWaste, totalEmissions, 'Before', 2, 'NewVariableNames', 'CO2Emission_tons');
 TotalConstructionEmissionsAndWaste = addvars(TotalConstructionEmissionsAndWaste, LocalEmission, 'Before', 6, 'NewVariableNames', 'CO2Emission_tons_Local');
 TotalConstructionEmissionsAndWaste = addvars(TotalConstructionEmissionsAndWaste, GlobalEmission, 'Before', 7, 'NewVariableNames', 'CO2Emission_tons_Global');
-
+%disp(TotalConstructionEmissionsAndWaste);
 end
 

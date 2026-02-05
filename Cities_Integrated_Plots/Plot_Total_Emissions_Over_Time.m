@@ -30,7 +30,7 @@ fs_legend = 13;
 
 rows.Emission_Total = [7 8 9]; % BAU / Moderate / Advanced
 
-outputDir = 'C:\Users\צור\Documents\MATLAB\NewVersionCities_Partial\Results_Plots\Total_Emissions';
+outputDir = 'C:\Users\צור\Documents\MATLAB\NewVersionCities_Partial\Results_Plots\Plot_Total_Emissions_Over_Time';
 if ~exist(outputDir,'dir'), mkdir(outputDir); end
 
 %% --- לולאה על תרחישים ---
