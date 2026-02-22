@@ -348,7 +348,7 @@ for i = 1:Years
 
     %% Emissions construction
     %disp(i);
-    [ConsumptionAmounts{4,i},EmissionsByYears{7,i}] = CalcConstruction(Data1, CurrentConstruction, CurrentConstructionFootprint, CurrentConstructionECO2Coefficients_ByMaterial);
+    [ConsumptionAmounts{4,i},EmissionsByYears{7,i}] = CalcConstruction(Data1, CurrentConstruction, CurrentConstructionFootprint, CurrentConstructionECO2Coefficients_ByMaterial, ChangeInGreenMaterials(i));
     % The base year has no emissions and material, cause all the next years are comparing to the first one. - so we give it the delta of 2020.
     ConsumptionAmounts{4,1} = ConsumptionAmounts{4,2};
     EmissionsByYears{7,1} = EmissionsByYears{7,2};

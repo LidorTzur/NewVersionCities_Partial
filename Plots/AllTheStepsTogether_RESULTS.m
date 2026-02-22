@@ -35,7 +35,7 @@ RDB.BAU_RDB.TotalEmissionSum1 = CalcUpDownStreamSum(RDB.BAU_RDB.TotalEmission1);
 Sum_Size = height(RDB.BAU_RDB.TotalEmission1)-1;
 
 Emission1_Sum_Local = sum(RDB.BAU_RDB.TotalEmission1{[1,3,5,7,9,11], :}); 
-Emission1_Sum_Global = sum(RDB.BAU_RDB.TotalEmission1{[2,4,6,8,10, 12], :}); 
+Emission1_Sum_Global = sum(RDB.BAU_RDB.TotalEmission1{[2,4,6,8,10,12], :}); 
 Emission1_Sum_Total = sum(RDB.BAU_RDB.TotalEmission1{1:Sum_Size, :}); 
 
 

@@ -30,10 +30,9 @@ GeneralInputsDataBase = struct();
 
 % For the Results Analisys
 ResultsDataBase = struct();
-ResultsDataBase.BAU_RDB = struct();
-ResultsDataBase.Moderate_RDB = struct();
-ResultsDataBase.Advanced_RDB = struct();
-
+% ResultsDataBase.BAU_RDB = struct();
+% ResultsDataBase.Moderate_RDB = struct();
+% ResultsDataBase.Advanced_RDB = struct();
 % For the sensetivity Analisys
 SensitivityResults = struct();
 

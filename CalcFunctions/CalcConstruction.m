@@ -1,4 +1,4 @@
-function [MaterialConsumption, TotalConstructionEmissionsAndWaste] = CalcConstruction(Data, CurrentYearConstruction, CurrentConstructionFootprint, CurrentConstructionECO2Coefficients_ByMaterial)
+function [MaterialConsumption, TotalConstructionEmissionsAndWaste] = CalcConstruction(Data, CurrentYearConstruction, CurrentConstructionFootprint, CurrentConstructionECO2Coefficients_ByMaterial, ChangeInGreenMaterials)
 
 % Description:
 %   Calculates the annual material consumption and associated emissions/waste
@@ -71,10 +71,21 @@ MaterialConsumption.Properties.VariableNames = ColNames;
 ColNames = Data.Const_DataBase.ConstructionEmissionTypes; % 'Mining Waste', 'NOX', 'PM10', 'SO2'
 TotalConstructionEmissionsAndWaste = array2table(zeros(numel(RowNames),numel(ColNames)), 'RowNames', RowNames);
 
+Saving_Potential = Data.Const_DataBase.Saving_Green_Cement; % הוקטור מהתמונה שלך (0, 0.34, 0...)
+
 % Fill the table
-for i = 1:width(TotalConstructionEmissionsAndWaste) %% 1-4
+for i = 1:width(TotalConstructionEmissionsAndWaste) %% 1-7
     for j = 1:height(TotalConstructionEmissionsAndWaste) %% 1-12
-        TotalConstructionEmissionsAndWaste{j,i} = EmissionCoefficients(i)*sum(MaterialConsumption{j, :}); %  tons  eco2
+        weightedSumWithGreenTransition = 0;
+        for m = 1:width(MaterialConsumption)
+            if Saving_Potential(m) > 0
+                matMiningFactor = 1 - (ChangeInGreenMaterials - 1);
+            else
+                matMiningFactor = 1;
+            end
+            weightedSumWithGreenTransition = weightedSumWithGreenTransition + (MaterialConsumption{j,m} * matMiningFactor);
+        end
+        TotalConstructionEmissionsAndWaste{j,i} = EmissionCoefficients(i)*weightedSumWithGreenTransition; %  tons  eco2
     end
 end
 

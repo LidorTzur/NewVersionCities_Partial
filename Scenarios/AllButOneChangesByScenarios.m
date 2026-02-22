@@ -16,11 +16,11 @@ function [AllButOneScenariosTable] = AllButOneChangesByScenarios(Data, ScenarioN
 % enabling tracking of these intermediate targets over the years.
 
 %% Inputs
-global BaseYear; % The base year for analysis (e.g., 2020)
+global BaseYear; 
 current_food_lost_global = Data.Food_DataBase.current_food_lost; % The global assumption that 33% of food manufactured is lost
 
 % Bring to current situation - 2020 (or 2025 if i have the data)
-YearsAfterAnalysis = Data.Electricity_DataBase.CurrentYearReal - BaseYear; % the number of years between 2023 to 2019
+YearsAfterAnalysis = Data.Electricity_DataBase.CurrentYearReal - BaseYear; 
 RenewableEnergies = Data.Electricity_DataBase.RenewableEnergies_CurrentYear; % Percentage of renewable energy
 NaturalGas = Data.Electricity_DataBase.NaturalGas_CurrentYear; % Percentage of natural gas
 
@@ -156,8 +156,8 @@ AllButOneScenariosTable{18,:} = CalcChangeVector(MilesTonesTable{18,:}, Years, S
 % We calculate the change vector that interpolates the High-Density ratio from the current ratio to the target S(21).
 % Assuming linear interpolation for the ratio itself (not the change *from* 1)
 AllButOneScenariosTable{21,:} = CalcChangeVector(MilesTonesTable{21,:}, Years, S(21), 'Type', 'Linear', 'Growth', true);
-AllButOneScenariosTable{22,:} = CalcChangeVector(MilesTonesTable{22,:}, Years, S(22), 'Type', 'Linear', 'Growth', true);
-AllButOneScenariosTable{23,:} = CalcChangeVector(MilesTonesTable{23,:}, Years, S(23), 'Type', 'Linear', 'Growth', true);
+AllButOneScenariosTable{22,:} = CalcChangeVector(MilesTonesTable{22,:}, Years, S(22), 'Type', 'Linear', 'Growth', false);
+AllButOneScenariosTable{23,:} = CalcChangeVector(MilesTonesTable{23,:}, Years, S(23), 'Type', 'Linear', 'Growth', false);
 AllButOneScenariosTable{24,:} = CalcChangeVector(MilesTonesTable{24,:}, Years, S(24), 'Type', 'Linear', 'Growth', true); % Moving to a green materials
 
 % For the all other categories floors number
