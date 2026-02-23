@@ -364,8 +364,9 @@ ExportWasteForRecyclingPercentage{1} = Data.Materials_DataBase.ExportWasteForRec
 colNames = ExportWasteForRecyclingPercentage{1}.Properties.VariableNames;
 
 for i = 2:Years
-    PrevRecyclePerc = ExportWasteForRecyclingPercentage{i-1}{:,:};
-    NewRecyclePerc = PrevRecyclePerc .* RecycleWaste(i);
+   % PrevRecyclePerc = ExportWasteForRecyclingPercentage{i-1}{:,:};
+    PrevRecyclePerc = ExportWasteForRecyclingPercentage{1}{:,:};
+    NewRecyclePerc = min(1, PrevRecyclePerc .* (RecycleWaste(i)));
 
     % Save to the relevant year
     ExportWasteForRecyclingPercentage{i} = array2table(NewRecyclePerc,'VariableNames', colNames);
@@ -379,13 +380,13 @@ for i=1:Years
         % נתוני הבסיס מהקובץ
         TotalWaste  = CurrentWaste{:,1};   % סה"כ פסולת
         Recycled    = CurrentWaste{:,2};   % ממוחזרת
-        NewBurial = TotalWaste - Recycled;
+        NewBurial = max(0, TotalWaste - Recycled);
         NewRecycled = Recycled;
     else
         TotalWaste = CurrentWaste{:,1};
         RecycleShare = ExportWasteForRecyclingPercentage{i}{:,:}; % New Recycle percentage
-        NewRecycled = TotalWaste .* RecycleShare;
-        NewBurial   = TotalWaste - NewRecycled;
+        NewRecycled = TotalWaste .* (RecycleShare);
+        NewBurial   = max(0,TotalWaste - NewRecycled);
     end
     % Update the table
     CurrentWaste{:,1} = NewBurial;  %Update it to be amount for burial
@@ -402,8 +403,11 @@ for i=1:Years
     CurrentWaste = WasteAndRecyclingCell{i};
 
     CurrentBurial = CurrentWaste{:,1};
-    NewBurial = CurrentBurial.*BurningWaste(i); % Calculates the amount of waste that will remain for burial after subtracting the amount designated for incineration.
+    NewBurial = CurrentBurial.*(BurningWaste(i)-1); % Calculates the amount of waste that will remain for burial after subtracting the amount designated for incineration.
     WasteInciniration(i) = WasteInciniration(i) + sum(CurrentBurial-NewBurial); %% how much waste in incinareted
+    % disp(i);
+    % disp(1-BurningWaste(i));
+    % disp(WasteInciniration(i));
     CurrentWaste{:,1} = NewBurial;
     WasteAndRecyclingCell{i} = CurrentWaste;
     Data1.Materials_DataBase.WasteAndRecyclingCell{i} = WasteAndRecyclingCell{i};

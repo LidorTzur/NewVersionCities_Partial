@@ -31,9 +31,7 @@ cities = {
     "BeerSheva" , "Data\BeerSheva.xlsx"  , "Scenarios_BeerSheva.xlsx"
     };
 
-% cities = {
-%     "Tlv" , "Data\Tlv.xlsx"  , "Scenarios_Tlv.xlsx"
-%     };
+
 
 % 1. Load existing data or initialize new structure
 if exist('AllCities.mat', 'file')

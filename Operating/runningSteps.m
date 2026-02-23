@@ -4,7 +4,6 @@
 orderIndex = choiceList('Select a scenario','Choose one of the scenarios and follow the instructions.',{'All the steps together', 'Sensitivity Analysis +- 10%'});
 
 switch orderIndex
-
     
     case 1  %% All the steps together
     RDB = ResultsDataBase;

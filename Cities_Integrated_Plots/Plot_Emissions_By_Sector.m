@@ -13,7 +13,7 @@ fs_axis_numbers = 12;  % Font size for axis numbers (Years and Y-values)
 fs_axis_labels  = 14;  % Font size for the Y-label (e.g., MtCO2eq)
 fs_title_main   = 22;  
 fs_title_city   = 14;  
-fs_data         = 11;  
+fs_data         = 9;  
 fs_legend       = 12;  
 
 cityNames = fieldnames(AllCities);
