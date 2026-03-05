@@ -403,7 +403,7 @@ for i=1:Years
     CurrentWaste = WasteAndRecyclingCell{i};
 
     CurrentBurial = CurrentWaste{:,1};
-    NewBurial = CurrentBurial.*(BurningWaste(i)-1); % Calculates the amount of waste that will remain for burial after subtracting the amount designated for incineration.
+    NewBurial = CurrentBurial - (CurrentBurial.*(BurningWaste(i)-1)); % Calculates the amount of waste that will remain for burial after subtracting the amount designated for incineration.
     WasteInciniration(i) = WasteInciniration(i) + sum(CurrentBurial-NewBurial); %% how much waste in incinareted
     % disp(i);
     % disp(1-BurningWaste(i));
