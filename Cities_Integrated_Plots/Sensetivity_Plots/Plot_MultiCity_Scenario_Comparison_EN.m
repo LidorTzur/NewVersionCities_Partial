@@ -6,8 +6,9 @@
 
 % 1. Automatically detect all cities
 allCityNames = fieldnames(AllCities);
+allCityNames = ["BeerSheva", "Tlv", "BeitShemesh"];
 nCities = numel(allCityNames);
-
+ 
 % 2. Get scenario names from the first available city
 firstCity = allCityNames{1};
 if isfield(AllCities.(firstCity), 'Sensitivity_RDB')

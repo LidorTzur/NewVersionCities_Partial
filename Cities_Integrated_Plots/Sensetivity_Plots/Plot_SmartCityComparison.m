@@ -6,6 +6,7 @@
 
 % 1. Automatically detect cities
 allCityNames = fieldnames(AllCities);
+allCityNames = ["BeerSheva", "Tlv", "BeitShemesh"];
 nCities = numel(allCityNames);
 
 % 2. Get scenario names from the first city

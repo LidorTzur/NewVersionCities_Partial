@@ -4,6 +4,7 @@
 %% =====================================================================
 
 allCityNames = fieldnames(AllCities);
+allCityNames = ["BeerSheva", "Tlv", "BeitShemesh"];
 nCities = numel(allCityNames);
 targetYearIdx = 32; % שנת 2050
 

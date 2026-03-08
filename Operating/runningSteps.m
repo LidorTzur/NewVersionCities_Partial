@@ -54,13 +54,13 @@ switch orderIndex
         
         % Define calculation period
         Years = TargetYear_global - BaseYear + 1;
-        
+
         % CALL THE GENERIC FUNCTION
         % You can change 'Deviation' or 'RelevantScenarios' right here!
         tempSR = runSensitivityAnalysis(DataBase, ScenariosAndValues, Years, ...
-            'RelevantScenarios', [1, 2, 4, 5, 6, 7, 8, 12], ...
+            'RelevantScenarios', [2,6,7,8,13,14,24], ...
             'Deviation', 0.10, ...  % Change to 0.15 for 15%
-            'BaseColumn', 9, ...    % Choose which column to test
+            'BaseColumn', 7, ...    % Choose which column to test
             'EnergyIdx', [6, 7]);   % Define Renewable/Gas indices
         
         % Save the result into the City's RDB

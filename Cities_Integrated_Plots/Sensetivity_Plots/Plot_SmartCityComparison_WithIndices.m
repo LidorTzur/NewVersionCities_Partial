@@ -6,6 +6,8 @@
 
 % 1. Automatically detect all cities in the AllCities structure
 allCityNames = fieldnames(AllCities);
+allCityNames = ["BeerSheva", "Tlv", "BeitShemesh"];
+
 nCities = numel(allCityNames);
 
 % 2. Identify Population index from the first available city

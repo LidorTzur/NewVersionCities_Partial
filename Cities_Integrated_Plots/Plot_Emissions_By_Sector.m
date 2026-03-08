@@ -1,6 +1,7 @@
 %% =====================================================================
 %  Plot_Emissions_By_Sector_SharedY_CleanX.m
-%  Goal: Shared Y-axis, Enlarged axis numbers, No X-label.
+%  Goal: Shared Y-axis, Enlarged axis numbers, No X-label, 
+%        and Individual sector values displayed inside stacks.
 %% =====================================================================
 addpath('helpers');
 
@@ -19,11 +20,10 @@ fs_legend       = 12;
 %% --- Configuration & Ordered Data ---
 % 1. Get city names in the logical categorical order
 catOrder = getCityCategorical(AllCities); 
-cityNames = cellstr(catOrder); % Convert to cell array of strings
+cityNames = cellstr(catOrder); 
 nCities = numel(cityNames);
 
 % 2. Rebuild the 'cities' cell array to match the NEW order
-% This ensures cities{1} is 'Tlv', cities{2} is 'RishonLeZion', etc.
 cities = cell(nCities, 1);
 for i = 1:nCities
     cityName = cityNames{i};
@@ -33,9 +33,7 @@ end
 %% --- Identify Unique Sectors ---
 sectorOrder = string([]);
 for c = 1:nCities
-    % Using getScenarioTableSum for summarized data
     tbl = getScenarioTableSum(cities{c}, 'BAU');   
-    % Extract row names excluding the last row (Total)
     names = string(tbl.Properties.RowNames(1:end-1));
     for nm = names.'
         if ~ismember(nm, sectorOrder), sectorOrder(end+1) = nm; end
@@ -62,11 +60,8 @@ for s = 1:numel(scenarios)
         
         t = tiledlayout(fig, 1, nCities, 'TileSpacing', 'compact', 'Padding', 'loose'); 
         
-        if isPC
-            unitStr = 'tCO2e per capita';
-        else
-            unitStr = 'MtCO2eq';
-        end
+        unitStr = 'MtCO2eq';
+        if isPC, unitStr = 'tCO2e per capita'; end
         
         sgtitle(fig, sprintf('%s Emissions (%s): %s', type, scen, strjoin(string(targetYears), ' vs ')), ...
                 'FontSize', fs_title_main, 'FontWeight', 'bold');
@@ -86,7 +81,6 @@ for s = 1:numel(scenarios)
                 yr = targetYears(k);
                 colIdx = find(contains(yearLabels, num2str(yr)), 1);
                 if ~isempty(colIdx)
-                    % Use extractSectorMatrix helper
                     res = extractSectorMatrix(tbl, sectorOrder, colIdx, colIdx);
                     y(:, k) = res(:, 2);
                     if isPC
@@ -110,36 +104,50 @@ for s = 1:numel(scenarios)
                 if k <= size(colors,1), b(k).FaceColor = colors(k,:); end
             end
             
+            % --- Add individual sector labels inside the bars ---
+            yStacked = cumsum(y, 1);       % Cumulative sum for positioning
+            yCenters = yStacked - y/2;     % Center of each stack segment
+            
+            for k = 1:numel(targetYears)
+                for sect = 1:nSectors
+                    val = y(sect, k);
+                    % Only show label if the sector is large enough (e.g., > 4% of axis)
+                    if val > (current_total_max * 0.04)
+                        % Choose text color based on bar brightness (optional: white for dark colors)
+                        txtColor = 'w';
+                        if mean(colors(sect,:)) > 0.6, txtColor = 'k'; end % Black for yellow/light
+                        
+                        text(ax, k, yCenters(sect, k), num2str(val, '%.1f'), ...
+                            'HorizontalAlignment', 'center', ...
+                            'VerticalAlignment', 'middle', ...
+                            'FontSize', fs_data - 2, ...
+                            'Color', txtColor, ...
+                            'FontWeight', 'bold');
+                    end
+                end
+            end
+
+            % --- Add total labels on top ---
             totals = sum(y, 1);
             text(ax, 1:numel(targetYears), totals, string(num2str(totals', '%.2f')), ...
                 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', ...
-                'FontSize', fs_data, 'FontWeight', 'bold');
+                'FontSize', fs_data, 'FontWeight', 'bold', 'Color', 'k');
             
             grid(ax, 'on');
             title(ax, cityName, 'FontSize', fs_title_city, 'FontWeight', 'bold');
-            
-            % --- Axis Settings (Enlarged) ---
-            % Apply font size to axis numbers
             set(ax, 'FontSize', fs_axis_numbers, 'FontWeight', 'bold');
-            
-            % Small rotation for years to prevent overlap
             xtickangle(ax, 30);
-            
-            % Remove X-axis label
             xlabel(ax, ''); 
             
-            % --- Shared Y-Axis Logic ---
             if c == 1
                 ylabel(ax, unitStr, 'FontSize', fs_axis_labels, 'FontWeight', 'bold');
                 ax.YAxis.Visible = 'on';
             else
-                % Hide numbers for plots that are not the first one
                 set(ax, 'YTickLabel', []); 
                 ax.YAxis.Label.String = ''; 
             end
         end
         
-        % Sync Height
         if global_max > 0
             linkaxes(ax_list, 'y');
             ylim(ax_list(1), [0 max(global_max * 1.25, 0.1)]);
@@ -153,4 +161,4 @@ for s = 1:numel(scenarios)
         saveas(fig, fullfile(outputDir, fileName));
     end
 end
-disp('✔ Done! Plots generated with large axis numbers and no X-labels.');
+disp('✔ Done! Plots generated with internal sector labels and shared Y-axis.');
