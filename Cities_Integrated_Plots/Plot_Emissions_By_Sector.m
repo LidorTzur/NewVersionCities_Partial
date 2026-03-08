@@ -16,9 +16,19 @@ fs_title_city   = 14;
 fs_data         = 9;  
 fs_legend       = 12;  
 
-cityNames = fieldnames(AllCities);
-cities    = struct2cell(AllCities);
-nCities   = numel(cities);
+%% --- Configuration & Ordered Data ---
+% 1. Get city names in the logical categorical order
+catOrder = getCityCategorical(AllCities); 
+cityNames = cellstr(catOrder); % Convert to cell array of strings
+nCities = numel(cityNames);
+
+% 2. Rebuild the 'cities' cell array to match the NEW order
+% This ensures cities{1} is 'Tlv', cities{2} is 'RishonLeZion', etc.
+cities = cell(nCities, 1);
+for i = 1:nCities
+    cityName = cityNames{i};
+    cities{i} = AllCities.(cityName);
+end
 
 %% --- Identify Unique Sectors ---
 sectorOrder = string([]);

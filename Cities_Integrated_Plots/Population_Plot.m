@@ -12,7 +12,7 @@ scen = 'BAU';
 
 % --- Get City Order and Info ---
 try
-    cats_cities = getCityCats(AllCities);
+    cats_cities = getCityCategorical(AllCities);
     cityNames = cellstr(cats_cities);
 catch
     cityNames = fieldnames(AllCities);

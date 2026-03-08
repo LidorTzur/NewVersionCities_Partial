@@ -4,14 +4,17 @@
 %% =====================================================================
 addpath('helpers');
 
-% --- קביעת סדר ערים עקבי ---
+% --- Set Consistent City Order (Categorical) ---
 try
-    cats_cities = getCityCats(AllCities);
+    % Use the new function to get the logical order
+    cats_cities = getCityCategorical(AllCities); 
     cityNames = cellstr(cats_cities);
 catch
-    % אם הפונקציה לא קיימת, ניקח את שמות השדות ישירות
+    % Fallback if the function is missing or errors out
+    warning('getCityCategorical not found. Using default fieldnames.');
     cityNames = fieldnames(AllCities);
 end
+
 nCities = numel(cityNames);
 
 scenarios = {'BAU','Moderate','Advanced'};

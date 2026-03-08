@@ -12,6 +12,13 @@ global BaseYear;
 BaseYear = 2019;
 Years = TargetYear_global-BaseYear+1; % Years between Base year to target
 Conversion_Liter_To_Kg = 0.85;
+% Order to print
+manualOrder = { ...
+    'Tlv', 'RishonLeZion', 'BeerSheva', ...    % Major hubs
+    'Raanana', 'Modiin', ...                   % High Socio-economic / Suburbs
+    'Hadera', 'Afula', 'KiryatGat', ...        % Rapid development / Periphery
+    'BeitShemesh', 'MazkeretBatya' ...         % Religious / Rural-Community
+};
 
 %% Lidor: population data, for the "populationCal" script
 global PopulationStartYear_global;

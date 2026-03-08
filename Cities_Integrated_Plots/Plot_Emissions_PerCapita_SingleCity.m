@@ -5,9 +5,19 @@
 
 addpath('helpers');
 
-cityNames = fieldnames(AllCities);
-cities    = struct2cell(AllCities);
-nCities   = numel(cities);
+% 1. Get city names in the correct logical order
+% (The function now handles the default order internally)
+catOrder = getCityCategorical(AllCities); 
+cityNames = cellstr(catOrder); 
+nCities = numel(cityNames);
+
+% 2. Rebuild the 'cities' cell array to match the NEW order
+% This ensures that popCity.Value (1, 2, 3...) maps to the correct data
+cities = cell(nCities, 1);
+for i = 1:nCities
+    cityName = cityNames{i};
+    cities{i} = AllCities.(cityName);
+end
 
 scenarios = {'BAU','Moderate','Advanced'};
 baseCol   = 1;

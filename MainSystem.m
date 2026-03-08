@@ -6,19 +6,19 @@
 % runningSteps;
 
 createPath;
-% cities = {
-%     "RishonLeZion"     , "Data\RishonLeZion.xlsx" , "Scenarios_Rishon.xlsx"
-%     "BeerSheva"    , "Data\BeerSheva.xlsx"    , "Scenarios_BeerSheva.xlsx"
-%     "BeitShemesh" , "Data\BeitShemesh.xlsx"  , "Scenarios_BeitShemesh.xlsx"
-%     "Tlv" , "Data\Tlv.xlsx"  , "Scenarios_Tlv.xlsx"
-% 
-%     "Modiin"     , "Data\Modiin.xlsx" , "Scenarios_Modiin.xlsx"
-%     "Afula"    , "Data\Afula.xlsx"    , "Scenarios_Afula.xlsx"
-%     "Raanana" , "Data\Raanana.xlsx"  , "Scenarios_Raanana.xlsx"
-%     "Hadera" , "Data\Hadera.xlsx"  , "Scenarios_Hadera.xlsx"
-%     "KiryatGat" , "Data\KiryatGat.xlsx"  , "Scenarios_KiryatGat.xlsx"
-%     "MazkeretBatya" , "Data\MazkeretBatya.xlsx"  , "Scenarios_MazkeretBatya.xlsx"     
-%     };
+cities = {
+    "RishonLeZion"     , "Data\RishonLeZion.xlsx" , "Scenarios_Rishon.xlsx"
+    "BeerSheva"    , "Data\BeerSheva.xlsx"    , "Scenarios_BeerSheva.xlsx"
+    "BeitShemesh" , "Data\BeitShemesh.xlsx"  , "Scenarios_BeitShemesh.xlsx"
+    "Tlv" , "Data\Tlv.xlsx"  , "Scenarios_Tlv.xlsx"
+
+    "Modiin"     , "Data\Modiin.xlsx" , "Scenarios_Modiin.xlsx"
+    "Afula"    , "Data\Afula.xlsx"    , "Scenarios_Afula.xlsx"
+    "Raanana" , "Data\Raanana.xlsx"  , "Scenarios_Raanana.xlsx"
+    "Hadera" , "Data\Hadera.xlsx"  , "Scenarios_Hadera.xlsx"
+    "KiryatGat" , "Data\KiryatGat.xlsx"  , "Scenarios_KiryatGat.xlsx"
+    "MazkeretBatya" , "Data\MazkeretBatya.xlsx"  , "Scenarios_MazkeretBatya.xlsx"     
+    };
 
 
 % cities = {
@@ -27,9 +27,9 @@ createPath;
 %     "BeitShemesh" , "Data\BeitShemesh.xlsx"  , "Scenarios_BeitShemesh.xlsx"
 %     };
 
-cities = {
-    "BeerSheva" , "Data\BeerSheva.xlsx"  , "Scenarios_BeerSheva.xlsx"
-    };
+% cities = {
+%     "BeerSheva" , "Data\BeerSheva.xlsx"  , "Scenarios_BeerSheva.xlsx"
+%     };
 
 
 

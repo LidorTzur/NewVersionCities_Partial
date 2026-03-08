@@ -165,9 +165,9 @@ for i =1:Years
    if i>1   % means that is not in the Base year
        waterData{'Drilling Water',i} = waterData{'Drilling Water',i-1}*WDB.Yearly_ChangeDrillingWater;
        
-       if i==2022-BaseYear+1 % Adjustment to the water model data for 2022, until all the data in the software is updated
-            waterData{'Drilling Water',i} = WDB.WaterConsumptionTableNew{'Drilling Water', '2022'};
-       end
+       % if i==2022-BaseYear+1 % Adjustment to the water model data for 2022, until all the data in the software is updated
+       %      waterData{'Drilling Water',i} = WDB.WaterConsumptionTableNew{'Drilling Water', '2022'};
+       % end
    end
 end
 
@@ -184,10 +184,10 @@ WaterConsumptionCell{1} =  CurrentConsumption;
 %The essential change that ensures the correctness of the water model in a single scenario
 %  Put the base values - Data for 2022 - another point we insert to increase accuracy
 if (ScenariosTable{1,1}) == ScenariosTable{1,width(ScenariosTable)} && (orderIndex == 2) 
-    for i =2:Years 
-        CurrentConsumption{1, :} = WDB.WaterConsumptionTableNew{:,'2022'}';
-        WaterConsumptionCell{i} =  CurrentConsumption;
-    end
+    % for i =2:Years 
+    %     CurrentConsumption{1, :} = WDB.WaterConsumptionTableNew{:,'2022'}';
+    %     WaterConsumptionCell{i} =  CurrentConsumption;
+    % end
 
 else
     for i =2:Years 
@@ -204,9 +204,9 @@ else
         CurrentConsumption{1,'Brackish water, fresh and non-fresh reservoir water'} = waterData{'Brackish water, fresh and non-fresh reservoir water',i}; 
         CurrentConsumption{1,'Desalinated Water'} = CurrentConsumption{1,'Water for Domestic & Industrial'}*WDB.FreshWaterForDomestic  + CurrentConsumption{1,'Water for Agriculture'}*WDB.FreshWaterForAgriculture  + CurrentConsumption{1,'Water for Neighbors'} + CurrentConsumption{1,'Water for  Nature'} - CurrentConsumption{1,'Drilling Water'}; 
         
-        if i == (2022-BaseYear+1) % Adjustment to the water model data for 2022, until all the data in the software is updated - to give extra data to the predictions
-            CurrentConsumption{1, :} = WDB.WaterConsumptionTableNew{:, '2022'}';
-        end
+        % if i == (2022-BaseYear+1) % Adjustment to the water model data for 2022, until all the data in the software is updated - to give extra data to the predictions
+        %     CurrentConsumption{1, :} = WDB.WaterConsumptionTableNew{:, '2022'}';
+        % end
           WaterConsumptionCell{i} =  CurrentConsumption;
     end
 end
