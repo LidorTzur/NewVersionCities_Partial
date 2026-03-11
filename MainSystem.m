@@ -21,15 +21,15 @@ createPath;
 %     };
 
 
-cities = {
-    "BeerSheva" , "Data\BeerSheva.xlsx"  , "Scenarios_BeerSheva.xlsx"
-    "Tlv" , "Data\Tlv.xlsx"  , "Scenarios_Tlv.xlsx"
-    "BeitShemesh" , "Data\BeitShemesh.xlsx"  , "Scenarios_BeitShemesh.xlsx"
-    };
-
 % cities = {
 %     "BeerSheva" , "Data\BeerSheva.xlsx"  , "Scenarios_BeerSheva.xlsx"
+%     "Tlv" , "Data\Tlv.xlsx"  , "Scenarios_Tlv.xlsx"
+%     "BeitShemesh" , "Data\BeitShemesh.xlsx"  , "Scenarios_BeitShemesh.xlsx"
 %     };
+
+cities = {
+    "BeerSheva" , "Data\BeerSheva.xlsx"  , "Scenarios_BeerSheva.xlsx"
+    };
 
 
 

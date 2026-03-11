@@ -18,6 +18,20 @@ fs_axis = 11; fs_title = 15; fs_data = 10; fs_legend = 10;
 targetYears = [2019, 2035, 2050];
 scenarios = {'BAU', 'Moderate', 'Advanced'};
 
+
+%% --- Identify Unique Sectors ---
+sectorOrder = string([]);
+for c = 1:nCities
+    tbl = getScenarioTableSum(cities{c}, 'BAU');   
+    names = string(tbl.Properties.RowNames(1:end-1));
+    for nm = names.'
+        if ~ismember(nm, sectorOrder), sectorOrder(end+1) = nm; end
+    end
+end
+nSectors = numel(sectorOrder);
+colors   = getSectorColors(nSectors);
+
+
 % יצירת תיקיית פלט
 outputDir = 'Results_Plots\Plot_Emissions_By_Sector\Grouped_Cities_Analysis';
 if ~exist(outputDir, 'dir'), mkdir(outputDir); end

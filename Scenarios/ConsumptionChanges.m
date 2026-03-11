@@ -311,11 +311,11 @@ Data.Const_DataBase = CDB;
 for i=2:Years
     
     % --- Non-Residential Sectors (Rows 1-9) - Maintain Existing Logic (Population Growth) ---
-    Non_Residential_Growth_Ratio = ScenariosTable{1,i}; 
+    %Non_Residential_Growth_Ratio = ScenariosTable{1,i}; 
     
     % Built Area Delta (New construction required this year)
     % Delta = Total Required up to year 'i' - Cumulative built up to year 'i-1'
-    Total_Non_Residential_Area = Non_Residential_Growth_Ratio * ConstructionInitialization(1:9); 
+    Total_Non_Residential_Area = ScenariosTable{1,i} * ConstructionInitialization(1:9); 
     ConstructionTable{1:9, i} = Total_Non_Residential_Area - sum(ConstructionTable{1:9, 1:i-1}, 2);
     
     % Floor Footprint Delta 
