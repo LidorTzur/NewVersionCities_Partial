@@ -86,8 +86,10 @@
 %% =====================================================================
 
 % 1. הגדרת רשימת הערים
-allCityNames = {'Tlv', 'RishonLeZion', 'BeerSheva', 'Raanana', 'Modiin', ...
-                'Hadera', 'Afula', 'KiryatGat', 'BeitShemesh', 'MazkeretBatya'};
+% allCityNames = {'Tlv', 'RishonLeZion', 'BeerSheva', 'Raanana', 'Modiin', ...
+%                 'Hadera', 'Afula', 'KiryatGat', 'BeitShemesh', 'MazkeretBatya'};
+allCityNames = {'Tlv', 'RishonLeZion', 'BeerSheva', 'Raanana', 'Modiin','Hadera', 'Afula', 'KiryatGat','BeitShemesh', 'MazkeretBatya'};
+
 nCities = numel(allCityNames);
 
 % 2. זיהוי רשימת התרחישים

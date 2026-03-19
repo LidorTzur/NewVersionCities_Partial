@@ -6,7 +6,9 @@
 
 % 1. Automatically detect all cities
 allCityNames = fieldnames(AllCities);
-allCityNames = ["BeerSheva", "Tlv", "BeitShemesh"];
+%allCityNames = ["BeerSheva", "Tlv", "BeitShemesh"];
+allCityNames = {'Tlv', 'RishonLeZion', 'BeerSheva', 'Raanana', 'Modiin','Hadera', 'Afula', 'KiryatGat','BeitShemesh', 'MazkeretBatya'};
+
 nCities = numel(allCityNames);
  
 % 2. Get scenario names from the first available city

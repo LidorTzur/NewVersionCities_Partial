@@ -57,12 +57,18 @@ switch orderIndex
 
         % CALL THE GENERIC FUNCTION
         % You can change 'Deviation' or 'RelevantScenarios' right here!
-        tempSR = runSensitivityAnalysis(DataBase, ScenariosAndValues, Years, ...
-            'RelevantScenarios', [2,6,7,8,13,14,24], ...
+        % tempSR = runSensitivityAnalysis(DataBase, ScenariosAndValues, Years, ...
+        %     'RelevantScenarios', [2,6,7,8,13,14,24], ...
+        %     'Deviation', 0.10, ...  % Change to 0.15 for 15%
+        %     'BaseColumn', 7, ...    % Choose which column to test
+        %     'EnergyIdx', [6, 7]);   % Define Renewable/Gas indices
+        
+          tempSR = runSensitivityAnalysis(DataBase, ScenariosAndValues, Years, ...
+            'RelevantScenarios', [1,4,5,10,11,12,15,16,17,19,21,32 ], ...
             'Deviation', 0.10, ...  % Change to 0.15 for 15%
             'BaseColumn', 7, ...    % Choose which column to test
             'EnergyIdx', [6, 7]);   % Define Renewable/Gas indices
-        
+
         % Save the result into the City's RDB
         SensitivityResults = tempSR;
         

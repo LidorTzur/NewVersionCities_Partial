@@ -4,7 +4,9 @@
 %% =====================================================================
 
 allCityNames = fieldnames(AllCities);
-allCityNames = ["BeerSheva", "Tlv", "BeitShemesh"];
+allCityNames = {'Tlv', 'RishonLeZion', 'BeerSheva', 'Raanana', 'Modiin','Hadera', 'Afula', 'KiryatGat','BeitShemesh', 'MazkeretBatya'};
+
+%allCityNames = ["BeerSheva", "Tlv", "BeitShemesh"];
 nCities = numel(allCityNames);
 targetYearIdx = 32; % שנת 2050
 
