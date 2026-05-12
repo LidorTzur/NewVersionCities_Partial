@@ -1,0 +1,12 @@
+addpath("Operating");
+addpath("Scenarios");
+addpath("CalcFunctions");
+addpath("Plots");
+%addpath("Archives");
+addpath("Data");
+addpath("results");
+addpath("AllTheStepsTogether_RESULTS");
+addpath("export_results_to_excel");
+addpath("Results_Plots");
+addpath("Cities_Integrated_Plots");
+addpath("helpers");
