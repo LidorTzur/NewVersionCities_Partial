@@ -1,6 +1,6 @@
 %% running steps
 
-orderIndex = 1; % הגדרה מראש שאת רוצה ניתוח רגישות
+orderIndex = 2; % הגדרה מראש שאת רוצה ניתוח רגישות
 
 %% scenario type input from the user
 % orderIndex = choiceList('Select a scenario','Choose one of the scenarios and follow the instructions.',{'All the steps together', 'Sensitivity Analysis +- 10%'});
@@ -80,25 +80,29 @@ switch orderIndex
         existingSR = struct();
         if isfield(AllCities, cityCode) && isfield(AllCities.(cityCode), 'Sensitivity_RDB')
             existingSR = AllCities.(cityCode).Sensitivity_RDB;
+        end
+        if isfield(AllCities, cityCode) && isfield(AllCities.(cityCode), 'Sensitivity_RDB_All_Years')
+            existingSR = AllCities.(cityCode).Sensitivity_RDB_All_Years;
             %fprintf('Found existing sensitivity data for %s. Merging results...\n', cityCode);
         end
         
-          tempSR = runSensitivityAnalysis(DataBase, ScenariosAndValues, Years, ...
-            'RelevantScenarios', [1,2,4,5,6,8,10,11,12,13,14,15,16,17,19,21,24,31,32 ], ...
-            'Deviation', 0.10, ...  % Change to 0.15 for 15%
-            'BaseColumn', 8, ...    % Choose which column to test
-            'EnergyIdx', [6, 7], ...
-            'ExistingSR', existingSR);   % Define Renewable/Gas indices
-
           % tempSR = runSensitivityAnalysis(DataBase, ScenariosAndValues, Years, ...
-          %   'RelevantScenarios', [1,4 ], ...
+          %   'RelevantScenarios', [1,2,4,5,6,8,10,11,12,13,14,17,19,21,24 ], ...
           %   'Deviation', 0.10, ...  % Change to 0.15 for 15%
           %   'BaseColumn', 8, ...    % Choose which column to test
           %   'EnergyIdx', [6, 7], ...
           %   'ExistingSR', existingSR);   % Define Renewable/Gas indices
 
+          tempSR_All_Years = runSensitivityAnalysis_All_Years(DataBase, ScenariosAndValues, Years, ...
+            'RelevantScenarios', [1,2,4,5,6,8,10,11,12,13,14,17,19,21,24 ], ...
+            'Deviation', 0.10, ...  % Change to 0.15 for 15%
+            'BaseColumn', 8, ...    % Choose which column to test
+            'EnergyIdx', [6, 7], ...
+            'ExistingSR', existingSR);   % Define Renewable/Gas indices
+
         % Save the result into the City's RDB
-        SensitivityResults = tempSR;
+        %SensitivityResults = tempSR;
+        SensitivityResults_All_Years = tempSR_All_Years;
         
         disp('Sensitivity Analysis Module: Completed successfully.');
 
