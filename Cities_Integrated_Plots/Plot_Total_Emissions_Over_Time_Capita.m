@@ -5,6 +5,7 @@
 %% =====================================================================
 addpath('helpers');
 
+TargetYear = 2040;
 % --- Set Consistent City Order (Categorical) ---
 try
     % Use the new function to get the logical order
@@ -25,6 +26,9 @@ firstCity = cityNames{1};
 yearLabels = AllCities.(firstCity).TotalResults.Properties.VariableNames;
 yearsNum   = str2double(yearLabels);
 nYears     = numel(yearLabels);
+% --- סינון השנים ---
+yearIdx = (yearsNum <= TargetYear); 
+yearsNumFiltered = yearsNum(yearIdx);
 
 %% הגדרות עיצוב
 cityColors = turbo(nCities); 
@@ -60,11 +64,12 @@ for s = 1:numel(scenarios)
             TR = C.TotalResults;
             
             % 1. שליפת פליטות טוטאליות (MtCO2eq) לכל השנים
-            totalEmissions = TR{rowIdx, :}; 
+            totalEmissions = TR{rowIdx, yearIdx}; 
             
             % 2. חילוץ אוכלוסייה לכל שנה בנפרד (במיליונים)
-            popPerYear = zeros(1, nYears);
-            for yIdx = 1:nYears
+            colsToProcess = find(yearIdx);
+            popPerYear = zeros(1, numel(colsToProcess));
+            for yIdx = 1:numel(colsToProcess)
                 % שימוש בפונקציה שסיפקת כדי לקבל אוכלוסייה לשנה הספציפית
                 popPerYear(yIdx) = getPopMillionsByCol(C, yIdx, scenName, yearLabels);
             end
@@ -72,7 +77,7 @@ for s = 1:numel(scenarios)
             % 3. חישוב פליטה לנפש (tCO2e per capita)
             % MtCO2eq / Millions of People = tCO2e / person
             yValsPC = totalEmissions ./ max(popPerYear, eps); 
-            xVals = yearsNum;        
+            xVals = yearsNumFiltered;        
             
             % ציור הקווים
             plot(xVals, yValsPC, '-', 'Color', cityColors(c,:), 'LineWidth', 3, ...
@@ -94,6 +99,8 @@ for s = 1:numel(scenarios)
     ylabel('Emissions per Capita (tCO2e / person)', 'FontSize', fs_label, 'FontWeight', 'bold');
     title(['Per Capita Emissions Projections: ', scenName], 'FontSize', fs_title, 'FontWeight', 'bold');
     
+    xlim([min(yearsNumFiltered) TargetYear]);
+
     ax = gca;
     ax.FontSize = fs_axis;
     ax.FontWeight = 'bold';

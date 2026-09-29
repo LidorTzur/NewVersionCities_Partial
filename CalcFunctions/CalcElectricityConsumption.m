@@ -165,13 +165,10 @@ function [TotalElectricityConsumptionEmissions, CurrentYearTotal] = CalcElectric
 
     % 7. Calculate CO2e (Column 9) 
     % Formula: CO2 + CH4*28 + N2O*265
-    TotalEmissions_Mat(:, 9) = TotalEmissions_Mat(:, 1) + ...
-                               TotalEmissions_Mat(:, 2) * 28 + ...
-                               TotalEmissions_Mat(:, 3) * 265;
+    TotalEmissions_Mat(:, 9) = TotalEmissions_Mat(:, 1) + TotalEmissions_Mat(:, 2) * 28 + TotalEmissions_Mat(:, 3) * 265;
 
     % 8. Final Table Conversion
-    TotalElectricityConsumptionEmissions = array2table(TotalEmissions_Mat, ...
-        'RowNames', RowNames, 'VariableNames', ElectricityEmissionTypes);
+    TotalElectricityConsumptionEmissions = array2table(TotalEmissions_Mat,'RowNames', RowNames, 'VariableNames', ElectricityEmissionTypes);
 end
 
 

@@ -11,7 +11,7 @@ nCities   = numel(cities);
 scenarios = {'BAU','Moderate','Advanced'};
 
 % --- Configuration ---
-yearsToExport = [2019, 2035, 2050]; 
+yearsToExport = [2019, 2030, 2040]; 
 startYear     = 2019; % Baseline year (Matrix Column 1)
 colsToExtract = yearsToExport - startYear + 1;
 
@@ -65,8 +65,8 @@ yearColNames = arrayfun(@(y) ['Year_', num2str(y)], yearsToExport, 'UniformOutpu
 varNames = [ {'City','Scenario','Metric'}, yearColNames ];
 
 SummaryTable = cell2table(summaryRows, 'VariableNames', varNames);
-writetable(SummaryTable, 'Results_Plots/SummaryTable_Long_2035.xlsx');
-disp('✔ SummaryTable_Long_2035.xlsx saved successfully.');
+writetable(SummaryTable, 'Results_Plots/SummaryTable_Long_2030.xlsx');
+disp('✔ SummaryTable_Long_2030.xlsx saved successfully.');
 
 %% =====================================================================
 % 2) Create SummaryWide (Wide Format)
@@ -109,8 +109,8 @@ end
 
 SummaryWide = cell2table(wideRows, 'VariableNames', {'Scenario','Metric'});
 SummaryWide = [SummaryWide array2table(wideVals, 'VariableNames', wideColNames)];
-writetable(SummaryWide, 'Results_Plots/SummaryTable_Wide_2035.xlsx');
-disp('✔ SummaryTable_Wide_2035.xlsx saved successfully.');
+writetable(SummaryWide, 'Results_Plots/SummaryTable_Wide_2030.xlsx');
+disp('✔ SummaryTable_Wide_2030.xlsx saved successfully.');
 
 %% =====================================================================
 % 3) Create SummaryDiffs (City Differences)
@@ -134,7 +134,7 @@ for i = 1:nCities-1
 end
 
 SummaryDiffs = [SummaryWide(:,1:2), array2table(diffVals, 'VariableNames', diffNames)];
-writetable(SummaryDiffs, 'Results_Plots/SummaryTable_Diffs_2035.xlsx');
+writetable(SummaryDiffs, 'Results_Plots/SummaryTable_Diffs_2030.xlsx');
 
-disp('✔ SummaryTable_Diffs_2035.xlsx saved successfully.');
+disp('✔ SummaryTable_Diffs_2030.xlsx saved successfully.');
 disp(['✔ All tables generated for years: ', strjoin(string(yearsToExport), ', ')]);

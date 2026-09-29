@@ -1,5 +1,37 @@
-ProjectsPapers/ 
-Results_Plots/ 
-*.mat 
-*.xlsx 
-*.zip 
+# Large generated data (AllCities.mat is ~600 MB - above GitHub's 100 MB limit)
+*.mat
+*.zip
+
+# Source documents, literature, drafts
+ProjectsPapers/
+
+# Old / unused code
+Archive/
+Cities_Integrated_Plots/Archive/
+
+# Generated figures and result tables
+Results_Plots/
+Cities_Integrated_Plots/Results_Plots/
+*.png
+*.jpg
+*.fig
+*.pdf
+*.sankey
+
+# Excel: ignore everywhere except the model inputs in Data/
+*.xlsx
+*.xlsm
+*.xls
+*.csv
+!Data/*.xlsx
+
+# Office / MATLAB / OS temporary files
+*.asv
+*.tmp
+~$*
+*.lnk
+*.url
+*.docx
+*.pptx
+Thumbs.db
+desktop.ini

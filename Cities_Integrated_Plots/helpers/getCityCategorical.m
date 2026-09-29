@@ -17,7 +17,7 @@ function cats = getCityCategorical(AllCities, manualOrder)
             'Tlv', 'RishonLeZion', 'BeerSheva', ...    % Metropolises
             'Raanana', 'Modiin', ...                   % Established/Suburbs
             'Hadera', 'Afula', 'KiryatGat', ...        % Growth/Periphery
-            'BeitShemesh', 'MazkeretBatya' ...         % Sectoral/Small
+            'BeitShemesh', 'MazkeretBatya', 'Rahat', 'Sakhnin' ...         % Sectoral/Small
         };
     end
 

@@ -4,32 +4,28 @@ function SR = runSensitivityAnalysis_All_Years(DataBase, ScenariosAndValues, Yea
     addRequired(p, 'DataBase');
     addRequired(p, 'ScenariosAndValues');
     addRequired(p, 'Years');
-
     addParameter(p, 'RelevantScenarios', [1, 2, 4]);
     addParameter(p, 'Deviation', 0.1); 
     addParameter(p, 'BaseColumn', 9);  
     addParameter(p, 'EnergyIdx', [6, 7]); 
     addParameter(p, 'ExistingSR', struct());
-
     parse(p, DataBase, ScenariosAndValues, Years, varargin{:});
     res = p.Results;
-
     RelScenIndices = res.RelevantScenarios;
     RowNames = ScenariosAndValues.Properties.RowNames;
     RelNames = RowNames(RelScenIndices);
     Dev = res.Deviation;
     Col = res.BaseColumn;
-
+    
     %% 2. Initialize Results Structure
     SR = res.ExistingSR; 
     rowLabels = {'As-Is', ['+', num2str(Dev*100), '%'], ['-', num2str(Dev*100), '%']};
-
+    
     % הגנה מורחבת: מאתחל מחדש אם המבנה ריק או אם הוא מכיל מבנה ישן שאינו Cell Array
     if ~isfield(SR, 'EmissionByScenario') || ~iscell(SR.EmissionByScenario)
         SR.EmissionByScenario = cell(1, Years);
         SR.AreaByScenario     = cell(1, Years);
         SR.WaterByScenario    = cell(1, Years);
-
         for t = 1:Years
             SR.EmissionByScenario{t} = array2table(zeros(3, 0), 'RowNames', rowLabels);
             SR.AreaByScenario{t}     = array2table(zeros(3, 0), 'RowNames', rowLabels);
@@ -37,61 +33,171 @@ function SR = runSensitivityAnalysis_All_Years(DataBase, ScenariosAndValues, Yea
         end
         SR.DeltaTables = cell(2, height(ScenariosAndValues));
     end
-
+    
     E1_orig = ScenariosAndValues{res.EnergyIdx(1), Col};
     E2_orig = ScenariosAndValues{res.EnergyIdx(2), Col};
-
+    
     %% 3. Main Calculation Loop
     for i = 1:length(RelScenIndices)
         Idx = RelScenIndices(i);
         scenName = RowNames{Idx}; 
         OrigVal = ScenariosAndValues{Idx, Col};
-
+        if ~isfield(SR, 'OrigParamValue') || ~isa(SR.OrigParamValue, 'containers.Map')
+            SR.OrigParamValue = containers.Map();
+        end
+        SR.OrigParamValue(scenName) = OrigVal;
         Offsets = [0, Dev, -Dev];
         TmpResultsAllYears = zeros(3, 3, Years); 
         TmpTables = cell(1, 3);    
+        
         for v = 1:3
             CurrentScenarios = ScenariosAndValues;
             current_offset = Offsets(v);
-
             CurrentScenarios{Idx, Col} = OrigVal + current_offset;
-
+            
             if Idx == res.EnergyIdx(1)
                 CurrentScenarios{res.EnergyIdx(2), Col} = E2_orig - current_offset;
             elseif Idx == res.EnergyIdx(2)
                 CurrentScenarios{res.EnergyIdx(1), Col} = E1_orig - current_offset;
             end
-
+            
             [FT] = AllButOneChangesByScenarios(DataBase, 0, Years, CurrentScenarios{:, Col}, 'MileStones', false);
             [pop] = populationCal(FT);
             [Emissions, Consump, Res, WaterFood, ~] = FullScenario(DataBase, FT, Years, pop, 2, 0);
-
             TotalEmTable = CalcUpDownStream(Emissions);
             TmpTables{v} = TotalEmTable;
-
             [AreaSum, ~, WaterSum] = CalcTotalResources(Res, Consump, WaterFood);
-
+            
             for t = 1:Years
                 TmpResultsAllYears(v, 1, t) = sum(TotalEmTable{1:12, t});
                 TmpResultsAllYears(v, 2, t) = sum(AreaSum{1:4, t});
                 TmpResultsAllYears(v, 3, t) = sum(WaterSum{1:5, t});
             end
         end
-
+        
         for t = 1:Years
             SR.EmissionByScenario{t}.(scenName) = TmpResultsAllYears(:, 1, t);
             SR.AreaByScenario{t}.(scenName)     = TmpResultsAllYears(:, 2, t);
             SR.WaterByScenario{t}.(scenName)    = TmpResultsAllYears(:, 3, t);
         end
-
-        SR.DeltaTables{1, Idx} = TmpTables{2} - TmpTables{1};
-        SR.DeltaTables{2, Idx} = TmpTables{1} - TmpTables{3};
+        
+        % שמירת טבלאות ההפרשים (Delta) תוך התאמה לפרמטר הספציפי
+        if Idx == 1
+            normalization_factor = (Dev * 100); 
+            
+            DiffMat1 = (TmpTables{2}{:, :} - TmpTables{1}{:, :}) / normalization_factor;
+            SR.DeltaTables{1, Idx} = TmpTables{1};
+            SR.DeltaTables{1, Idx}{:, :} = DiffMat1;
+            
+            DiffMat2 = (TmpTables{1}{:, :} - TmpTables{3}{:, :}) / normalization_factor;
+            SR.DeltaTables{2, Idx} = TmpTables{1};
+            SR.DeltaTables{2, Idx}{:, :} = DiffMat2;
+        else
+            SR.DeltaTables{1, Idx} = TmpTables{2} - TmpTables{1};
+            SR.DeltaTables{2, Idx} = TmpTables{1} - TmpTables{3};
+        end
     end
-
+    
     SR.RelevantScenarioNames = RelNames;
     SR.DeviationUsed = Dev;
     SR.BaseColumnUsed = Col;
 end
+
+
+% function SR = runSensitivityAnalysis_All_Years(DataBase, ScenariosAndValues, Years, varargin)
+%     %% 1. Input Parsing
+%     p = inputParser;
+%     addRequired(p, 'DataBase');
+%     addRequired(p, 'ScenariosAndValues');
+%     addRequired(p, 'Years');
+% 
+%     addParameter(p, 'RelevantScenarios', [1, 2, 4]);
+%     addParameter(p, 'Deviation', 0.1); 
+%     addParameter(p, 'BaseColumn', 9);  
+%     addParameter(p, 'EnergyIdx', [6, 7]); 
+%     addParameter(p, 'ExistingSR', struct());
+% 
+%     parse(p, DataBase, ScenariosAndValues, Years, varargin{:});
+%     res = p.Results;
+% 
+%     RelScenIndices = res.RelevantScenarios;
+%     RowNames = ScenariosAndValues.Properties.RowNames;
+%     RelNames = RowNames(RelScenIndices);
+%     Dev = res.Deviation;
+%     Col = res.BaseColumn;
+% 
+%     %% 2. Initialize Results Structure
+%     SR = res.ExistingSR; 
+%     rowLabels = {'As-Is', ['+', num2str(Dev*100), '%'], ['-', num2str(Dev*100), '%']};
+% 
+%     % הגנה מורחבת: מאתחל מחדש אם המבנה ריק או אם הוא מכיל מבנה ישן שאינו Cell Array
+%     if ~isfield(SR, 'EmissionByScenario') || ~iscell(SR.EmissionByScenario)
+%         SR.EmissionByScenario = cell(1, Years);
+%         SR.AreaByScenario     = cell(1, Years);
+%         SR.WaterByScenario    = cell(1, Years);
+% 
+%         for t = 1:Years
+%             SR.EmissionByScenario{t} = array2table(zeros(3, 0), 'RowNames', rowLabels);
+%             SR.AreaByScenario{t}     = array2table(zeros(3, 0), 'RowNames', rowLabels);
+%             SR.WaterByScenario{t}    = array2table(zeros(3, 0), 'RowNames', rowLabels);
+%         end
+%         SR.DeltaTables = cell(2, height(ScenariosAndValues));
+%     end
+% 
+%     E1_orig = ScenariosAndValues{res.EnergyIdx(1), Col};
+%     E2_orig = ScenariosAndValues{res.EnergyIdx(2), Col};
+% 
+%     %% 3. Main Calculation Loop
+%     for i = 1:length(RelScenIndices)
+%         Idx = RelScenIndices(i);
+%         scenName = RowNames{Idx}; 
+%         OrigVal = ScenariosAndValues{Idx, Col};
+% 
+%         Offsets = [0, Dev, -Dev];
+%         TmpResultsAllYears = zeros(3, 3, Years); 
+%         TmpTables = cell(1, 3);    
+%         for v = 1:3
+%             CurrentScenarios = ScenariosAndValues;
+%             current_offset = Offsets(v);
+% 
+%             CurrentScenarios{Idx, Col} = OrigVal + current_offset;
+% 
+%             if Idx == res.EnergyIdx(1)
+%                 CurrentScenarios{res.EnergyIdx(2), Col} = E2_orig - current_offset;
+%             elseif Idx == res.EnergyIdx(2)
+%                 CurrentScenarios{res.EnergyIdx(1), Col} = E1_orig - current_offset;
+%             end
+% 
+%             [FT] = AllButOneChangesByScenarios(DataBase, 0, Years, CurrentScenarios{:, Col}, 'MileStones', false);
+%             [pop] = populationCal(FT);
+%             [Emissions, Consump, Res, WaterFood, ~] = FullScenario(DataBase, FT, Years, pop, 2, 0);
+% 
+%             TotalEmTable = CalcUpDownStream(Emissions);
+%             TmpTables{v} = TotalEmTable;
+% 
+%             [AreaSum, ~, WaterSum] = CalcTotalResources(Res, Consump, WaterFood);
+% 
+%             for t = 1:Years
+%                 TmpResultsAllYears(v, 1, t) = sum(TotalEmTable{1:12, t});
+%                 TmpResultsAllYears(v, 2, t) = sum(AreaSum{1:4, t});
+%                 TmpResultsAllYears(v, 3, t) = sum(WaterSum{1:5, t});
+%             end
+%         end
+% 
+%         for t = 1:Years
+%             SR.EmissionByScenario{t}.(scenName) = TmpResultsAllYears(:, 1, t);
+%             SR.AreaByScenario{t}.(scenName)     = TmpResultsAllYears(:, 2, t);
+%             SR.WaterByScenario{t}.(scenName)    = TmpResultsAllYears(:, 3, t);
+%         end
+% 
+%         SR.DeltaTables{1, Idx} = TmpTables{2} - TmpTables{1};
+%         SR.DeltaTables{2, Idx} = TmpTables{1} - TmpTables{3};
+%     end
+% 
+%     SR.RelevantScenarioNames = RelNames;
+%     SR.DeviationUsed = Dev;
+%     SR.BaseColumnUsed = Col;
+% end
 
 
 % function SR = runSensitivityAnalysis_All_Years(DataBase, ScenariosAndValues, Years, varargin)

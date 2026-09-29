@@ -27,7 +27,7 @@ MaterialEmissionsByYear = array2table(zeros(length(RowNames), length(ColNames)),
 %% === Calculate emissions per material ===
 for i = 1:length(RowNames)
     EF_production = CoeffArray(i,1);
-    EF_recycling  = CoeffArray(i,2);
+    %EF_recycling  = CoeffArray(i,2);
     EF_benefit    = CoeffArray(i,3);
     EF_landfill   = CoeffArray(i,4);
 
@@ -37,15 +37,16 @@ for i = 1:length(RowNames)
 
     ProductionEmis = prodAmount * EF_production;
     LandfillEmis   = landfillAmount * EF_landfill;
-    RecyclingEmis  = recycleAmount * EF_recycling;
+    % RecyclingEmis  = recycleAmount * EF_recycling;
     RecycleCredit  = recycleAmount * EF_benefit;
 
-    Total = ProductionEmis + LandfillEmis + RecyclingEmis - RecycleCredit;
+    Total = ProductionEmis - RecycleCredit;
 
-    MaterialEmissionsByYear{i, 'Production_tCO2e'} = ProductionEmis + RecyclingEmis - RecycleCredit;
+    MaterialEmissionsByYear{i, 'Production_tCO2e'} = ProductionEmis - RecycleCredit;
     MaterialEmissionsByYear{i, 'Landfill_tCO2e'}   = LandfillEmis;
-    MaterialEmissionsByYear{i, 'Recycling_tCO2e'}  = RecyclingEmis;
-    MaterialEmissionsByYear{i, 'Recycling_Benefit_tCO2e'} = -RecycleCredit;
+    % MaterialEmissionsByYear{i, 'Recycling_tCO2e'}  = RecyclingEmis;
+    MaterialEmissionsByYear{i, 'Recycling_tCO2e'}  = 0;
+    MaterialEmissionsByYear{i, 'Recycling_Benefit_tCO2e'} = RecycleCredit;
     MaterialEmissionsByYear{i, 'Total_tCO2e'}      = Total;
 end
 end

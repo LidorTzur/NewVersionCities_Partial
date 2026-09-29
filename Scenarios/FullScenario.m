@@ -98,8 +98,8 @@ for i=1:Years
    currentFuelTable = AmountsOfFuelsCells{1,i}(4:6,:);
    ConsumptionAmounts{temp_row_num,i} = currentFuelTable;
    emData = table2array(currentFuelTable);
-   emData(1,:) = emData(1,:) * fuel_MTOE_coeff;
-   emData(2:3,:) = emData(2:3,:) * FuelForEnergyPercentage(i) * fuel_LPG_coeff;
+   emData(1,:) = emData(1,:) * fuel_MTOE_coeff; % 2.5 industry
+   emData(2:3,:) = emData(2:3,:) * FuelForEnergyPercentage(i) * fuel_LPG_coeff; % 2.9 home & commercial
    EmissionsByYears{temp_row_num_2,i} = array2table(emData, 'RowNames', FuelConsumption_RowNames, 'VariableNames', FuelConsumption_ColNames);
 end
 
@@ -158,8 +158,6 @@ end
 
 % Water Emissions (from sewege)
 
-temp_em_sewage = 10;
-temp_cons_water = 1;
 
 for i = 1:Years
 
@@ -168,18 +166,18 @@ for i = 1:Years
     waterArr(:, 1:4) = waterArr(:, 1:4) * WaterSaving(i);
     
     % ReCalculate Reclaimed WasteWater
-    waterArr(:, 6) = Data.Water_DataBase.ReclaimedRatio * waterArr(:, 1) *Data.Water_DataBase.FreshWaterForDomestic; 
+    waterArr(:, 6) = Data.Water_DataBase.ReclaimedRatio * waterArr(:, 1); 
     % ReCalculate Desilinated Water
-    waterArr(:, 8) = (waterArr(:, 1)* Data.Water_DataBase.FreshWaterForDomestic + waterArr(:, 2)* Data.Water_DataBase.FreshWaterForAgriculture + waterArr(:, 3)) - waterArr(:, 5) - waterArr(:, 7);
+    waterArr(:, 8) = (waterArr(:, 1)* Data.Water_DataBase.FreshWaterForDomestic + waterArr(:, 2)* Data.Water_DataBase.FreshWaterForAgriculture + waterArr(:, 3) + waterArr(:, 4)) - waterArr(:, 5);
     waterArr(:, 8) = max(waterArr(:, 8), 0);
 
     WaterConsumptionCell{i}{:,:} = waterArr;
 
-    EmissionsByYears{temp_em_sewage,i} = CalcSewegeEmissions(Data, WaterConsumptionCell{i});
+    EmissionsByYears{10,i} = CalcSewegeEmissions(Data, WaterConsumptionCell{i});
 
     sumWater = sum(waterArr, 1);
 
-    ConsumptionAmounts{temp_cons_water,i} = array2table(waterArr, 'VariableNames', WaterConsumptionCell{i}.Properties.VariableNames);
+    ConsumptionAmounts{1,i} = array2table(waterArr, 'VariableNames', WaterConsumptionCell{i}.Properties.VariableNames);
 
 end
 
@@ -539,16 +537,17 @@ for i = 1:Years
     % 2. Integration with Water & Food
     % The amount of water for global food per cubic meter is twice the electricity coefficients for global water in KWH per cubic meter.
     currentTotalWaterElect = ElectricityFromWaterCell{i}{6,1};
+
     electConsArr(6,i) = currentTotalWaterElect;
-    
+
     % Calculate electricity for drilling/transporting fresh water (from food cell)
     foodWaterArr = table2array(WaterFromFoodCell{1,i});
     electConsArr(7,i) = sum(foodWaterArr(1, 3:4)) * DrillingWaterCoeff;
-    
+
     % 3. Core Calculations: Consumption & Manufacturing
     % !!! Pass the current YEAR vector from our fast Matrix
     CurrentYearVec = electConsArr(:,i);
-    
+
     % Run model functions
     [EmissionsByYears{2,i}, ElectricityBySources{1:6,i}] = CalcElectricityConsumption(Data, CurrentYearVec, PercentageOfElectricitySourcesByYears{:,i}, WasteInciniration(i), i);
     % Shiri's Adjustments: allowing changes in PV emissions - sending the function the consumption of the prev year in order to find the delta,and the year (i) so we can calculate the current emissions

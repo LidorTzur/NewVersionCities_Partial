@@ -1,18 +1,18 @@
 %% =====================================================================
 %  Plot_DualHorizon_Sensitivity_Comparison.m
-%  סקריפט חדש: השוואת רגישות בין שתי שנות מפתח (2035 מול 2050)
+%  סקריפט חדש: השוואת רגישות בין שתי שנות מפתח (2030 מול 2040)
 %  מייצר חלון מפוצל (Subplots) לכל תרחיש משמעותי
 %% =====================================================================
 
 % 1. הגדרות רשימת הערים ותיקיית פלט
-allCityNames = {'Tlv', 'RishonLeZion', 'BeerSheva', 'Raanana', 'Modiin','Hadera', 'Afula', 'KiryatGat','BeitShemesh', 'MazkeretBatya'};
+allCityNames = {'Tlv', 'RishonLeZion', 'BeerSheva', 'Raanana', 'Modiin','Hadera', 'Afula', 'KiryatGat','BeitShemesh', 'MazkeretBatya', 'Rahat', 'Sakhnin'};
 nCities = numel(allCityNames);
 outputDir = 'Results_Plots\Sensitivity Analysis\Dual_Horizon_Comparison';
 if ~exist(outputDir, 'dir'), mkdir(outputDir); end
 
 % הגדרת שתי שנות המפתח והאינדקסים שלהן במודל (מבוסס על שנת התחלה 2019)
-yearA = 2035; idxA = yearA - 2019 + 1;
-yearB = 2050; idxB = yearB - 2019 + 1;
+yearA = 2030; idxA = yearA - 2019 + 1;
+yearB = 2040; idxB = yearB - 2019 + 1;
 
 % 2. זיהוי רשימת התרחישים מהעיר הראשונה
 firstCity = allCityNames{1};
@@ -31,8 +31,8 @@ for s = 1:nScenarios
     scenarioName = scenNames{s};
     
     % מערכים לשמירת מדדי הרגישות של שתי השנים
-    elasticity_2035 = zeros(nCities, 1);
-    elasticity_2050 = zeros(nCities, 1);
+    elasticity_2030 = zeros(nCities, 1);
+    elasticity_2040 = zeros(nCities, 1);
     
     % שליפת הנתונים מהמודל הרב-שנתי
     for i = 1:nCities
@@ -40,26 +40,28 @@ for s = 1:nScenarios
         if isfield(AllCities, cityName) && isfield(AllCities.(cityName), 'Sensitivity_RDB_All_Years')
             SR = AllCities.(cityName).Sensitivity_RDB_All_Years;
             
-            % שליפה עבור שנת 2035
+            % שליפה עבור שנת 2030
             if idxA <= numel(SR.EmissionByScenario)
                 TA = SR.EmissionByScenario{idxA};
                 if ismember(scenarioName, TA.Properties.VariableNames)
                     baseValA = TA{1, scenarioName};
                     plusValA = TA{2, scenarioName};
                     if baseValA ~= 0
-                        elasticity_2035(i) = ((plusValA - baseValA) / baseValA) * 100;
+                        relInputChangePctA = getRelInputChangePct(SR, scenarioName);
+                        elasticity_2030(i) = (((plusValA - baseValA) / baseValA) * 100) / relInputChangePctA;
                     end
                 end
             end
             
-            % שליפה עבור שנת 2050
+            % שליפה עבור שנת 2040
             if idxB <= numel(SR.EmissionByScenario)
                 TB = SR.EmissionByScenario{idxB};
                 if ismember(scenarioName, TB.Properties.VariableNames)
                     baseValB = TB{1, scenarioName};
                     plusValB = TB{2, scenarioName};
                     if baseValB ~= 0
-                        elasticity_2050(i) = ((plusValB - baseValB) / baseValB) * 100;
+                        relInputChangePctB = getRelInputChangePct(SR, scenarioName);
+                        elasticity_2040(i) = (((plusValB - baseValB) / baseValB) * 100) / relInputChangePctB;
                     end
                 end
             end
@@ -68,7 +70,7 @@ for s = 1:nScenarios
     end
     
     % סינון תרחישים זניחים: אם בשתי השנים ההשפעה המקסימלית קטנה מ-0.2%, נדלג
-    if max(abs(elasticity_2035)) < 0.2 && max(abs(elasticity_2050)) < 0.2
+    if max(abs(elasticity_2030)) < 0.1 && max(abs(elasticity_2040)) < 0.1
         continue;
     end
 
@@ -79,18 +81,18 @@ for s = 1:nScenarios
     barColor = [0.15 0.45 0.65]; 
     
     % -----------------------------------------------------------------
-    % תת-גרף 1: שנת 2035 (צד שמאל)
+    % תת-גרף 1: שנת 2030 (צד שמאל)
     % -----------------------------------------------------------------
     ax1 = subplot(1, 2, 1);
     
-    % מיון הערים לפי הרגישות של שנת 2035
-    [sorted_35, sortIdx_35] = sort(elasticity_2035, 'ascend');
+    % מיון הערים לפי הרגישות של שנת 2030
+    [sorted_35, sortIdx_35] = sort(elasticity_2030, 'ascend');
     cities_35 = allCityNames(sortIdx_35);
     
     b1 = bar(ax1, categorical(cities_35, cities_35), sorted_35, 'FaceColor', barColor);
     grid(ax1, 'on');
     title(ax1, ['Mid-Term Horizon: ', num2str(yearA)], 'FontSize', 12, 'FontWeight', 'bold');
-    ylabel(ax1, '\Delta Total Emissions [%] (for +10% \DeltaParam)');
+    ylabel(ax1, '\Delta Total Emissions [%] per 1% \DeltaParam (Elasticity)');
     xtickangle(ax1, 35);
     
     % הוספת ערכים מעל/מתחת לעמודות
@@ -98,12 +100,12 @@ for s = 1:nScenarios
         'VerticalAlignment', 'bottom', 'HorizontalAlignment', 'center', 'FontWeight', 'bold', 'FontSize', 9);
     
     % -----------------------------------------------------------------
-    % תת-גרף 2: שנת 2050 (צד ימין)
+    % תת-גרף 2: שנת 2040 (צד ימין)
     % -----------------------------------------------------------------
     ax2 = subplot(1, 2, 2);
     
-    % מיון הערים לפי הרגישות של שנת 2050 (כדי לראות אם הדירוג הפנימי השתנה)
-    [sorted_50, sortIdx_50] = sort(elasticity_2050, 'ascend');
+    % מיון הערים לפי הרגישות של שנת 2040 (כדי לראות אם הדירוג הפנימי השתנה)
+    [sorted_50, sortIdx_50] = sort(elasticity_2040, 'ascend');
     cities_50 = allCityNames(sortIdx_50);
     
     b2 = bar(ax2, categorical(cities_50, cities_50), sorted_50, 'FaceColor', barColor * 0.85); % גוון מעט כהה יותר לשוני

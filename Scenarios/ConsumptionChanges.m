@@ -3,7 +3,7 @@
 
 %% -------------------------------------------------Variables-------------------------------------------
 
-PerCapitaTransGrowth = 1.075; % Annual growth factor for per-capita VKT based on national historical trends (National Model)
+PerCapitaTransGrowth = 1.0075; % Annual growth factor for per-capita VKT based on national historical trends (National Model)
 
 global BaseYear
 scenArr = table2array(ScenariosTable); % Convert once to avoid table indexing
@@ -113,7 +113,7 @@ sectorNames = WDB.WaterConsumptionTableNew.Properties.RowNames;
 
 % Project drilling growth and ecological water requirements (water for nature) over time
 waterDataMat = zeros(8, Years);
-waterDataMat(5, :) = WDB.WaterConsumptionTableNew{5, 2} * (WDB.Yearly_ChangeDrillingWater .^ (0:Years-1)); % Drilling Water
+waterDataMat(5, :) = WDB.WaterConsumptionTableNew{5, 2} * (WDB.Yearly_ChangeDrillingWater .^ (0:Years-1)); % Natural Water
 waterDataMat(7, :) = WDB.WaterConsumptionTableNew{7, 2}; % Brackish water, fresh and non-fresh reservoir water
 waterDataMat(4, :) = WDB.WaterConsumptionTableNew{4, 2}; % For Nature
 
@@ -128,11 +128,11 @@ for i = 1:Years
     currW(3) = palestinePop(i) * WDB.Avg_per_capita_Palestinians; % Neighbors/Palestinians
     currW(4) = waterDataMat(4, i); % For Nature
     currW(5) = waterDataMat(5, i); % Natural Drilling supply
-    currW(6) = WDB.ReclaimedRatio * currW(1) * WDB.FreshWaterForDomestic; % Reclaimed WasteWater
+    currW(6) = WDB.ReclaimedRatio * currW(1); % Reclaimed WasteWater
     currW(7) = waterDataMat(7, i); % Brackish Water- Fixed to all years
     % Desalinated water is calculated as a "buffer" to meet demand after natural sources are exhausted
-    currW(8) = (currW(1)*WDB.FreshWaterForDomestic + currW(2)*WDB.FreshWaterForAgriculture + currW(3)) - currW(5) - currW(7);
-    
+    %currW(8) = (currW(1)*WDB.FreshWaterForDomestic + currW(2)*WDB.FreshWaterForAgriculture + currW(3) + currW(4)) - currW(5);
+    currW(8) = max(0, (currW(1)*WDB.FreshWaterForDomestic + currW(2)*WDB.FreshWaterForAgriculture + currW(3) + currW(4)) - currW(5));
 
     WaterConsumptionCell{i} = array2table(currW, 'VariableNames', sectorNames);
 end
@@ -191,8 +191,7 @@ RowNames = {'Crude Oil Products - Not for Energy', 'Crude Oil For Export', 'Crud
 ColNames = {'Naptha', 'Diesel','Mazut','Kerosene','Gasoline','Liquified Petroleum Gas', 'Other'};
 AmountsOfFuelsCells = Data.Materials_DataBase.AmountsOfFuelsCells;
 % Crude Oil Products - For Energy
-% multiple by 2- so it match to the data of raziel (this is what tal did and matched to raziel data)
-AmountsOfFuelsCells{1,1}{4,:} = AmountsOfFuelsCells{1,1}{4,:}*2; % Completion to an estimated size of 1.5 MTOE Because currently the data is 0.75
+AmountsOfFuelsCells{1,1}{4,:} = AmountsOfFuelsCells{1,1}{4,:}; 
 for i = 1:Years
     CurrentFuelConsumption = array2table(zeros(6,7),'RowNames', RowNames);
     CurrentFuelConsumption.Properties.VariableNames = ColNames;

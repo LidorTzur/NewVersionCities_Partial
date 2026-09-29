@@ -1,91 +1,183 @@
+% %% =====================================================================
+% % Plot_Population_Comparison_Modular.m
+% % Goal: Produce a modular population comparison chart across multiple years
+% % Uses existing helper functions from 'helpers' folder.
+% %% =====================================================================
+% addpath('helpers');
+% 
+% % --- Modular Configuration ---
+% % Add or remove years here as needed
+% targetYears = [2019, 2035, 2050]; 
+% scen = 'BAU'; 
+% 
+% % --- Get City Order and Info ---
+% try
+%     cats_cities = getCityCategorical(AllCities);
+%     cityNames = cellstr(cats_cities);
+% catch
+%     cityNames = fieldnames(AllCities);
+% end
+% nCities = numel(cityNames);
+% 
+% % Get year labels from the first city
+% firstCity = cityNames{1};
+% yearLabels = AllCities.(firstCity).BAU_RDB.TotalEmissionSum1.Properties.VariableNames;
+% 
+% %% --- Extract Population Data ---
+% nYears = numel(targetYears);
+% popData = zeros(nCities, nYears); 
+% 
+% for i = 1:nCities
+%     cityName = cityNames{i};
+%     if isfield(AllCities, cityName)
+%         C = AllCities.(cityName);
+% 
+%         for k = 1:nYears
+%             yr = targetYears(k);
+%             % Find the column index for the specific year
+%             colIdx = find(contains(yearLabels, num2str(yr)), 1);
+% 
+%             if ~isempty(colIdx)
+%                 % Use your existing helper function
+%                 popData(i, k) = getPopMillionsByCol(C, colIdx, scen, yearLabels);
+%             end
+%         end
+%     end
+% end
+% 
+% %% --- Create Plot ---
+% fig = figure('Name', 'Modular Population Comparison', 'Color', 'w', ...
+%              'Units', 'normalized', 'Position', [0.1 0.1 0.8 0.7]);
+% 
+% % Create Grouped Bar Chart
+% b = bar(popData, 'grouped', 'BarWidth', 0.8);
+% 
+% % Set aesthetic colors (dynamic based on number of years)
+% colors = lines(nYears); 
+% for k = 1:nYears
+%     b(k).FaceColor = colors(k, :);
+%     b(k).DisplayName = num2str(targetYears(k));
+% 
+%     % Add Value Labels above bars
+%     xPos = b(k).XEndPoints;
+%     yVal = b(k).YData;
+%     for j = 1:numel(xPos)
+%         if yVal(j) > 0
+%             text(xPos(j), yVal(j), sprintf('%.2f', yVal(j)), ...
+%                 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', ...
+%                 'FontSize', 10, 'FontWeight', 'bold');
+%         end
+%     end
+% end
+% 
+% %% --- Axis and Styling ---
+% set(gca, 'XTick', 1:nCities, 'XTickLabel', cityNames, ...
+%     'XTickLabelRotation', 45, 'FontSize', 13, 'FontWeight', 'bold');
+% 
+% ylabel('Population (Millions)', 'FontSize', 15, 'FontWeight', 'bold');
+% title(sprintf('Population Growth Comparison: %s', strjoin(string(targetYears), ' vs ')), ...
+%       'FontSize', 18, 'FontWeight', 'bold');
+% 
+% grid on;
+% legend('Location', 'northeastoutside', 'FontSize', 12);
+% 
+% %% --- Save ---
+% outputDir = 'Results_Plots\Population_Plot';
+% if ~exist(outputDir,'dir'), mkdir(outputDir); end
+% 
+% fileName = sprintf('Population_Comparison_%s.png', strjoin(string(targetYears), '_'));
+% saveas(fig, fullfile(outputDir, fileName));
+% 
+% disp(['✔ Population comparison chart for ', num2str(targetYears), ' saved successfully.']);
+
+
 %% =====================================================================
-% Plot_Population_Comparison_Modular.m
-% Goal: Produce a modular population comparison chart across multiple years
-% Uses existing helper functions from 'helpers' folder.
+%  Plot_Population_Growth_Analysis_Wide.m
+%  Goal: Wider bars, increased spacing, adjusted for better visuals
 %% =====================================================================
+clearvars -except AllCities; clc; close all;
 addpath('helpers');
 
-% --- Modular Configuration ---
-% Add or remove years here as needed
-targetYears = [2019, 2035, 2050]; 
+% 1. הגדרת הנתיב לתיקייה הרצויה
+outputDir = 'C:\Users\צור\Documents\MATLAB\NewVersionCities_Partial\Results_Plots\Population_Plot';
+
+% 2. בדיקה אם התיקייה קיימת, אם לא - יצירה שלה
+if ~exist(outputDir, 'dir')
+    mkdir(outputDir);
+end
+
+targetYears = [2019, 2030, 2040]; 
 scen = 'BAU'; 
 
-% --- Get City Order and Info ---
-try
-    cats_cities = getCityCategorical(AllCities);
-    cityNames = cellstr(cats_cities);
-catch
-    cityNames = fieldnames(AllCities);
-end
+% --- Data Extraction (Unchanged) ---
+cat_cities = getCityCategorical(AllCities);
+cityNames = cellstr(cat_cities);
 nCities = numel(cityNames);
-
-% Get year labels from the first city
 firstCity = cityNames{1};
 yearLabels = AllCities.(firstCity).BAU_RDB.TotalEmissionSum1.Properties.VariableNames;
 
-%% --- Extract Population Data ---
 nYears = numel(targetYears);
 popData = zeros(nCities, nYears); 
-
 for i = 1:nCities
     cityName = cityNames{i};
     if isfield(AllCities, cityName)
         C = AllCities.(cityName);
-        
         for k = 1:nYears
             yr = targetYears(k);
-            % Find the column index for the specific year
             colIdx = find(contains(yearLabels, num2str(yr)), 1);
-            
             if ~isempty(colIdx)
-                % Use your existing helper function
                 popData(i, k) = getPopMillionsByCol(C, colIdx, scen, yearLabels);
             end
         end
     end
 end
+popGrowth = ((popData ./ popData(:, 1)) - 1) * 100;
 
-%% --- Create Plot ---
-fig = figure('Name', 'Modular Population Comparison', 'Color', 'w', ...
-             'Units', 'normalized', 'Position', [0.1 0.1 0.8 0.7]);
-
-% Create Grouped Bar Chart
-b = bar(popData, 'grouped', 'BarWidth', 0.8);
-
-% Set aesthetic colors (dynamic based on number of years)
+%% --- Plot 1: Total Population (Wider) ---
+fig1 = figure('Name', 'Total Population', 'Color', 'w', 'Position', [100 100 1100 500]);
+% BarWidth 0.85 נותן מראה רחב ונוכח
+b1 = bar(popData, 'grouped', 'BarWidth', 0.85); 
 colors = lines(nYears); 
 for k = 1:nYears
-    b(k).FaceColor = colors(k, :);
-    b(k).DisplayName = num2str(targetYears(k));
+    b1(k).FaceColor = colors(k, :);
+    b1(k).DisplayName = num2str(targetYears(k));
     
-    % Add Value Labels above bars
-    xPos = b(k).XEndPoints;
-    yVal = b(k).YData;
-    for j = 1:numel(xPos)
-        if yVal(j) > 0
-            text(xPos(j), yVal(j), sprintf('%.2f', yVal(j)), ...
-                'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', ...
-                'FontSize', 10, 'FontWeight', 'bold');
-        end
+    xtips = b1(k).XEndPoints;
+    yvals = b1(k).YData;
+    for j = 1:numel(xtips)
+        text(xtips(j), yvals(j), sprintf('%.2f', yvals(j)), ...
+            'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', ...
+            'FontSize', 8, 'FontWeight', 'bold', 'Rotation', 0); 
     end
 end
+ylabel('Population (Millions)');
+title('Total Population Size (2019-2050)', 'FontSize', 14);
+set(gca, 'XTick', 1:nCities, 'XTickLabel', cityNames, 'XTickLabelRotation', 45, 'FontSize', 10);
+grid on; legend('Location', 'northeastoutside');
 
-%% --- Axis and Styling ---
-set(gca, 'XTick', 1:nCities, 'XTickLabel', cityNames, ...
-    'XTickLabelRotation', 45, 'FontSize', 13, 'FontWeight', 'bold');
+%% --- Plot 2: Percentage Growth (Wider) ---
+fig2 = figure('Name', 'Population Growth Percentage', 'Color', 'w', 'Position', [150 150 1100 500]);
+b2 = bar(popGrowth, 'grouped', 'BarWidth', 0.85);
+for k = 1:nYears
+    b2(k).FaceColor = colors(k, :);
+    b2(k).DisplayName = num2str(targetYears(k));
+    
+    xtips = b2(k).XEndPoints;
+    yvals = b2(k).YData;
+    for j = 1:numel(xtips)
+        text(xtips(j), yvals(j), sprintf('%.0f%%', yvals(j)), ...
+            'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', ...
+            'FontSize', 8, 'FontWeight', 'bold', 'Rotation', 0);
+    end
+end
+ylabel('Growth from 2019 (%)');
+title('Population Growth Relative to 2019 (%)', 'FontSize', 14);
+set(gca, 'XTick', 1:nCities, 'XTickLabel', cityNames, 'XTickLabelRotation', 45, 'FontSize', 10);
+grid on; legend('Location', 'northeastoutside');
 
-ylabel('Population (Millions)', 'FontSize', 15, 'FontWeight', 'bold');
-title(sprintf('Population Growth Comparison: %s', strjoin(string(targetYears), ' vs ')), ...
-      'FontSize', 18, 'FontWeight', 'bold');
 
-grid on;
-legend('Location', 'northeastoutside', 'FontSize', 12);
+% 3. שמירת הגרפים בנתיב המוגדר
+saveas(fig1, fullfile(outputDir, 'Population_Total.png'));
+saveas(fig2, fullfile(outputDir, 'Population_Growth_Percentage.png'));
 
-%% --- Save ---
-outputDir = 'Results_Plots\Population_Plot';
-if ~exist(outputDir,'dir'), mkdir(outputDir); end
-
-fileName = sprintf('Population_Comparison_%s.png', strjoin(string(targetYears), '_'));
-saveas(fig, fullfile(outputDir, fileName));
-
-disp(['✔ Population comparison chart for ', num2str(targetYears), ' saved successfully.']);
+disp(['✔ Results saved successfully to: ', outputDir]);

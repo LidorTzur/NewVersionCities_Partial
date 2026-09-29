@@ -13,6 +13,7 @@ nCities   = numel(cities);
 scenarios = {'BAU','Moderate','Advanced'};
 
 baseCol   = 1;
+Years = 32;
 targetCol = Years;
 
 %% הגדרת מדדים מתוך TotalResults

@@ -4,30 +4,46 @@
 %% =====================================================================
 addpath('helpers');
 
+cities = fieldnames(AllCities);
+
 % --- 1. הגדרת הקבוצות ---
 groupNames = {'Metropolises', 'Established Satellites', 'Growth Cities', 'Sectoral & Small'};
 cityGroups = { ...
     {'Tlv', 'RishonLeZion', 'BeerSheva'}, ...
     {'Raanana', 'Modiin'}, ...
     {'Hadera', 'Afula', 'KiryatGat'}, ...
-    {'BeitShemesh', 'MazkeretBatya'} ...
+    {'BeitShemesh', 'MazkeretBatya','Rahat', 'Sakhnin'} ...
 };
 
 % --- 2. הגדרות תצוגה ---
 fs_axis = 11; fs_title = 15; fs_data = 10; fs_legend = 10; 
-targetYears = [2019, 2035, 2050];
+targetYears = [2019, 2030, 2040];
 scenarios = {'BAU', 'Moderate', 'Advanced'};
 
 
 %% --- Identify Unique Sectors ---
+% sectorOrder = string([]);
+% for c = 1:nCities
+%     tbl = getScenarioTableSum(cities{c}, 'BAU');   
+%     names = string(tbl.Properties.RowNames(1:end-1));
+%     for nm = names.'
+%         if ~ismember(nm, sectorOrder), sectorOrder(end+1) = nm; end
+%     end
+% end
+
 sectorOrder = string([]);
-for c = 1:nCities
-    tbl = getScenarioTableSum(cities{c}, 'BAU');   
+cities = fieldnames(AllCities); % וודא שהשורה הזו קיימת
+for c = 1:numel(cities)
+    cityName = cities{c};              % שומר את שם העיר
+    C = AllCities.(cityName);          % שולף את אובייקט העיר מה-Struct
+    tbl = getScenarioTableSum(C, 'BAU');   % מעביר את האובייקט C ולא טקסט
+    
     names = string(tbl.Properties.RowNames(1:end-1));
     for nm = names.'
         if ~ismember(nm, sectorOrder), sectorOrder(end+1) = nm; end
     end
 end
+
 nSectors = numel(sectorOrder);
 colors   = getSectorColors(nSectors);
 

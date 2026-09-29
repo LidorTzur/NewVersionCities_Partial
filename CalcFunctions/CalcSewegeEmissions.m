@@ -31,7 +31,7 @@ SewegeEmissionsCoefficients = Data.Water_DataBase.SewegeTreatmentEmissionsCoeffi
 TotalSewege = WaterConsumption{1,6};
 SewegeTreatmentEmmissionsTable = array2table(zeros(1,2));
 SewegeTreatmentEmmissionsTable.Properties.VariableNames = {'Air Pollutants', 'GHG'};
-SewegeTreatmentEmmissionsTable{1,1} = SewegeEmissionsCoefficients{1,1}*TotalSewege/1000; %% tons
-SewegeTreatmentEmmissionsTable{1,2} = SewegeEmissionsCoefficients{1,2}*TotalSewege/1000; %% tons
+SewegeTreatmentEmmissionsTable{1,1} = SewegeEmissionsCoefficients{1,1}*TotalSewege*1000; %% tons
+SewegeTreatmentEmmissionsTable{1,2} = SewegeEmissionsCoefficients{1,2}*TotalSewege*1000; %% tons
 
 end

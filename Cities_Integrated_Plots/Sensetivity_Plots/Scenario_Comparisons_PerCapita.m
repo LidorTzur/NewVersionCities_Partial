@@ -4,11 +4,11 @@
 %% =====================================================================
 
 allCityNames = fieldnames(AllCities);
-allCityNames = {'Tlv', 'RishonLeZion', 'BeerSheva', 'Raanana', 'Modiin','Hadera', 'Afula', 'KiryatGat','BeitShemesh', 'MazkeretBatya'};
+allCityNames = {'Tlv', 'RishonLeZion', 'BeerSheva', 'Raanana', 'Modiin','Hadera', 'Afula', 'KiryatGat','BeitShemesh', 'MazkeretBatya', 'Rahat', 'Sakhnin'};
 
 %allCityNames = ["BeerSheva", "Tlv", "BeitShemesh"];
 nCities = numel(allCityNames);
-targetYearIdx = 32; % שנת 2050
+targetYearIdx = 22; % שנת 2050
 
 firstCity = allCityNames{1};
 SR_ref = AllCities.(firstCity).Sensitivity_RDB;

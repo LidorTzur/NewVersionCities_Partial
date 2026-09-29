@@ -1,16 +1,16 @@
 %% running steps
 
-orderIndex = 2; % הגדרה מראש שאת רוצה ניתוח רגישות
+%orderIndex = 2; % הגדרה מראש שאת רוצה ניתוח רגישות
 
-%% scenario type input from the user
-% orderIndex = choiceList('Select a scenario','Choose one of the scenarios and follow the instructions.',{'All the steps together', 'Sensitivity Analysis +- 10%'});
-% if ~exist('orderIndex', 'var') || isempty(orderIndex)
-%     orderIndex = choiceList('Select a scenario', ...
-%         'Choose one of the scenarios and follow the instructions.', ...
-%         {'All the steps together', 'Sensitivity Analysis +- 10%'});
-% else
-%     fprintf('Running in automatic mode: orderIndex = %d\n', orderIndex);
-% end
+% scenario type input from the user
+orderIndex = choiceList('Select a scenario','Choose one of the scenarios and follow the instructions.',{'All the steps together', 'Sensitivity Analysis +- 10%'});
+if ~exist('orderIndex', 'var') || isempty(orderIndex)
+    orderIndex = choiceList('Select a scenario', ...
+        'Choose one of the scenarios and follow the instructions.', ...
+        {'All the steps together', 'Sensitivity Analysis +- 10%'});
+else
+    fprintf('Running in automatic mode: orderIndex = %d\n', orderIndex);
+end
 
 switch orderIndex
     
@@ -94,7 +94,7 @@ switch orderIndex
           %   'ExistingSR', existingSR);   % Define Renewable/Gas indices
 
           tempSR_All_Years = runSensitivityAnalysis_All_Years(DataBase, ScenariosAndValues, Years, ...
-            'RelevantScenarios', [1,2,4,5,6,8,10,11,12,13,14,17,19,21,24 ], ...
+            'RelevantScenarios', [1,2,4,5,6,8,10,11,12,13,14,17,19,21,24 ,2,4,5,6,8,10,11,12,13,14,17,19,21,24 ], ...
             'Deviation', 0.10, ...  % Change to 0.15 for 15%
             'BaseColumn', 8, ...    % Choose which column to test
             'EnergyIdx', [6, 7], ...

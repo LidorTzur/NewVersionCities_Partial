@@ -4,6 +4,8 @@
 %% =====================================================================
 addpath('helpers');
 
+TargetYear = 2040;
+
 % --- Set Consistent City Order (Categorical) ---
 try
     % Use the new function to get the logical order
@@ -23,6 +25,10 @@ scenarios = {'BAU','Moderate','Advanced'};
 firstCity = cityNames{1};
 yearLabels = AllCities.(firstCity).TotalResults.Properties.VariableNames;
 yearsNum   = str2double(yearLabels);
+
+% --- סינון השנים לפי השנה שקבעת ---
+yearIdx = (yearsNum <= TargetYear); 
+yearsNumFiltered = yearsNum(yearIdx);
 
 %% הגדרות עיצוב
 cityColors = turbo(nCities); 
@@ -55,8 +61,8 @@ for s = 1:numel(scenarios)
         if isfield(AllCities, cityName)
             TR = AllCities.(cityName).TotalResults;
             % שליפת הנתונים מהשורה הרלוונטית
-            yVals = TR{rowIdx, :};   
-            xVals = yearsNum;        
+            yVals = TR{rowIdx, yearIdx};   
+            xVals = yearsNumFiltered;        
             
             % ציור הקווים
             plot(xVals, yVals, '-', 'Color', cityColors(c,:), 'LineWidth', 3, ...
@@ -77,6 +83,8 @@ for s = 1:numel(scenarios)
     xlabel('Year', 'FontSize', fs_label, 'FontWeight', 'bold');
     ylabel('Total Emissions (MtCO2eq)', 'FontSize', fs_label, 'FontWeight', 'bold');
     title(['Total Emissions Projections: ', scenName], 'FontSize', fs_title, 'FontWeight', 'bold');
+    
+    xlim([min(yearsNumFiltered) TargetYear]);
     
     ax = gca;
     ax.FontSize = fs_axis;

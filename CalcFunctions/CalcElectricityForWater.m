@@ -12,6 +12,8 @@
 % Output:
 %   ElectricityForWaterConsumption - Table with total electricity consumption for each water source (in KWh).
 
+
+
  %% Inputs 
  % {'Drilling Water', 'Desalinated Water', 'Moving Reclaimed Wastewater', 'Reclaimed Wastewater','Moving Brackish water, fresh and non-fresh reservoir water', 'Total'}
  Water_Electricity_Types = Data.Water_DataBase.Water_Electricity_Types;

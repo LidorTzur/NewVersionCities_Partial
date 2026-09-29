@@ -5,13 +5,13 @@
 %% =====================================================================
 
 % 1. הגדרות בסיס וערים
-allCityNames = {'Tlv', 'RishonLeZion', 'BeerSheva', 'Raanana', 'Modiin','Hadera', 'Afula', 'KiryatGat','BeitShemesh', 'MazkeretBatya'};
+allCityNames = {'Tlv', 'RishonLeZion', 'BeerSheva', 'Raanana', 'Modiin','Hadera', 'Afula', 'KiryatGat','BeitShemesh', 'MazkeretBatya', 'Rahat', 'Sakhnin'};
 nCities = numel(allCityNames);
 outputDir = 'Results_Plots\Sensitivity Analysis\Temporal_Trends';
 if ~exist(outputDir, 'dir'), mkdir(outputDir); end
 
 % הגדרת ציר השנים לניתוח המגמה (מ-2025 עד 2050 בקפיצות של 5 שנים)
-trendYears = 2025:5:2050;
+trendYears = 2025:5:2040;
 nYears = numel(trendYears);
 
 % 2. שליפת שמות התרחישים וסינון ראשוני מהעיר הראשונה
@@ -75,7 +75,9 @@ customColors = [
     0.95, 0.75, 0.00;  % Afula (Yellow)
     0.40, 0.40, 0.40;  % KiryatGat (Gray)
     0.20, 0.80, 0.50;  % BeitShemesh (Mint)
-    0.60, 0.40, 0.20   % MazkeretBatya (Brown)
+    0.60, 0.40, 0.20;  % MazkeretBatya (Brown)
+    0.75, 0.00, 0.75;  % Rahat (Magenta)
+    0.00, 0.45, 0.74   % Sakhnin (Light Blue)
 ];
 
 fprintf('Generating %d temporal trend line plots...\n', nFilteredScens);
